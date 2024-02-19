@@ -13,3 +13,7 @@ These are the goals of this thesis:
 - [ ] Analyze Unlikabilty
 - [ ] Create attacker models
 - [ ] Analyze attacker models (for example data leaks)
+
+## Subtasks
+
+These are the subtasks that are currently being worked on:
