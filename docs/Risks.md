@@ -1,5 +1,10 @@
 # Risks
 
+* Sickness me/supervisor
+* Project plan is bad
+* other Ideas
+
+
 This file will be part of the project management document.
 
 ## VCs
