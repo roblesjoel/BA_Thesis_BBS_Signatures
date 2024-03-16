@@ -1,0 +1,54 @@
+%============================ Project Managenent Document ================================
+% define document class
+\documentclass[
+	a4paper               % paper format
+%	,10.5pt               % fontsize
+%	,BCOR=18mm            % Binding correction
+	,bibliography=totoc   % If enabled add bibliography to TOC
+	,listof=totoc         % If enabled add lists to TOC
+%	,bilingual
+	,monolingual
+]{bfhthesis}              % KOMA-script report
+
+\usepackage[
+	hidelinks,
+	pdfusetitle,
+]{hyperref}
+
+\begin{document}
+
+\frontmatter
+
+\title{Bachelor's Thesis}
+\subtitle{Extended BBS?: Implementation Part}
+\author{Joël Gabriel Robles Gasser}
+\institution{Bern University of Applied Sciences}
+\department{Engineering and Computer Science}
+\institute{Computer Science}
+\version{0.1}
+\titlegraphic{\includegraphics[width=\width]{example-image}}
+\advisor{Prof. Dr. Annett Laube \and Prof. Dr. Reto Koenig}
+\expert{Dr. Andreas Spichiger}
+\degreeprogram{Bachelor of Science in Computer Science}
+
+%----------------  BFH tile page   -----------------------------------------
+\maketitle
+
+\addchap{Abstract}
+Here an abstract might be placed.
+
+
+%------------ TABLEOFCONTENTS ----------------
+\tableofcontents
+
+%------------ START MAIN PART ----------------
+\mainmatter
+
+\chapter{First chapter of the main part}
+
+\appendix
+
+\chapter{First appendix Chapter}
+
+
+\end{document}
