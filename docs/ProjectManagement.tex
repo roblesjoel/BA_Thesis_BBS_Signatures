@@ -14,6 +14,8 @@
 	hidelinks,
 	pdfusetitle,
 ]{hyperref}
+\usepackage{tikzducks}
+\usepackage{amsmath}
 
 \begin{document}
 
@@ -130,9 +132,61 @@ With these characteristics we can understand the equations for verifying the sig
 	\end{split}
 \end{equation}
 
-\chapter{BBS with VC's}
+\chapter{Use Cases}
+For this Thesis we will use a small collection of use cases to demonstrate how BBS should work in conjunction with extensions (like VC's, Link Secrets etc.).
 
-\section{Use Case}
+\section{Simply buying a train and mobile subscription}
+Lets assume you want to go and buy a train subscription.
+Once at the counter, the employee ask you for your ID card, to verify your identity and to get the required data for the subscription.
+Now the employee should only need to check if the ID is valid, if the photo on it matches you, something to link your subscription to you (your name is used for that most of the time) and maybe he also needs your birthday for an age specific discount.
+By handing out your ID, you lose the ability to selectively disclose information about yourself, and with that you lose your anonymity.
+
+
+\begin{figure}[h]
+	\begin{minipage}{0.28\textwidth}
+		\textbf{Client}\newline\newline
+		\begin{tikzpicture}
+			\duck[graduate]
+		\end{tikzpicture}
+	\end{minipage}\hfill
+	\begin{minipage}{0.28\textwidth}
+		$$\underrightarrow{\includegraphics[width=30mm]{./img/ID.jpg}}$$
+		$$\overleftarrow{\includegraphics[width=30mm]{./img/Swisspass.jpeg}}$$
+	\end{minipage}\hfil
+	\begin{minipage}{0.28\textwidth}
+		\textbf{SBB}\newline\newline
+		\begin{tikzpicture}
+			\duck[tshirt, jacket=blue!50!black, tie=red]
+		\end{tikzpicture}
+	\end{minipage}
+	\caption{Buying a train subscription}
+	\label{fig:trainssub}
+\end{figure}
+
+Now you also need a mobile subscription. You go to your next Swiss Post office 
+
+ 
+	
+
+
+
+
+
+\chapter{Extensions of BBS}
+
+\section{BBS with VC's}
+The BBS signatures and proofs as well as the messages need to be transported somehow.
+For this Thesis we chose Verifiable credentials \cite{verifiable-credentials} as the representation of these attributes.
+But what are VC's? \newline
+Verifiable credentials are JSON-LD data models, designed to represent different types of digital credentials.
+The Idea, is to be able to translate physical credentials, like an ID or a driver's license, into the digital world.
+In this Thesis we will only look at a small part of the standard, just enough that we can use it together with BBS.
+
+\subsection{Prepare VC's for BBS}
+
+
+
+
 
 \appendix
 
