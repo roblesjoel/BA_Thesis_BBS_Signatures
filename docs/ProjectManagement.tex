@@ -16,6 +16,7 @@
 ]{hyperref}
 \usepackage{tikzducks}
 \usepackage{amsmath}
+\usepackage{hyperref}
 
 \begin{document}
 
@@ -152,7 +153,7 @@ By handing out your ID, you lose the ability to selectively disclose information
 	\begin{minipage}{0.28\textwidth}
 		$$\underrightarrow{\includegraphics[width=30mm]{./img/ID.jpg}}$$
 		$$\overleftarrow{\includegraphics[width=30mm]{./img/Swisspass.jpeg}}$$
-	\end{minipage}\hfil
+	\end{minipage}\hfill
 	\begin{minipage}{0.28\textwidth}
 		\textbf{SBB}\newline\newline
 		\begin{tikzpicture}
@@ -160,10 +161,47 @@ By handing out your ID, you lose the ability to selectively disclose information
 		\end{tikzpicture}
 	\end{minipage}
 	\caption{Buying a train subscription}
-	\label{fig:trainssub}
+	\label{fig:trainsub}
 \end{figure}
 
-Now you also need a mobile subscription. You go to your next Swiss Post office 
+Now you also need a mobile subscription. You go to your next Swiss Post office.
+
+\begin{figure}[h]
+	\begin{minipage}{0.28\textwidth}
+		\textbf{Client}\newline\newline
+		\begin{tikzpicture}
+			\duck[graduate]
+		\end{tikzpicture}
+	\end{minipage}\hfill
+
+	\begin{minipage}{0.28\textwidth}
+		$$\underrightarrow{\includegraphics[width=30mm]{./img/ID.jpg}}$$
+		$$\overleftarrow{\includegraphics[width=30mm]{example-image-duck}}$$
+	\end{minipage}\hfill
+
+	\begin{minipage}{0.28\textwidth}
+		\textbf{Swiss Post}\newline\newline
+		\begin{tikzpicture}
+			\duck[tshirt, jacket=yellow!50!orange, tie=black]
+		\end{tikzpicture}
+	\end{minipage}
+	
+	\caption{Buying a mobile subscription}
+	\label{fig:mobilesub}
+\end{figure}
+
+Here, the employee makes the same checks as the SBB employee to see if you are who you say you are.
+And again, by handing out your ID, you lose the ability to selectively disclose information about yourself.
+
+\begin{figure}
+	\includegraphics[width=30mm]{example-image-duck}
+\end{figure}
+
+Now lets say but verifiers collude. As they have the same information about you, they link it back to you and create a profile about.
+In \autoref{chap:bbsex} we will see how we can use BBS to restore unlinkability and more.
+	
+
+
 
  
 	
@@ -173,6 +211,7 @@ Now you also need a mobile subscription. You go to your next Swiss Post office
 
 
 \chapter{Extensions of BBS}
+\label{chap:bbsex}
 
 \section{BBS with VC's}
 The BBS signatures and proofs as well as the messages need to be transported somehow.
