@@ -24,13 +24,14 @@
 \let\code\texttt
 
 \title{Bachelor Thesis}
-\subtitle{Name of Thesis}
+\subtitle{Unlinkability of Verifiable Credentials in a practical approach}
 \author[J. Robles]{Joel Robles}
 \institute{TI}
 \titlegraphic*{\includegraphics{example-image-duck}}%is only used with BFH-graphic and BFH-fullgraphic
+\date{March 21, 2024}
 
 %Activate the output of a frame number:
-%\setbeamertemplate{page number in head/foot}[framenumber]
+% \setbeamertemplate{page number in foot}[framenumber]
 
 
 \AtBeginSection{\sectionpage}
@@ -43,9 +44,40 @@
     \tableofcontents
 \end{frame}
 
-\section{Preface}
+\section{Tasks}
 
-\begin{frame}{Preface}
+\begin{frame}{Tasks}
+    Analyse each of these tasks for data leakage and if they break unlinkability
+    \begin{itemize}
+        \item VCs \& OIDC4VP
+        \begin{itemize}
+            \item For VC's read the W3C VC draft
+            \item For OIDC4VP read the OpenID draft
+        \end{itemize}
+        \item Pseudonyms
+        \begin{itemize}
+            \item Read the BBS Pseudonyms draft
+            \item Talk with the Authors of the draft
+        \end{itemize}
+        \item Link Secrets \& Blind Signatures
+        \begin{itemize}
+            \item For Link Secrets, use Rolf Haennis paper
+            \item For Blind Signatures, read the BBS blind signatures draft
+            \item Talk with the Authors of the blind signatures draft
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+% \begin{frame}{Tasks}
+%     The emergence of Self-Sovereign Identity (SSI) technology has marked a significant shift in the landscape of digital identity management. With its promise of empowering individuals to have full control over their personal information, SSI holds the potential to address the long-standing privacy and security concerns associated with traditional identity systems. Verifiable Credentials (VC) are the heart of SSI. They contain the user's information, and the way verifiable presentations are derived is critical to achieving the high security goals, especially unlinkability. The BBS signature scheme promises to fulfill all the requirements as it offers selective disclosure, unlinkability, per-verifier linkability and link secrets.
+% This bachelor thesis examines the use of the BBS signature scheme for VC in concrete use cases. Based on the existing issuance and attestation exchange protocols (OIDC4VC /DIDComm), the unlinkability and solidity of a use case-based implementation is examined. Within the attacker model, possible vulnerabilities and attack vectors are analyzed and mitigation measures are proposed.
+% \end{frame}
+
+\section{Project Management}
+
+\section{Use Case}
+
+\begin{frame}{Use Case}
     \framesubtitle{Buying a GA}
     \begin{columns}[onlytextwidth,T]
         \column{50mm}  
@@ -73,7 +105,7 @@
     \end{columns}
 \end{frame}
 
-\begin{frame}{Preface}
+\begin{frame}{Use Case}
     \framesubtitle{Signing a phone contract}
     \begin{columns}[onlytextwidth,T]
         \column{50mm}  
@@ -101,7 +133,7 @@
     \end{columns}
 \end{frame}
 
-\begin{frame}{Preface}
+\begin{frame}{Use Case}
     \framesubtitle{Colluding verifiers}
     \begin{columns}[onlytextwidth,T]
         \column{50mm}  
@@ -130,19 +162,9 @@
     \end{columns}
 \end{frame}
 
-\section{Tasks}
+\section{VC's}
 
-\begin{frame}{Tasks}
-    \begin{itemize}
-        \item VCs \& OIDC4VP
-        \item Pseudonyms
-        \item Link Secrets \& Blind Signatures
-    \end{itemize}
-\end{frame}
-
-\section{VC's \& OIDC4VP}
-
-\begin{frame}{VC's}
+\begin{frame}{VC structure}
     \begin{figure}[h]
         \centering
         \includegraphics[width=70mm]{./img/VC_example.png}
@@ -150,31 +172,47 @@
     \end{figure}
 \end{frame}
 
-\begin{frame}{Problems with VC's}
+\begin{frame}{VC's and linkability}
     \begin{itemize}
-        \item No Java implementation for VC's
-        \item ID in the VC as well as in the credentialSubject (making VC's linkable)
+        \item What is linkability?
         \begin{itemize}
-            \item The ID in the credentialSubject can be left out. If we want to have revocation the Credential needs to have an ID.
+            \item When two different presentations at two different verifiers can be linked back to you
         \end{itemize}
-        \item How do we sign the attributes of the credentialSubject but also the whole credential for data Integrity, in a way that we can leverage the selective disclosed of BBS?
+        \item Linkability in VC's with IDs in the VC and in the credentialSubject
         \begin{itemize}
-            \item Flatten the JSON Object
-        \end{itemize}
+            \item Are only optional
+            \item But what to do when we want revocation?
+        \end{itemize}\vfill
+        \item Use IDs in the VC but not in the credentialSubject
+        \item Also make use of zero-knowledge-proofs to show that the ID of the VC is not part of a revocation list
     \end{itemize}
 \end{frame}
 
-\begin{frame}{OIDC4VP}
-    \begin{figure}[h]
-        \centering
-        \includegraphics[width=120mm]{./img/OIDC4VP.png}
-        \caption{Same Device Flow for OIDC4VP, \url{https://openid.net/specs/openid-4-verifiable-presentations-1_0.html}}
-    \end{figure}
-\end{frame}
+% \begin{frame}{Problems with VC's}
+%     \begin{itemize}
+%         \item No Java implementation for VC's
+%         \item ID in the VC as well as in the credentialSubject (making VC's linkable)
+%         \begin{itemize}
+%             \item The ID in the credentialSubject can be left out. If we want to have revocation the Credential needs to have an ID.
+%         \end{itemize}
+%         \item How do we sign the attributes of the credentialSubject but also the whole credential for data Integrity, in a way that we can leverage the selective disclosed of BBS?
+%         \begin{itemize}
+%             \item Flatten the JSON Object
+%         \end{itemize}
+%     \end{itemize}
+% \end{frame}
 
-\section{Pseudonyms}
+% \begin{frame}{OIDC4VP}
+%     \begin{figure}[h]
+%         \centering
+%         \includegraphics[width=120mm]{./img/OIDC4VP.png}
+%         \caption{Same Device Flow for OIDC4VP, \url{https://openid.net/specs/openid-4-verifiable-presentations-1_0.html}}
+%     \end{figure}
+% \end{frame}
 
-\section{Link Secrets \& Blind Signatures}
+% \section{Pseudonyms}
+
+% \section{Link Secrets \& Blind Signatures}
 
 
 \end{document}
