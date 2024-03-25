@@ -47,6 +47,50 @@ Here an abstract might be placed.
 \mainmatter
 
 \chapter{Introduction}
+Self-sovereign Identity (SSI)\cite{self-sovereign-identity} is a concept where individuals can control their digital identity and what data is shared with whom.
+In the real world physical credentials like an ID or a driver's license are used, which makes selectively disclosing information hard, as there is more information on the credentials as there is needed in one presentation.
+If we digitalize these credentials, we create the option for individuals to selectively disclose information. 
+Verifiable credentials (VC's)\cite{verifiable-credentials} are a type of digital credentials that can be used to represent physical credentials.
+These digital credentials support multiple signing themes, one of which is the BBS Signature scheme (BBS)\cite{bbs-signature-scheme}.
+This signature scheme is based on the trust triangle seen in figure \ref{fig:trusttringle}, where there are three involved parties.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=4cm]{example-image-duck}
+	\caption{The trust triangle}
+	\label{fig:trusttringle}
+\end{figure}
+
+These parties are the issuer, holder and verfier.
+The issuer issues the credential, the holder holds the credential and presents it to the verifier, which then verifies the validity of the credential.
+This signature scheme supports cryptographic signing as well as cryptographic proof creation, which enables unlinkability.
+Unlinkabity is the concept that there is no link between each credential presentation and different verifiers, so no persona about one individual can be created.
+BBS also supports selective disclose, to only disclose a subset of the signed messages. With that we have the two most important attributes for this thesis.
+In this thesis we assume that the BBS Signature scheme has no flaws, and the promoted unlinkability of the scheme holds in every situation.
+We will also only use verifiable-credentials with data integrity, to not only protect the attributes of the credential (like the name, birthdate \dots) but to also protect the meta-data of the verifiable credential.
+For the data integrity we will also use the BBS Signature Scheme.
+Somehow the credentials need to send between the issuer and holder and between the holder and the verifier.
+For this thesis we will only look at the messaging between the holder and the verifier and assume that the VC creation and transportation to the holder is secure.
+For the presentation of the credentials there is an extension called a Verifiable-presentation (VP)\cite{verifiable-credentials}.
+To present the VP we use OpenID-Connect for Verifiable-Presentations (OIDC4VP)\cite{oidc4vp}.
+For OIDC4VP we assume that all communication using the HTTP-protocol is encrypted using TLS.
+With this information we now know how to represent a credential in the digital world with VCs, how to secure it against tampering with BBS, to selectively disclose data and use proofs to unlink multiple presentations (also) with BBS, and how to present the credential to verifier using OIDC4VP.
+But there are still more things that we can do.
+First of we would like to simply the process of a returning customer.
+Think about how often you log in into Netflix, either with your email and password or with the cached login token.
+It would be very unnecessary to present your credential each time you would like to watch a show, so we would like recognition.
+To solve that problem we will look at Pseudonyms\cite{pseudonyms} in chapter \ref{chap:Pseudonyms}.
+These Pseudonyms are used for a verifier to recognize already before seen individual.
+This extension of the BBS Signature scheme should not break the unlinkability of the BBS proofs as they are only linkable between one verifier and the holder, but will still be analyzed.
+Lastly we will look at the problem, where if we need to present two different credentials (like a driver's license and the vehicle registration document), how can we proof that both documents are owned by the same holder.
+For that we will make use of link secrets\cite{linksecrets}.
+Link Secrets are secret values that only the holder knows.
+This value is supplied blinded to the issuer, meaning that is encoded in such a way that the issued cannot find out what the original value is.
+For the signer to be able to create a VC containing a blinded value, they would need to use Blind BBS Signatures\cite{bbs-signature-scheme}, which allows signing of such blinded values.
+With the blind signatures we also allow individuals to create their own credentials for their own needs, without needing to reveal the content of the credential, by using the ability to blind values.
+When a holder then presents two different credentials to a verifier, he can proof that both of those credentials are owned by him by proving the knowledge of the contents of the blinded link secrets.
+And with that we have now seen all the extensions that will be thematised in this thesis.
+All these extensions we be analyzed for data leakage or for breaking the unlinkability provided by the BBS Signature Scheme.
 
 \chapter{Goals}
 
@@ -223,6 +267,15 @@ In this Thesis we will only look at a small part of the standard, just enough th
 
 \subsection{Prepare VC's for BBS}
 
+
+\section{BBS with Pseudonyms}
+\label{chap:Pseudonyms}
+
+\section{BBS with Link Secrets}
+\label{chap:linksecrets}
+
+\section{BBS with Blind Signatures}
+\label{chap:blindsignatures}
 
 
 
