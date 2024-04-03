@@ -8,6 +8,7 @@
 	,listof=totoc         % If enabled add lists to TOC
 %	,bilingual
 	,monolingual
+	twoside=false,
 ]{bfhthesis}              % KOMA-script report
 
 \usepackage[
@@ -17,13 +18,63 @@
 \usepackage{tikzducks}
 \usepackage{amsmath}
 \usepackage{hyperref}
+\usepackage{listings}
+
+\LoadBFHModule{boxes}
+
+\colorlet{punct}{red!60!black}
+\definecolor{background}{HTML}{EEEEEE}
+\definecolor{delim}{RGB}{20,105,176}
+\colorlet{numb}{magenta!60!black}
+
+\lstdefinelanguage{json}{
+    basicstyle=\normalfont\ttfamily,
+    numbers=left,
+    numberstyle=\scriptsize,
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=lines,
+    backgroundcolor=\color{background},
+    literate=
+     *{0}{{{\color{numb}0}}}{1}
+      {1}{{{\color{numb}1}}}{1}
+      {2}{{{\color{numb}2}}}{1}
+      {3}{{{\color{numb}3}}}{1}
+      {4}{{{\color{numb}4}}}{1}
+      {5}{{{\color{numb}5}}}{1}
+      {6}{{{\color{numb}6}}}{1}
+      {7}{{{\color{numb}7}}}{1}
+      {8}{{{\color{numb}8}}}{1}
+      {9}{{{\color{numb}9}}}{1}
+      {:}{{{\color{punct}{:}}}}{1}
+      {,}{{{\color{punct}{,}}}}{1}
+      {\{}{{{\color{delim}{\{}}}}{1}
+      {\}}{{{\color{delim}{\}}}}}{1}
+      {[}{{{\color{delim}{[}}}}{1}
+      {]}{{{\color{delim}{]}}}}{1},
+}
+
+\lstdefinelanguage{canon}{
+    basicstyle=\normalfont\ttfamily,
+    numbers=left,
+    numberstyle=\scriptsize,
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=lines,
+    backgroundcolor=\color{background},
+}
 
 \begin{document}
 
 \frontmatter
 
 \title{Bachelor's Thesis}
-\subtitle{Extended BBS?: Management Document}
+\subtitle{Unlinkability of Verfiable Credentials in a practical approach
+: Project Management Document}
 \author{Joël Gabriel Robles Gasser}
 \institution{Bern University of Applied Sciences}
 \department{Engineering and Computer Science}
@@ -63,18 +114,22 @@ This signature scheme is based on the trust triangle seen in figure \ref{fig:tru
 
 These parties are the issuer, holder and verfier.
 The issuer issues the credential, the holder holds the credential and presents it to the verifier, which then verifies the validity of the credential.
-This signature scheme supports cryptographic signing as well as cryptographic proof creation, which enables unlinkability.
-Unlinkabity is the concept that there is no link between each credential presentation and different verifiers, so no persona about one individual can be created.
+Besides signing, this signature scheme also supports proof creation, which enables unlinkability.
+Unlinkabity is the concept that there is no link between each credential presentation and different verifiers.
 BBS also supports selective disclose, to only disclose a subset of the signed messages. With that we have the two most important attributes for this thesis.
 In this thesis we assume that the BBS Signature scheme has no flaws, and the promoted unlinkability of the scheme holds in every situation.
 We will also only use verifiable-credentials with data integrity, to not only protect the attributes of the credential (like the name, birthdate \dots) but to also protect the meta-data of the verifiable credential.
 For the data integrity we will also use the BBS Signature Scheme.
 Somehow the credentials need to send between the issuer and holder and between the holder and the verifier.
 For this thesis we will only look at the messaging between the holder and the verifier and assume that the VC creation and transportation to the holder is secure.
-For the presentation of the credentials there is an extension called a Verifiable-presentation (VP)\cite{verifiable-credentials}.
+For the presentation of the credentials there is an extension of VCs called a Verifiable-presentation (VP)\cite{verifiable-credentials}.
 To present the VP we use OpenID-Connect for Verifiable-Presentations (OIDC4VP)\cite{oidc4vp}.
-For OIDC4VP we assume that all communication using the HTTP-protocol is encrypted using TLS.
+For OIDC4VP we assume that all communication is secured and encrypted.
 With this information we now know how to represent a credential in the digital world with VCs, how to secure it against tampering with BBS, to selectively disclose data and use proofs to unlink multiple presentations (also) with BBS, and how to present the credential to verifier using OIDC4VP.
+
+
+\newpage
+
 But there are still more things that we can do.
 First of we would like to simply the process of a returning customer.
 Think about how often you log in into Netflix, either with your email and password or with the cached login token.
@@ -243,18 +298,9 @@ And again, by handing out your ID, you lose the ability to selectively disclose 
 
 Now lets say but verifiers collude. As they have the same information about you, they link it back to you and create a profile about.
 In \autoref{chap:bbsex} we will see how we can use BBS to restore unlinkability and more.
-	
 
 
-
- 
-	
-
-
-
-
-
-\chapter{Extensions of BBS}
+\chapter{Extensions with BBS}
 \label{chap:bbsex}
 
 \section{BBS with VC's}
@@ -266,7 +312,126 @@ The Idea, is to be able to translate physical credentials, like an ID or a drive
 In this Thesis we will only look at a small part of the standard, just enough that we can use it together with BBS.
 
 \subsection{Prepare VC's for BBS}
+VCs are JSON objects with multiple key-value pairs on different levels.
+BBS can only sign statements.
+So somehow we need to transform the JSON objects to statements, that then can be signed by BBS.
+To achieve this we will use the Data Integrity BBS Cryptosuites draft\cite{bbsvc}.
 
+We will use the following VC as an example.
+\begin{lstlisting}[language=json,firstnumber=1,caption={Example VC},captionpos=b]
+{
+	"@context": [
+		"https://www.w3.org/ns/credentials/v2"
+	],
+	"type":  ["VerifiableCredential"],
+	"credentialSubject":{
+		"first_name": "Joel",
+		"last_name": "Robles"
+	}
+}
+\end{lstlisting}
+
+With that we can follow these steps to sign the VC.
+
+\subsubsection{Shuffled label map}
+\label{sub:shuffledlabelmap}
+
+\subsubsection{Create the proof config}
+The first step is to create the proof config.
+The proof config contains the information about the proof that will be generated, like what cryptosuite was used, what type of proof it is and so on.
+
+\begin{itemize}
+	\item Create an empty proof\_config object
+	\item Set proof\_config.type to "DataIntegrityProof"
+	\item Set proof\_config.cryptosuite to "bbs-2023"
+	\item Set proof\_config.created to the current time
+	\item (Not in draft but in code) Set proof\_config.verificationMethod to the url of the verification information (see: \url{https://www.w3.org/TR/vc-di-bbs/#multikey})
+	\item Set proof\_config.@context to the @context of the VC
+	\item Set canonical\_proof\_config to the canonical representation of the proof\_config using the Universal RDF DatasetCanonicalization Algorithm\cite{rdf}
+	\item Return canonical\_proof\_config
+\end{itemize}
+
+If we follow the instructions' step by step we get a JSON object like this:
+\begin{lstlisting}[language=json,firstnumber=1,caption={Example VC},captionpos=b]
+{
+	"type": "DataIntegrityProof",
+	"cryptosuite": "bbs-2023",
+	"created": "2024-04-01T21:28:52.401Z",
+	"verificationMethod": "www.example.com/keys",
+	"proofPurpose": "assertionMethod",
+	"@context": [
+		"https://www.w3.org/ns/credentials/v2"
+	],
+}
+\end{lstlisting}
+
+Which in turn is canonicalized into this:
+
+\begin{lstlisting}[language=canon,firstnumber=1,caption={Example VC canonicalized},captionpos=b]
+\_:c14n0 <http://purl.org/dc/terms/created> "2024-04-01T21:35:10.679Z"^^<http://www.w3.org/2001/XMLSchema\#dateTime> .
+\_:c14n0 <http://www.w3.org/1999/02/22-rdf-syntax-ns\#type> <https://w3id.org/security\#DataIntegrityProof> .
+\_:c14n0 <https://w3id.org/security\#cryptosuite> "bbs-2023"^^<https://w3id.org/security\#cryptosuiteString> .
+\_:c14n0 <https://w3id.org/security\#proofPurpose> <https://w3id.org/security\#assertionMethod> .
+\_:c14n0 <https://w3id.org/security\#verificationMethod> <did:key:zUC7DerdEmfZ8f4pFajXgGwJoMkV1ofMTmEG5UoNvnWiPiLuGKNeqgRpLH2TV4Xe5mJ2cXV76gRN7LFQwapF1VFu6x2yrr5ci1mXqC1WNUrnHnLgvfZfMH7h6xP6qsf9EKRQrPQ\#zUC7DerdEmfZ8f4pFajXgGwJoMkV1ofMTmEG5UoNvnWiPiLuGKNeqgRpLH2TV4Xe5mJ2cXV76gRN7LFQwapF1VFu6x2yrr5ci1mXqC1WNUrnHnLgvfZfMH7h6xP6qsf9EKRQrPQ> .
+\end{lstlisting}
+
+With that we have our canonical\_proof\_config and the first step is finished.
+
+\subsubsection{Transform the VC}
+\label{chap:transform}
+The next step is the transformation of the VC, into statements that can be signed.
+
+\begin{itemize}
+	\item Define hmac\_key as a random string of 32 Bytes
+	\item Define hmac\_func as the hmac function with the input of hmac\_key. In this thesis we use SHA-256 as the hashing algorithm.
+	\item Define label\_map\_factory\_function as the function which is returned from the create\_shuffled\_id\_label\_map\_function defined in chapter \ref{sub:shuffledlabelmap}.
+	\item Set group\_definitions to a map where "mandatory" is the key and the values are the mandatory attributes. In our case we want the first\_name to be mandatory.
+	\item Set groups to the response of the canonicalizeAndGroup.groups algorithm specified in the DataIntegrity for ECDSA draft\cite{ecdsa}, passing the label\_map\_factory\_function, group\_definitions and the VC.
+	\item Set mandatory to the value from groups.mandatory.matching
+	\item Set nonMandatory to the value from groups.mandatory.nonMatching
+	\item Re-set the hmac\_key to the value that can be exportet from the hmac\_func
+	\item Return an object containing "mandatory" set to mandatory, "nonMandatory" set to nonMandatory and "hmacKey" set to hmac\_key.
+\end{itemize}
+
+This object may look like this:
+
+\begin{lstlisting}[language=json,firstnumber=1,caption={Return object of the VC transformation},captionpos=b]
+{
+	"mandatory": [[
+		0,
+		"_:b0 <https://www.w3.org/ns/credentials/issuer-dependent#first_name> \"Joel\" .\n",
+		],
+		[
+		2,
+		"_:b1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://www.w3.org/2018/credentials#VerifiableCredential> .\n",
+		],
+		[
+		3,
+		"_:b1 <https://www.w3.org/2018/credentials#credentialSubject> _:b0 .\n",
+		]],
+	"nonMandatory": [[
+		1,
+		"_:b0 <https://www.w3.org/ns/credentials/issuer-dependent#last_name> \"Robles\" .\n",
+	  ]],
+	"hmacKey": [0, 17, 34, 51, 68, 85, 102, 119, 136, 153, 170, 187, 204, 221, 238, 255, 0, 17, 34, 51, 68, 85, 102, 119, 136, 153, 170, 187, 204, 221, 238, 255],
+}
+\end{lstlisting}
+
+And with that we transformed the VC into canonical statements that can later be signed by BBS.
+
+\subsubsection{Hash the proof data}
+
+Lastly we need to create a proof hash that then will be added to the canonical statements that will be signed by BBS.
+
+\begin{itemize}
+	\item Set proof\_hash as the result of the hashing of canonical\_proof\_config using SHA-256.
+	\item Set the mandatory\_hash as the result of the hashing of mandatory using SHA-256. Be aware that mandatory is an array that first needs to be concatenated. In this thesis we don't use any delimiter for concatenation. 
+	\item Initialise hash\_data as a copy of transformed\_document, then adding the key-value pairs "proofHash"-proof\_hash and "mandatoryHash"-mandatory\_hash
+	\item Return hash\_data
+\end{itemize}
+
+With that we are now able to sign the statements with BBS.
+There is no example here as this is just the same object from chapter \ref{chap:transform} with two hashes as new key-value pairs.
 
 \section{BBS with Pseudonyms}
 \label{chap:Pseudonyms}
