@@ -36,18 +36,9 @@
     showstringspaces=false,
     breaklines=true,
     frame=lines,
+	postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
     backgroundcolor=\color{background},
     literate=
-     *{0}{{{\color{numb}0}}}{1}
-      {1}{{{\color{numb}1}}}{1}
-      {2}{{{\color{numb}2}}}{1}
-      {3}{{{\color{numb}3}}}{1}
-      {4}{{{\color{numb}4}}}{1}
-      {5}{{{\color{numb}5}}}{1}
-      {6}{{{\color{numb}6}}}{1}
-      {7}{{{\color{numb}7}}}{1}
-      {8}{{{\color{numb}8}}}{1}
-      {9}{{{\color{numb}9}}}{1}
       {:}{{{\color{punct}{:}}}}{1}
       {,}{{{\color{punct}{,}}}}{1}
       {\{}{{{\color{delim}{\{}}}}{1}
@@ -66,6 +57,7 @@
     breaklines=true,
     frame=lines,
     backgroundcolor=\color{background},
+	postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
 }
 
 \begin{document}
@@ -311,7 +303,9 @@ Verifiable credentials are JSON-LD data models, designed to represent different 
 The Idea, is to be able to translate physical credentials, like an ID or a driver's license, into the digital world.
 In this Thesis we will only look at a small part of the standard, just enough that we can use it together with BBS.
 
-\subsection{Prepare VC's for BBS}
+\subsection{Used VC standards}
+
+\subsection{Prepare VCs for BBS}
 VCs are JSON objects with multiple key-value pairs on different levels.
 BBS can only sign statements.
 So somehow we need to transform the JSON objects to statements, that then can be signed by BBS.
@@ -335,6 +329,30 @@ With that we can follow these steps to sign the VC.
 
 \subsubsection{Shuffled label map}
 \label{sub:shuffledlabelmap}
+
+RDF is deterministic, we then shuffle the inputs with a hmac on each creation
+
+Because of security considerations mentioned in chapter \ref{subsec:vcseccons} the canonicalised proof\_config needs to be shuffled.
+
+The required input of this algorithm is an \textbf{HMAC} which already was initialized with a secret key, and a \textbf{canonical\_id\_map}, where the node prefixes \textbf{\_:} are stripped.
+The output is a function, \textbf{label\_map\_factory\_function}. (In java return function???)
+The output is a map, \textbf{bnode\_id\_map}.
+
+\begin{itemize}
+	\item Initialize \textbf{bnode\_id\_map} to a new map.
+	\item For each entry in the \textbf{canonical\_id\_map}, which are split up into key - value
+	\item \begin{itemize}
+		\item Set \textbf{hmac\_result} to result of a HMAC-digest operation on the value of the entry. 
+		\item Add a new map entry into \textbf{bnode\_id\_map}, where the key is the key from \textbf{canonical\_id\_map} and the value is \textbf{hmac\_result} encoded in base64-url encoding defined in chapter 5 and 3.2 of "RFC 4648"\cite{base64}.
+	\end{itemize}
+	\item Initialize \textbf{hmac\_ids} to the sorted values of \textbf{bnode\_id\_map}
+	\item For each key in the \textbf{bnode\_id\_map}
+	\item \begin{itemize}
+		\item Set the value for the given key in \textbf{bnode\_id\_map} with \textbf{b} concatenated with the index of the correspoing value in \textbf{hmac\_ids}. The value should then look like \textbf{b0}.
+	\end{itemize}
+	\item Finally return \textbf{bnode\_id\_map}.
+\end{itemize}
+
 
 \subsubsection{Create the proof config}
 The first step is to create the proof config.
@@ -432,6 +450,68 @@ Lastly we need to create a proof hash that then will be added to the canonical s
 
 With that we are now able to sign the statements with BBS.
 There is no example here as this is just the same object from chapter \ref{chap:transform} with two hashes as new key-value pairs.
+
+\subsubsection{Generate and serialize the signature}
+
+Now we generate the bbs signature and serialize it.
+
+\begin{itemize}
+	\item Set bbs\_header to the concatenation of proof\_hash and mandatory\_hash
+	\item Set bbs\_messages to the messages in the non\_mandatory array, which are represented as byte arrays encoded with UTF-8
+	\item Set bbs\_signature to the result of the bbs signature operation, defined in chapter 3.5.1 of the BBS Siganture Scheme\cite{bbs-signature-scheme}.
+	\item Initialise proof\_value to the bbs proof header bytes 0xd9, 0x5d and 0x02
+	\item Set components to an array containing(in this order): bbs\_signature, bbs\_header, public\_key, hmac\_key, mandatory\_pointers
+	\item Set cbor to result of the application of the CBOR-encoding\cite{cbor}, where CBOR tagging \textbf{Must NOT} be used.
+	\item Set proof\_value to the concatenation of proof\_value and cbor
+	\item Set base\_proof to the value of the base64-url encoding defined in chapter 5 of "RFC 4648"\cite{base64} but without padding as mentioned in chapter 3.2 of the same RFC.
+	\item Return base \_proof
+\end{itemize}
+
+The base\_proof should look something like this, starting with an \textbf{u} and having no padding:
+
+\begin{lstlisting}[language=canon,firstnumber=1,caption={Serialised signature},captionpos=b]
+u2V0ChdhAWFC2HFadcICoWHnR-s9oPaUegpsXqwH_8ngk4TBuMLDFqnvVCo9axh2gcmb2w4KJ5LlfQOgl6M_YY3waJwFPMF5oqtZGI0rzf6HfWOS6VfGPWthAWEClRFA4ut1V3aj4gUvaZAvy2PvZHn-CFZzt5TUfXODzG0MDCe45ZPrMkpKH4UaaxIUqC6L_lhaGZLEMu5ae3gHb2EBYYKTvGvo9pXVJbxIrm3i4wkdhUxqKCTIGrnxFuAdZwWi6T3omD5wzZ7bAGbRneEEQSxBmXtvnC6Pr59nPv_v3HrAW9wq_uxYzF_NyaX3GPv0h_FV2T2OSao8C6uoyWiqIj9hAWCAAESIzRFVmd4iZqrvM3e7_ABEiM0RVZneImaq7zN3u_4F4HS9jcmVkZW50aWFsU3ViamVjdC9maXJzdF9uYW1l
+\end{lstlisting}
+
+\subsubsection{Add signature to VC}
+
+Finally, we add the generated signature to the VC.
+
+\begin{itemize}
+	\item Add a new key-value pair "proof"-"proof\_config" to the VC
+	\item Add a new key-value pair "proofValue"-"base\_proof" to VC.proof 
+\end{itemize}
+
+And with that we now have a fully functional VC which was signed with bbs.
+
+This is an example how it could look:
+
+\begin{lstlisting}[language=json,firstnumber=1,caption={Signed VC},captionpos=b]
+{
+	"@context": [
+		"https://www.w3.org/ns/credentials/v2"
+	],
+	"type": [
+		"VerifiableCredential"
+	],
+	"credentialSubject": {
+		"first_name": "Joel",
+		"last_name": "Robles"
+	},
+	"proof": {
+		"type": "DataIntegrityProof",
+		"cryptosuite": "bbs-2023",
+		"created": "2024-04-03T22:11:27.027Z",
+		"verificationMethod": "did:key:zUC7DerdEmfZ8f4pFajXgGwJoMkV1ofMTmEG5UoNvnWiPiLuGKNeqgRpLH2TV4Xe5mJ2cXV76gRN7LFQwapF1VFu6x2yrr5ci1mXqC1WNUrnHnLgvfZfMH7h6xP6qsf9EKRQrPQ#zUC7DerdEmfZ8f4pFajXgGwJoMkV1ofMTmEG5UoNvnWiPiLuGKNeqgRpLH2TV4Xe5mJ2cXV76gRN7LFQwapF1VFu6x2yrr5ci1mXqC1WNUrnHnLgvfZfMH7h6xP6qsf9EKRQrPQ",
+		"proofPurpose": "assertionMethod",
+		"proofValue": "u2V0ChdhAWFC2HFadcICoWHnR-s9oPaUegpsXqwH_8ngk4TBuMLDFqnvVCo9axh2gcmb2w4KJ5LlfQOgl6M_YY3waJwFPMF5oqtZGI0rzf6HfWOS6VfGPWthAWEClRFA4ut1V3aj4gUvaZAvy2PvZHn-CFZzt5TUfXODzG0MDCe45ZPrMkpKH4UaaxIUqC6L_lhaGZLEMu5ae3gHb2EBYYKTvGvo9pXVJbxIrm3i4wkdhUxqKCTIGrnxFuAdZwWi6T3omD5wzZ7bAGbRneEEQSxBmXtvnC6Pr59nPv_v3HrAW9wq_uxYzF_NyaX3GPv0h_FV2T2OSao8C6uoyWiqIj9hAWCAAESIzRFVmd4iZqrvM3e7_ABEiM0RVZneImaq7zN3u_4F4HS9jcmVkZW50aWFsU3ViamVjdC9maXJzdF9uYW1l"
+	}
+}
+\end{lstlisting}
+
+\subsection{Security Considerations of VCs}
+\label{subsec:vcseccons}
+
 
 \section{BBS with Pseudonyms}
 \label{chap:Pseudonyms}
