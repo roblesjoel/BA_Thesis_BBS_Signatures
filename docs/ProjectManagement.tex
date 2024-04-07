@@ -303,7 +303,22 @@ Verifiable credentials are JSON-LD data models, designed to represent different 
 The Idea, is to be able to translate physical credentials, like an ID or a driver's license, into the digital world.
 In this Thesis we will only look at a small part of the standard, just enough that we can use it together with BBS.
 
-\subsection{Used VC standards}
+\subsection{Used VC concepts}
+In this section we will define which VC concepts are used in this thesis.
+
+\subsubsection{@context}
+The \textbf{@context} attribute are used to map human-friendly ids like \textit{type} to an url.
+These urls then help the system understand what the content of the VC is.
+The value of the \textbf{@context} attribute is an ordered list, where the first entry must be \verb|<https://www.w3.org/ns/credentials/v2>|
+We will also use the context \verb|<https://w3c.github.io/vc-data-integrity/contexts/data-integrity/v2.jsonld>| to signify that the content of the VC is protected.
+
+\subsubsection{id}
+
+
+\subsubsection{type}
+
+\subsubsection{credentialSubject}
+
 
 \subsection{Prepare VCs for BBS}
 VCs are JSON objects with multiple key-value pairs on different levels.
@@ -315,7 +330,8 @@ We will use the following VC as an example.
 \begin{lstlisting}[language=json,firstnumber=1,caption={Example VC},captionpos=b]
 {
 	"@context": [
-		"https://www.w3.org/ns/credentials/v2"
+		"https://www.w3.org/ns/credentials/v2",
+		"https://www.w3.org/ns/credentials/examples/v2"
 	],
 	"type":  ["VerifiableCredential"],
 	"credentialSubject":{
@@ -334,7 +350,7 @@ RDF is deterministic, we then shuffle the inputs with a hmac on each creation
 
 Because of security considerations mentioned in chapter \ref{subsec:vcseccons} the canonicalised proof\_config needs to be shuffled.
 
-The required input of this algorithm is an \textbf{HMAC} which already was initialized with a secret key, and a \textbf{canonical\_id\_map}, where the node prefixes \textbf{\_:} are stripped.
+The required input of this algorithm is an \textbf{HMAC} which already was initialized with a secret key (\textit{Maybe only input the key, as java cannot pass functions}), and a \textbf{canonical\_id\_map}, where the node prefixes \textbf{\_:} are stripped (from \textit{\_:c14n0} to \textit{c14n0}).
 The output is a function, \textbf{label\_map\_factory\_function}. (In java return function???)
 The output is a map, \textbf{bnode\_id\_map}.
 
@@ -386,11 +402,11 @@ If we follow the instructions' step by step we get a JSON object like this:
 Which in turn is canonicalized into this:
 
 \begin{lstlisting}[language=canon,firstnumber=1,caption={Example VC canonicalized},captionpos=b]
-\_:c14n0 <http://purl.org/dc/terms/created> "2024-04-01T21:35:10.679Z"^^<http://www.w3.org/2001/XMLSchema\#dateTime> .
-\_:c14n0 <http://www.w3.org/1999/02/22-rdf-syntax-ns\#type> <https://w3id.org/security\#DataIntegrityProof> .
-\_:c14n0 <https://w3id.org/security\#cryptosuite> "bbs-2023"^^<https://w3id.org/security\#cryptosuiteString> .
-\_:c14n0 <https://w3id.org/security\#proofPurpose> <https://w3id.org/security\#assertionMethod> .
-\_:c14n0 <https://w3id.org/security\#verificationMethod> <did:key:zUC7DerdEmfZ8f4pFajXgGwJoMkV1ofMTmEG5UoNvnWiPiLuGKNeqgRpLH2TV4Xe5mJ2cXV76gRN7LFQwapF1VFu6x2yrr5ci1mXqC1WNUrnHnLgvfZfMH7h6xP6qsf9EKRQrPQ\#zUC7DerdEmfZ8f4pFajXgGwJoMkV1ofMTmEG5UoNvnWiPiLuGKNeqgRpLH2TV4Xe5mJ2cXV76gRN7LFQwapF1VFu6x2yrr5ci1mXqC1WNUrnHnLgvfZfMH7h6xP6qsf9EKRQrPQ> .
+_:c14n0 <http://purl.org/dc/terms/created> "2024-04-01T21:35:10.679Z"^^<http://www.w3.org/2001/XMLSchema\#dateTime> .
+_:c14n0 <http://www.w3.org/1999/02/22-rdf-syntax-ns\#type> <https://w3id.org/security\#DataIntegrityProof> .
+_:c14n0 <https://w3id.org/security\#cryptosuite> "bbs-2023"^^<https://w3id.org/security\#cryptosuiteString> .
+_:c14n0 <https://w3id.org/security\#proofPurpose> <https://w3id.org/security\#assertionMethod> .
+_:c14n0 <https://w3id.org/security\#verificationMethod> <did:key:zUC7DerdEmfZ8f4pFajXgGwJoMkV1ofMTmEG5UoNvnWiPiLuGKNeqgRpLH2TV4Xe5mJ2cXV76gRN7LFQwapF1VFu6x2yrr5ci1mXqC1WNUrnHnLgvfZfMH7h6xP6qsf9EKRQrPQ\#zUC7DerdEmfZ8f4pFajXgGwJoMkV1ofMTmEG5UoNvnWiPiLuGKNeqgRpLH2TV4Xe5mJ2cXV76gRN7LFQwapF1VFu6x2yrr5ci1mXqC1WNUrnHnLgvfZfMH7h6xP6qsf9EKRQrPQ> .
 \end{lstlisting}
 
 With that we have our canonical\_proof\_config and the first step is finished.

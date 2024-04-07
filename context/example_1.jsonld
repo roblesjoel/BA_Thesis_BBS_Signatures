@@ -1,0 +1,12 @@
+{
+    "@context":{
+        "credentialSubject":{
+            "first_name": {
+                "type" : "https://schema.org/givenName"
+            },
+            "last_name": {
+                "type" : "https://schema.org/familyName"
+            }
+        }
+    }
+}
