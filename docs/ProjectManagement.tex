@@ -11,6 +11,8 @@
 	twoside=false,
 ]{bfhthesis}              % KOMA-script report
 
+\setcounter{secnumdepth}{3}
+
 \usepackage[
 	hidelinks,
 	pdfusetitle,
@@ -93,7 +95,7 @@ Here an abstract might be placed.
 Self-sovereign Identity (SSI)\cite{self-sovereign-identity} is a concept where individuals can control their digital identity and what data is shared with whom.
 In the real world physical credentials like an ID or a driver's license are used, which makes selectively disclosing information hard, as there is more information on the credentials as there is needed in one presentation.
 If we digitalize these credentials, we create the option for individuals to selectively disclose information. 
-Verifiable credentials (VC's)\cite{verifiable-credentials} are a type of digital credentials that can be used to represent physical credentials.
+Verifiable credentials (VCs)\cite{verifiable-credentials} are a type of digital credentials that can be used to represent physical credentials.
 These digital credentials support multiple signing themes, one of which is the BBS Signature scheme (BBS)\cite{bbs-signature-scheme}.
 This signature scheme is based on the trust triangle seen in figure \ref{fig:trusttringle}, where there are three involved parties.
 
@@ -104,40 +106,44 @@ This signature scheme is based on the trust triangle seen in figure \ref{fig:tru
 	\label{fig:trusttringle}
 \end{figure}
 
-These parties are the issuer, holder and verfier.
-The issuer issues the credential, the holder holds the credential and presents it to the verifier, which then verifies the validity of the credential.
+These parties are the issuer, holder and verifier.
+The issuer supplies the credential to the holder, which stores it. The holder is then able to present it to a verifier, which checks its validity and content.
+The verifier uses the signature to also check the authenticity and integrity of the supplied credential.
 Besides signing, this signature scheme also supports proof creation, which enables unlinkability.
-Unlinkabity is the concept that there is no link between each credential presentation and different verifiers.
-BBS also supports selective disclose, to only disclose a subset of the signed messages. With that we have the two most important attributes for this thesis.
-In this thesis we assume that the BBS Signature scheme has no flaws, and the promoted unlinkability of the scheme holds in every situation.
+Unlinkability is the concept that there is no link between each credential presentation and different verifiers.
+BBS also supports selective disclosure, to only disclose a subset of the information contained in the credential.\\
+
+In this thesis we want to investigate the use of the BBS Signature Scheme in a real world scenario.
+We assume that the BBS Signature scheme has no flaws, and the promoted unlinkability of the scheme holds in every situation.
 We will also only use verifiable-credentials with data integrity, to not only protect the attributes of the credential (like the name, birthdate \dots) but to also protect the meta-data of the verifiable credential.
-For the data integrity we will also use the BBS Signature Scheme.
-Somehow the credentials need to send between the issuer and holder and between the holder and the verifier.
+For the data integrity we will also use the BBS Signature Scheme.\\
+
+The credentials need to send between the issuer and holder and between the holder and the verifier.
 For this thesis we will only look at the messaging between the holder and the verifier and assume that the VC creation and transportation to the holder is secure.
 For the presentation of the credentials there is an extension of VCs called a Verifiable-presentation (VP)\cite{verifiable-credentials}.
 To present the VP we use OpenID-Connect for Verifiable-Presentations (OIDC4VP)\cite{oidc4vp}.
-For OIDC4VP we assume that all communication is secured and encrypted.
-With this information we now know how to represent a credential in the digital world with VCs, how to secure it against tampering with BBS, to selectively disclose data and use proofs to unlink multiple presentations (also) with BBS, and how to present the credential to verifier using OIDC4VP.
+For OIDC4VP we assume that all communication is secured and encrypted.\\
 
+\textit{Zusammenfassend}
+With this information we now know how to represent a credential in the digital world with VCs, how to secure it against tampering with BBS, to selectively disclose data and use proofs to unlink multiple presentations (also) with BBS, and how to present the credential to verifier using OIDC4VP.\\
 
-\newpage
-
-But there are still more things that we can do.
+\textit{Why not login?}
 First of we would like to simply the process of a returning customer.
 Think about how often you log in into Netflix, either with your email and password or with the cached login token.
-It would be very unnecessary to present your credential each time you would like to watch a show, so we would like recognition.
-To solve that problem we will look at Pseudonyms\cite{pseudonyms} in chapter \ref{chap:Pseudonyms}.
+It would be very unnecessary to present your VC each time you would like to watch a show, so we would like recognition.
+To solve that problem we will look at Pseudonyms\cite{pseudonyms} in chapter \ref{chap:Pseudonyms}.\\
+
 These Pseudonyms are used for a verifier to recognize already before seen individual.
-This extension of the BBS Signature scheme should not break the unlinkability of the BBS proofs as they are only linkable between one verifier and the holder, but will still be analyzed.
-Lastly we will look at the problem, where if we need to present two different credentials (like a driver's license and the vehicle registration document), how can we proof that both documents are owned by the same holder.
-For that we will make use of link secrets\cite{linksecrets}.
-Link Secrets are secret values that only the holder knows.
-This value is supplied blinded to the issuer, meaning that is encoded in such a way that the issued cannot find out what the original value is.
-For the signer to be able to create a VC containing a blinded value, they would need to use Blind BBS Signatures\cite{bbs-signature-scheme}, which allows signing of such blinded values.
-With the blind signatures we also allow individuals to create their own credentials for their own needs, without needing to reveal the content of the credential, by using the ability to blind values.
-When a holder then presents two different credentials to a verifier, he can proof that both of those credentials are owned by him by proving the knowledge of the contents of the blinded link secrets.
-And with that we have now seen all the extensions that will be thematised in this thesis.
-All these extensions we be analyzed for data leakage or for breaking the unlinkability provided by the BBS Signature Scheme.
+This extension of the BBS Signature scheme should not break the unlinkability of the BBS proofs as they are only linkable between one verifier and the holder, but will still be analyzed.\\
+
+Lastly we will look at the problem, where if we need to present two different VCs (like a driver's license and the vehicle registration document), how can we proof that both documents are owned by the same holder.
+For that we will make use of link secrets\cite{linksecrets}, which is a secret value that only the holder knows.
+% This value is supplied blinded to the issuer, meaning that is encoded in such a way that the issued cannot find out what the original value is.
+% For the signer to be able to create a VC containing a blinded value, they would need to use Blind BBS Signatures\cite{bbs-signature-scheme}, which allows signing of such blinded values.
+% With the blind signatures we also allow individuals to create their own credentials for their own needs, without needing to reveal the content of the credential, by using the ability to blind values.
+% When a holder then presents two different credentials to a verifier, he can proof that both of those credentials are owned by him by proving the knowledge of the contents of the blinded link secrets.
+In this thesis we want to analyse these concepts in conjunction with the BBS Signature scheme, to see if there is any data leakage or if the unlinkability provided by the BBS Signature Scheme will break.
+For this we will investigate each concept step by step, based on their respective specifications, and implement them if needed.
 
 \chapter{Goals}
 
@@ -291,7 +297,6 @@ And again, by handing out your ID, you lose the ability to selectively disclose 
 Now lets say but verifiers collude. As they have the same information about you, they link it back to you and create a profile about.
 In \autoref{chap:bbsex} we will see how we can use BBS to restore unlinkability and more.
 
-
 \chapter{Extensions with BBS}
 \label{chap:bbsex}
 
@@ -302,6 +307,9 @@ But what are VC's? \newline
 Verifiable credentials are JSON-LD data models, designed to represent different types of digital credentials.
 The Idea, is to be able to translate physical credentials, like an ID or a driver's license, into the digital world.
 In this Thesis we will only look at a small part of the standard, just enough that we can use it together with BBS.
+We will also use VPs, or Verifiable Presentations. These are praticly a VC wrapped in an other VC.
+A concrete example can be found in chapter \dots
+All VC concepts described can also be applied to VPs, so VP and VC can be used interchangeably.
 
 \subsection{Used VC concepts}
 In this section we will define which VC concepts are used in this thesis.
@@ -310,28 +318,73 @@ In this section we will define which VC concepts are used in this thesis.
 The \textbf{@context} attribute are used to map human-friendly ids like \textit{type} to an url.
 These urls then help the system understand what the content of the VC is.
 The value of the \textbf{@context} attribute is an ordered list, where the first entry must be \verb|<https://www.w3.org/ns/credentials/v2>|
-We will also use the context \verb|<https://w3c.github.io/vc-data-integrity/contexts/data-integrity/v2.jsonld>| to signify that the content of the VC is protected.
+We will also use the context \verb|<https://w3id.org/security/data-integrity/v2>| to signify that the content of the VC is protected.
+Lastly we use a custom context, which describes the content in the credentialSubject.
+
+Our custom context looks like this:
+\begin{lstlisting}[language=json,firstnumber=1,caption={Example custom context},captionpos=b]
+{
+    "@context":{
+        "first_name": "https://schema.org/givenName",
+        "last_name": "https://schema.org/familyName"
+    }
+}
+\end{lstlisting}
+
+The complete \textbf{@context} which we will use in our example, where the different contexts are represented by urls, looks like this:
+\begin{lstlisting}[language=json,firstnumber=1,caption={Example context},captionpos=b]
+{
+	"@context": [
+		"https://www.w3.org/ns/credentials/v2",
+		"https://w3id.org/security/data-integrity/v2",
+		"https://raw.githubusercontent.com/RockstaYT/BA_Thesis_BBS_Signatures/docs/context/example_1.jsonld"
+	],
+}
+\end{lstlisting}
 
 \subsubsection{id}
 
+TODO: Will be looked at later with the ZKP \& revocation
 
 \subsubsection{type}
 
+The \textbf{type} defines what the VC is. 
+It is a set containing either urls to the description of the VC or be an ID that can be mapped through \textbf{@context}.
+If we use the standard mapped IDs, the type set must either include \textit{VerifiableCredential} or \textit{VerifiablePresentation}.
+If we want, we can also add a more specific type, in which we define more information about the VC.
+
+May be used later \dots
+
 \subsubsection{credentialSubject}
+The credentialSubject contains a set of objects, which each contain multiple statements about the subject of the credential.
+In our first example we only have one object with two statements about the subject, namely \textit{first\_name} and \textit{last\_name}.
 
+Such a credential subject may look like this:
+\begin{lstlisting}[language=json,firstnumber=1,caption={Example credentialSubject},captionpos=b]
+{
+	"credentialSubject":{
+		"first_name": "Joel",
+		"last_name": "Robles"
+	}
+}
+\end{lstlisting}
 
-\subsection{Prepare VCs for BBS}
-VCs are JSON objects with multiple key-value pairs on different levels.
-BBS can only sign statements.
-So somehow we need to transform the JSON objects to statements, that then can be signed by BBS.
-To achieve this we will use the Data Integrity BBS Cryptosuites draft\cite{bbsvc}.
+\subsubsection{proof}
 
-We will use the following VC as an example.
+proof = signature, but also = proof, depending on VC or VP.
+
+\subsection{Prepare VCs for BBS and sign them}
+Now that we know the different concepts that we use for the example, we can look into how to prepare the VC to be signed by the BBS signature scheme.
+VCs are JSON objects with multiple key-value pairs on different levels, while BBS can only sign statements.
+So somehow we need to transform the JSON object into statements, which then can be signed by BBS.
+To achieve this we will use the \textit{Data Integrity BBS Cryptosuites draft}\cite{bbsvc}.
+
+We will be using the following VC as an example.
 \begin{lstlisting}[language=json,firstnumber=1,caption={Example VC},captionpos=b]
 {
 	"@context": [
 		"https://www.w3.org/ns/credentials/v2",
-		"https://www.w3.org/ns/credentials/examples/v2",
+		"https://w3id.org/security/data-integrity/v2",
 		"https://raw.githubusercontent.com/RockstaYT/BA_Thesis_BBS_Signatures/docs/context/example_1.jsonld"
 	],
 	"type":  ["VerifiableCredential"],
@@ -342,18 +395,48 @@ We will use the following VC as an example.
 }
 \end{lstlisting}
 
-With that we can follow these steps to sign the VC.
+We define following variables:\newline
+\textbf{vc}: The VC document\newline
+\textbf{hmac\_key}: A 32-bit random string, which is later used to initialize an HMAC.\newline
+\textbf{mandatory\_attributes}: A set of attributes which are mandatory for the holder to disclose to the verifier. For this example we will set the \textit{first\_name} as mandatory. This may look like this: ["credentialSubject/first\_name"].\newline
+
+Now follow these steps to transform and sign the VC:
+\begin{itemize}
+	\item Set \textbf{canonical\_proof\_config} to the result of the algorithm described in chapter \ref{subsubsec:proof_config} (maybe also input the public key)
+	\item Set \textbf{transformed\_document} to the result of the algorithm described in chapter \ref{chap:transform} with the inputs \textbf{vc} and \textbf{mandatory\_attributes}
+	\item Set \textbf{hash\_data} to the result of the algorithm described in chapter \ref{subsubsec:proofHash} with the inputs \textbf{canonical\_proof\_config}, \textbf{mandatory\_attributes} and \textbf{transformed\_document}
+	\item Set \textbf{base\_proof} to the result of the algorithm described in chapter \ref{subsubsec:sign} with the inputs \textbf{hash\_data}, \textbf{transformed\_document}, \textbf{hmac\_key} and \textbf{mandatory\_attributes}.
+	\item Set \textbf{signed\_vc} to the result of the algorithm described in chapter \ref{subsubsec:signed} with the inputs \textbf{vc}, somehow proof\_config and \textbf{base\_proof}
+\end{itemize}
+
+And with that \textbf{signed\_vc} is a valid signed VC, that can be used to generate a derived VP with selective disclosure and unlinkable proofs.
 
 \subsubsection{Shuffled label map}
 \label{sub:shuffledlabelmap}
 
-RDF is deterministic, we then shuffle the inputs with a hmac on each creation
+Because of security considerations mentioned in chapter \ref{subsec:vcseccons} the canonicalised \textbf{vc} needs to be shuffled.
 
-Because of security considerations mentioned in chapter \ref{subsec:vcseccons} the canonicalised proof\_config needs to be shuffled.
+The required input of this algorithm is random 32-bit long bit-string named \textbf{hmac\_key} which will be used to initialize a \textit{HMAC}.
+We also need a map of the canonical ids named \textbf{canonical\_id\_map}, where the node prefixes \textbf{\_:} are stripped (from \textit{\_:c14n0} to \textit{c14n0}).
+This map may look like this:
+\begin{lstlisting}[language=canon,firstnumber=1,caption={Example canonical id map},captionpos=b]
+[
+  "_:_e3e2ad71-3a6d-4b66-8f57-b3ae79f6dcad_1",
+  "_:c14n0",
+]
+\end{lstlisting}
 
-The required input of this algorithm is an \textbf{HMAC} which already was initialized with a secret key (\textit{Maybe only input the key, as java cannot pass functions}), and a \textbf{canonical\_id\_map}, where the node prefixes \textbf{\_:} are stripped (from \textit{\_:c14n0} to \textit{c14n0}).
-The output is a function, \textbf{label\_map\_factory\_function}. (In java return function???)
-The output is a map, \textbf{bnode\_id\_map}.
+The output is a bnode map named \textbf{bnode\_id\_map}, which may look like this:
+\begin{lstlisting}[language=canon,firstnumber=1,caption={Example canonical id map},captionpos=b]
+[
+	"_e3e2ad71-3a6d-4b66-8f57-b3ae79f6dcad_1",
+	"b1",
+]
+\end{lstlisting}
+
+As you can see the canonical id \textit{\_:c14n0} is replaced with a bnode id \textit{b1}.
+
+The return of this algorithm is a bnode id map named \textbf{bnode\_id\_map}
 
 \begin{itemize}
 	\item Initialize \textbf{bnode\_id\_map} to a new map.
@@ -370,8 +453,8 @@ The output is a map, \textbf{bnode\_id\_map}.
 	\item Finally return \textbf{bnode\_id\_map}.
 \end{itemize}
 
-
 \subsubsection{Create the proof config}
+\label{subsubsec:proof_config}
 The first step is to create the proof config.
 The proof config contains the information about the proof that will be generated, like what cryptosuite was used, what type of proof it is and so on.
 
@@ -417,15 +500,13 @@ With that we have our canonical\_proof\_config and the first step is finished.
 The next step is the transformation of the VC, into statements that can be signed.
 
 \begin{itemize}
-	\item Define hmac\_key as a random string of 32 Bytes
 	\item Define hmac\_func as the hmac function with the input of hmac\_key. In this thesis we use SHA-256 as the hashing algorithm.
 	\item Define label\_map\_factory\_function as the function which is returned from the create\_shuffled\_id\_label\_map\_function defined in chapter \ref{sub:shuffledlabelmap}.
 	\item Set group\_definitions to a map where "mandatory" is the key and the values are the mandatory attributes. In our case we want the first\_name to be mandatory.
 	\item Set groups to the response of the canonicalizeAndGroup.groups algorithm specified in the DataIntegrity for ECDSA draft\cite{ecdsa}, passing the label\_map\_factory\_function, group\_definitions and the VC.
 	\item Set mandatory to the value from groups.mandatory.matching
 	\item Set nonMandatory to the value from groups.mandatory.nonMatching
-	\item Re-set the hmac\_key to the value that can be exportet from the hmac\_func
-	\item Return an object containing "mandatory" set to mandatory, "nonMandatory" set to nonMandatory and "hmacKey" set to hmac\_key.
+	\item Return an object containing "mandatory" set to mandatory, "nonMandatory" set to nonMandatory.
 \end{itemize}
 
 This object may look like this:
@@ -455,12 +536,14 @@ This object may look like this:
 And with that we transformed the VC into canonical statements that can later be signed by BBS.
 
 \subsubsection{Hash the proof data}
+\label{subsubsec:proofHash}
 
 Lastly we need to create a proof hash that then will be added to the canonical statements that will be signed by BBS.
 
 \begin{itemize}
 	\item Set proof\_hash as the result of the hashing of canonical\_proof\_config using SHA-256.
-	\item Set the mandatory\_hash as the result of the hashing of mandatory using SHA-256. Be aware that mandatory is an array that first needs to be concatenated. In this thesis we don't use any delimiter for concatenation. 
+	\item Set the mandatory\_hash as the result of the hashing of mandatory using SHA-256. Be aware that mandatory is an array that first needs to be concatenated. In this thesis we don't use any delimiter for concatenation.
+	\item bbsheader!!! 
 	\item Initialise hash\_data as a copy of transformed\_document, then adding the key-value pairs "proofHash"-proof\_hash and "mandatoryHash"-mandatory\_hash
 	\item Return hash\_data
 \end{itemize}
@@ -469,6 +552,7 @@ With that we are now able to sign the statements with BBS.
 There is no example here as this is just the same object from chapter \ref{chap:transform} with two hashes as new key-value pairs.
 
 \subsubsection{Generate and serialize the signature}
+\label{subsubsec:sign}
 
 Now we generate the bbs signature and serialize it.
 
@@ -478,10 +562,10 @@ Now we generate the bbs signature and serialize it.
 	\item Set bbs\_signature to the result of the bbs signature operation, defined in chapter 3.5.1 of the BBS Siganture Scheme\cite{bbs-signature-scheme}.
 	\item Initialise proof\_value to the bbs proof header bytes 0xd9, 0x5d and 0x02
 	\item Set components to an array containing(in this order): bbs\_signature, bbs\_header, public\_key, hmac\_key, mandatory\_pointers
-	\item Set cbor to result of the application of the CBOR-encoding\cite{cbor}, where CBOR tagging \textbf{Must NOT} be used.
+	\item Set cbor to result of the application of the CBOR-encoding\cite{cbor}, where CBOR tagging \textbf{Must NOT} be used. on the array 
 	\item Set proof\_value to the concatenation of proof\_value and cbor
 	\item Set base\_proof to the value of the base64-url encoding defined in chapter 5 of "RFC 4648"\cite{base64} but without padding as mentioned in chapter 3.2 of the same RFC.
-	\item Return base \_proof
+	\item Return base\_proof
 \end{itemize}
 
 The base\_proof should look something like this, starting with an \textbf{u} and having no padding:
@@ -491,12 +575,14 @@ u2V0ChdhAWFC2HFadcICoWHnR-s9oPaUegpsXqwH_8ngk4TBuMLDFqnvVCo9axh2gcmb2w4KJ5LlfQOg
 \end{lstlisting}
 
 \subsubsection{Add signature to VC}
+\label{subsubsec:signed}
 
 Finally, we add the generated signature to the VC.
 
 \begin{itemize}
 	\item Add a new key-value pair "proof"-"proof\_config" to the VC
-	\item Add a new key-value pair "proofValue"-"base\_proof" to VC.proof 
+	\item Add a new key-value pair "proofValue"-"base\_proof" to VC.proof
+	\item Return \textbf{vc}
 \end{itemize}
 
 And with that we now have a fully functional VC which was signed with bbs.
@@ -526,9 +612,10 @@ This is an example how it could look:
 }
 \end{lstlisting}
 
+\subsection{Derive selective disclosure VPs}
+
 \subsection{Security Considerations of VCs}
 \label{subsec:vcseccons}
-
 
 \section{BBS with Pseudonyms}
 \label{chap:Pseudonyms}
@@ -543,6 +630,7 @@ This is an example how it could look:
 
 
 \appendix
+
 
 \chapter{First appendix Chapter}
 
