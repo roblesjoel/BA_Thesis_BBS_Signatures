@@ -1,0 +1,67 @@
+\documentclass[
+	english,%globale Übergabe der Hauptsprache
+%	logofile=example-image-duck, %Falls die Logo Dateien nicht vorliegen
+	authorontitle=true,
+	]{bfhbeamer}
+
+
+\usepackage[main=english]{babel}
+\usepackage{tikz}  
+\usepackage{tikzsymbols}
+\usepackage{tikzducks}
+\usepackage{amsmath}
+\usepackage{caption}
+
+% Der folgende Block ist nur bei pdfTeX auf Versionen vor April 2018 notwendig
+\usepackage{iftex}
+\ifPDFTeX
+\usepackage[utf8]{inputenc}%kompatibilität mit TeX Versionen vor April 2018
+\fi
+
+
+%Makros für Formatierungen der Doku
+%Im Allgemeinen nicht notwendig!
+\let\code\texttt
+
+\title{Bachelor Thesis}
+\subtitle{Unlinkability of Verifiable Credentials in a practical approach}
+\author[J. Robles]{Joel Robles}
+\institute{TI}
+\titlegraphic*{\includegraphics{example-image-duck}}%is only used with BFH-graphic and BFH-fullgraphic
+\date{March 21, 2024}
+
+%Activate the output of a frame number:
+% \setbeamertemplate{page number in foot}[framenumber]
+
+
+\AtBeginSection{\sectionpage}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Table of Contents}
+    \tableofcontents
+\end{frame}
+
+\section{Recap}
+
+\begin{frame}{Recap}
+    \begin{itemize}
+        \item What are the goals of this Thesis?
+        \item What is BBS?
+        \item What are VCs?
+    \end{itemize}
+\end{frame}
+
+\section{Updates}
+
+\begin{frame}{Updates}
+    \begin{itemize}
+        \item Merging of the Pseudonym and Link Secret Task
+        \item Knowledge of how VCs can be transformed into statements that can be signed by bbs
+    \end{itemize}
+\end{frame}
+
+\end{document}
+
