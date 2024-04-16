@@ -648,13 +648,51 @@ We define following variables:\\
 \label{subsub:createdisclosuredata}
 
 This algorithm creates the data for the selective disclosure of a VP.
-
 The inputs of this algorithm are a VC \textbf{vc}, the proof \textbf{base\_proof}, the selective pointers \textbf{selective\_pointers} and a presentation header \textbf{ph}.
+The output is \dots
+
+We follow these steps:
+\begin{itemize}
+	\item Set \textbf{bbs\_signature}, \textbf{bbs\_header}, \textbf{public\_key}, \textbf{hmac\_key} and \textbf{mandatory\_pointers} to their respective value in the response of the algorithm described in chapter \ref{subsub:parsebaseproof}
+	\item Define \textbf{label\_map\_factory\_function} as the function which is returned from the \textbf{create\_shuffled\_id\_label\_map\_function} defined in chapter \ref{sub:shuffledlabelmap} with the input \textbf{hmac\_key}
+	\item Set \textbf{combined\_pointers} to the concatenation of \textbf{mandatory\_pointers} and \textbf{selective\_pointers}
+	\item Set \textbf{group\_definitions} to an object with following key-value pairs: \textit{mandatory} - \textbf{mandatory\_pointers}, \textit{selective} - \textbf{selective\_pointers} and \textit{combined} - \textit{combined\_pointers}
+	\item Set \textbf{groups} and \textbf{label\_map} to \textit{response.groups} and \textit{response.labelMap} respectively of the \textit{canonicalizeAndGroup} algorithm specified in the DataIntegrity for ECDSA specification\cite{ecdsa}, passing the \textbf{label\_map\_factory\_function}, \textbf{group\_definitions} and \textbf{vc}.
+	\item Set \textbf{combined\_match} to \textbf{groups.combined.matching}
+	\item Set \textbf{mandatory\_match} to \textbf{groups.mandatory.matching}
+	\item Set \textbf{combined\_indexes} to the ordered list of \textbf{combined\_match.keys}
+	\item Set \textbf{mandatory\_indexes} to an empty array. We want to compute the position of the mandatory indexes in the \textbf{combined\_match} array, so that the verifier knows which indexes were mandatory to reveal
+	\item For each key in \textbf{mandatory\_match} find its index in \textbf{combined\_indexes} and add it to \textbf{mandatory\_indexes}.
+	\item Set \textbf{selective\_match} to \textbf{groups.selective.matching}
+	\item Set \textbf{mandatory\_non\_match} to \textbf{groups.mandatory.nonMatching}
+	\item Set \textbf{non\_mandatory\_indexes} to the ordered list of \textbf{mandatory\_non\_match.keys}
+	\item Set \textbf{selective\_indexes} to an empty array. This time we want to compute the position of the selective indexes in the \textbf{non\_mandatory\_indexes} list. This list will be used for the bbs proof generation process, to define which messages are going to be revealed.
+	\item For each key in \textbf{selective\_match} find its index in \textbf{non\_mandatory\_indexes} and add it to \textbf{selective\_indexes}
+	\item Set \textbf{bbs\_messages} to the values of \textbf{non\_mandatory.values} as byte arrays
+	\item Set \textbf{bbs\_proof} to the result of the bbs proof operation defined in chapter 3.5.3 of \textit{The BBS Signature Scheme}\cite{bbs-signature-scheme}, with the input \textbf{public\_key}, \textbf{bbs\_signature}, \textbf{bbs\_header}, \textbf{ph}, \textbf{bbs\_messages} and \textbf{selective\_indexes}
+	\item Set \textbf{initial\_document} to the result of the algorithm described in chapter 3.4.13 of \textit{Data Integrity ECDSA Cryptosuites v1.0}\cite{ecdsa}, with the inputs \textbf{vc} and \textbf{combined\_pointers}
+	\item 
+\end{itemize}
+
 
 \subsubsection{Parse the base proof}
 \label{subsub:parsebaseproof}
 
+This algorithm parses a base proof value back to objects.
+The input of this algorithm is a base proof \textbf{base\_proof}.
+The output is a object \textbf{parsed\_base\_proof} containing the parsed base proof values.
 
+We follow these steps to parse the base proof:
+\begin{itemize}
+	\item Check that the \textbf{base\_proof} start with a \textit{u}, indicating that it is a base64-url encoded string.
+	\item Set \textbf{decoded\_proof\_value} to the result of the base64-url decoding with no padding as described in \textit{The Base16, Base32, and Base64 Data Encodings}\cite{base64}
+	\item Check that \textbf{decoded\_proof\_value} starts with the proof header bytes \textit{0xd9}, \textit{0x5d} and \textit{0x02}
+	\item Set \textbf{components} to the cbor decoding described in \textit{RFC 8949}\cite{cbor}, starting with the fourth byte in \textbf{decoded\_proof\_value}
+	\item Set \textbf{base\_proof\_object} to the key-value pairs \textit{bbs\_signature} - \textbf{components[0]}, \textit{bbs\_header} - \textbf{components[1]}, \textit{public\_key} - \textbf{components[2]}, \textit{hmac\_key} - \textbf{components[3]} and \textit{mandatory\_pointers} - \textbf{components[4]}
+	\item Return \textbf{base\_proof\_object}
+\end{itemize}
+
+With that we parsed the base proof bytes back to objects.
 
 
 \subsection{Security Considerations of VCs}
