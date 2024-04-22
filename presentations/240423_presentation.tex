@@ -6,10 +6,6 @@
 
 
 \usepackage[main=english]{babel}
-\usepackage{tikz}  
-\usepackage{tikzsymbols}
-\usepackage{tikzducks}
-\usepackage{amsmath}
 \usepackage{caption}
 
 % Der folgende Block ist nur bei pdfTeX auf Versionen vor April 2018 notwendig
@@ -30,8 +26,10 @@
 \titlegraphic*{\includegraphics{example-image-duck}}%is only used with BFH-graphic and BFH-fullgraphic
 \date{April 23, 2024}
 
-%Activate the output of a frame number:
 % \setbeamertemplate{page number in foot}[framenumber]
+
+%Activate the output of a frame number:
+\setbeamertemplate{page number in foot}[framenumber]
 
 
 \AtBeginSection{\sectionpage}
@@ -54,11 +52,21 @@
 
 \begin{frame}{What is Self-sovereign Identity (SSI)?}
     \begin{itemize}
-        \item Is a concept, where a Person, also known as holder, can decide who gets to know what about them
-        \item The state at the moment, holder has no control over their data
-        \item They are not able to choose what data is shared and what not, also known as selective disclosure
-        \item For example, if we show our government ID, which is a set of data or also known as a set of attributes, the verifier sees all the information on there
-        \item Other problem, if a holder shows his data to someone who wants to verify it, also known as verifier, and then shows the same data to a second verifier, they can be linked
+        \item Is a concept, where a Person, also known as a \textbf{Holder}, decides who gets to know what about them
+        \item The state at the moment - Holders have no control over their data
+        \item Holders cannot choose what to disclose and what not, also known as \textbf{selective disclosure}
+        \item First problem: 
+        \begin{itemize}
+            \item Holder shows Government ID
+            \item Is a set of data/ set of \textbf{attributes}
+            \item The person verifying sees all the attributes
+        \end{itemize}
+        \item Second problem:
+        \begin{itemize}
+            \item Holder shows attributes to someone who wants to verify, known as a \textbf{verifier}
+            \item Then shows the same attributes to a second verifier
+            \item The holder then can be \textbf{linked}
+        \end{itemize}
     \end{itemize}
 \end{frame}
 
@@ -67,7 +75,7 @@
         \column{70mm}  
         
         \begin{itemize}
-            \item But how does the verifier know that the set of attributes, which is also known as a credential, is valid?
+            \item How does the verifier know that the set of attributes (\textbf{credential}), is valid?
             \item He trusts the issuer!
             \item Example: Swiss government ID has holograms
         \end{itemize}
@@ -90,10 +98,14 @@
         \column{70mm}  
 
     \begin{itemize}
-        \item Now we would like to recreate these physical credentials digitally
-        \item We chose Verifiable credentials to represent the physical credentials digitally
-        \item These are JSON-LD Objects that represent attributes in as key-value pairs
-        \item Example: The first name on the government ID, is represented as \{"first\_name": "Joel"\}, where "first\_name" is the key and "Joel" is the value
+        \item Verifiable Credentials are digital representations of physical credentials
+        \item JSON-LD represent attributes as \textbf{key-value pairs}
+        \item Example:
+        \begin{itemize}
+            \item First name on Government ID
+            \item Represented as \{"first\_name": "Joel"\}
+            \item "first\_name" is the key and "Joel" is the value
+        \end{itemize}
     \end{itemize}
 
     \column{70mm}
@@ -108,14 +120,15 @@
 
 \begin{frame}{VCs and BBS}
     \begin{itemize}
-        \item But why are they called \textbf{Verifiable} credentials?
-        \item The verifier is able to verify the VC that was presented to him, also known as a Verifiable Presentation, because of cryptographic signatures.
-        \item These signatures show to a verifier that a credential has not been altered since the issuance by an issuer he trusts
-        \item We use the BBS Signature Scheme, also known as BBS, to generate such signatures
-        \item This signature scheme also provides the selective disclosure and unlinkability which is sought after in SSI
-        \item But how unlinkability, if the verifier needs the signature of a credential?
-        \item BBS can generate so-called proofs, which proof that a holder knows the signature of the credential without revealing the signature
-        \item The proofs are also unlinkable between each other
+        \item Why are they called \textbf{Verifiable} Credentials?
+        \item The verifier is able to verify a VC that was presented to him (\textbf{Verifiable Presentation}), because of cryptographic signatures
+        \item These show that a credential has not been altered since issuance
+        \item We use the BBS Signature Scheme (\textbf{BBS})
+        \item This scheme provides \textbf{selective disclosure} and \textbf{unlinkability}
+        \item How unlinkability? - Verifier needs the signature
+        \item BBS can generate \textbf{proofs} 
+        \item These proof that a holder knows the signature, without revealing it
+        \item These are also unlinkable between each generation
     \end{itemize}
 \end{frame}
 
@@ -125,11 +138,10 @@
     \begin{columns}[onlytextwidth,T]
         \column{70mm}  
         \begin{itemize}
-            \item A holder would like to present a VC to a verifier
-            \item For that we can use Verifiable Presentation
-            \item Now we could generate a BBS proof, but BBS can only sign statements and not key value pairs
-            \item For that we can use the RDF canonicalization algorithm, which creates statements out of key-value pairs
-            \item These statements then can be used to create a BBS proof
+            \item A holder would like to present a VC
+            \item For that, Verifiable Presentations are used
+            \item BBS can only sign statements
+            \item The \textbf{RDF} canonicalization algorithm creates statements out of key-value pairs
         \end{itemize}
 
         \column{70mm}
@@ -148,9 +160,18 @@
 \begin{frame}{Shuffling of statements}
     \begin{itemize}
         \item The verifier now gets a VP from the holder, which can be verified against the public key of the issuer
-        \item Now let's assume that the holder gets a new version of the credential from the issues, where an attribute has been changed
-        \item In a very specific case, the determinism of the RDF canonicalization algorithm can lead to data leakage
-        \item That is why on each time this algorithm is used, the canonical statements must be shuffled using a has function
+        \item The holder gets a new version of a credential, where an attribute has been changed
+        \item In a very specific case, the RDF canonicalization algorithm can lead to data leakage
+        \item Each time this algorithm is used, the canonical statements must be shuffled using a hash function
+    \end{itemize}
+\end{frame}
+
+\section{Outlook}
+
+\begin{frame}{Outlook}
+    \begin{itemize}
+        \item Analyze OpenID Connect for Verifiable Presentations (\textbf{OIDC4VP}) for unlinkability and data leakage
+        \item Analyze Link Secrets and Blind Signatures for unlinkability and data leakage
     \end{itemize}
 \end{frame}
 
