@@ -643,6 +643,19 @@ We define following variables:\\
 \subsubsection{Derive VP}
 \label{subsub:derivevp}
 
+This algorithm handles all the data for a selective disclosure proof creation.
+The inputs of this algorithm are a VC \textbf{vc}, the proof \textbf{base\_proof}, the selective pointers \textbf{selective\_pointers} and a presentation header \textbf{ph}.
+The output is \dots
+
+We follow these steps:
+\begin{itemize}
+	\item Set \textbf{bbs\_proof}, \textbf{label\_map}, \textbf{mandatory\_indexes}, \textbf{selective\_indexes} and \textbf{reavealed\_document} to their corresponding entry in the response object from the algorithm described in chapter \ref*{subsub:createdisclosuredata}, with the inputs \textbf{vc}, \textbf{base\_proof}, \textbf{selective\_pointers} and \textbf{ph}
+	\item Set \textbf{new\_proof} to a copy of \textbf{base\_proof}
+	\item Replace \textbf{new\_proof.proofValue} with the result of calling the algorithm in chapter \ref{subsub:parsebaseproof}, with the inputs \textbf{bbs\_proof}, \textbf{label\_map}, \textbf{mandatory\_indexes} and \textbf{selective\_indexes}
+	\item Set \textbf{reavealed\_document.proof} to \textbf{new\_proof}
+	\item Return \textbf{reavealed\_document}
+\end{itemize}
+
 
 \subsubsection{Create disclosure data}
 \label{subsub:createdisclosuredata}
@@ -670,8 +683,15 @@ We follow these steps:
 	\item For each key in \textbf{selective\_match} find its index in \textbf{non\_mandatory\_indexes} and add it to \textbf{selective\_indexes}
 	\item Set \textbf{bbs\_messages} to the values of \textbf{non\_mandatory.values} as byte arrays
 	\item Set \textbf{bbs\_proof} to the result of the bbs proof operation defined in chapter 3.5.3 of \textit{The BBS Signature Scheme}\cite{bbs-signature-scheme}, with the input \textbf{public\_key}, \textbf{bbs\_signature}, \textbf{bbs\_header}, \textbf{ph}, \textbf{bbs\_messages} and \textbf{selective\_indexes}
-	\item Set \textbf{initial\_document} to the result of the algorithm described in chapter 3.4.13 of \textit{Data Integrity ECDSA Cryptosuites v1.0}\cite{ecdsa}, with the inputs \textbf{vc} and \textbf{combined\_pointers}
-	\item 
+	\item Set \textbf{reavealed\_document} to the result of the algorithm described in chapter 3.4.13 of \textit{Data Integrity ECDSA Cryptosuites v1.0}\cite{ecdsa}, with the inputs \textbf{vc} and \textbf{combined\_pointers}
+	\item Set \textbf{deskolemized\_n\_quads} to the joined string from the \textbf{groups.combined.deskolemizedNQuads} array. In this thesis we do not use a delimiter
+	\item Set \textbf{canonical\_id\_map} to the result of the JSON-LD canonicalization algorithm
+	\item Set \textbf{verifier\_label\_map} to an empty map. This maps the canonical blank node identifiers like \textit{c14n0} from the revealed vc to the blank node identifiers created by the issuer
+	\item For each entry in \textbf{canonical\_id\_map}:
+	\begin{itemize}
+		\item Add an entry to \textbf{verifier\_label\_map} where the key is the current value of the \textbf{canonical\_id\_map} entry and the value is the entry where the key the in \textbf{label\_map} is the same as the current key from \textbf{canonical\_id\_map}
+	\end{itemize}
+	\item Return an object with following key-value pairs: \textit{bbsProof} - \textbf{bbs\_proof}, \textit{verifierLabelMap} - \textbf{label\_map}, \textit{mandatoryIndexes} - \textbf{mandatory\_indexes}, \textit{selectiveIndexes} - \textbf{selective\_indexes} and \textit{revealedDocument} - \textbf{reavealed\_document}
 \end{itemize}
 
 
@@ -694,6 +714,8 @@ We follow these steps to parse the base proof:
 
 With that we parsed the base proof bytes back to objects.
 
+\subsubsection{Serialize the proof value}
+\label{subsub:serializebaseproof}
 
 \subsection{Security Considerations of VCs}
 \label{subsec:vcseccons}
