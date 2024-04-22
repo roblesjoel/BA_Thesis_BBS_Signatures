@@ -1,0 +1,7 @@
+\babel@toc {english}{}\relax 
+\beamer@sectionintoc {1}{Goal}{3}{0}{1}
+\beamer@sectionintoc {2}{Self-sovereign Identity}{5}{0}{2}
+\beamer@sectionintoc {3}{Verifiable Credentials}{8}{0}{3}
+\beamer@sectionintoc {4}{Verifiable Presentations}{11}{0}{4}
+\beamer@sectionintoc {5}{Security Considerations}{13}{0}{5}
+\beamer@sectionintoc {6}{Outlook}{15}{0}{6}
