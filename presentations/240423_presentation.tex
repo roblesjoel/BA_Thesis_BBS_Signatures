@@ -29,7 +29,7 @@
 % \setbeamertemplate{page number in foot}[framenumber]
 
 %Activate the output of a frame number:
-\setbeamertemplate{page number in foot}[framenumber]
+\setbeamertemplate{footline}[frame number]
 
 
 \AtBeginSection{\sectionpage}
@@ -45,15 +45,15 @@
 \section{Goal}
 
 \begin{frame}{What is the goal?}
-    The goal is to analyze the BBS Signature Scheme in conjunction with VCs in concrete use-cases and to ascertain that there is no linkability or data-leakage for real-world implementations.
+    \centering
+    Check for unlinkability of Verifiable Credentials in conjuction with the BBS Signature Scheme in Real-World implementations
 \end{frame}
 
 \section{Self-sovereign Identity}
 
-\begin{frame}{What is Self-sovereign Identity (SSI)?}
+\begin{frame}{Self-sovereign Identity (SSI)}
     \begin{itemize}
         \item Is a concept, where a Person, also known as a \textbf{Holder}, decides who gets to know what about them
-        \item The state at the moment - Holders have no control over their data
         \item Holders cannot choose what to disclose and what not, also known as \textbf{selective disclosure}
         \item First problem: 
         \begin{itemize}
@@ -67,6 +67,8 @@
             \item Then shows the same attributes to a second verifier
             \item The holder then can be \textbf{linked}
         \end{itemize}
+        \item Today's state - Holders have no control over their attributes
+        \item Tomorrow's state thanks to SSI - Holders have full control over their attributes
     \end{itemize}
 \end{frame}
 
