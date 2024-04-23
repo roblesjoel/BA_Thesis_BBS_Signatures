@@ -637,8 +637,38 @@ As in that example we forced the disclosure of the \textit{last\_name} we will d
 
 We define following variables:\\
 \textbf{vc}: The VC, \textbf{not containing} the proof object\\
+\textbf{base\_proof}: The proof object from the VC\\
 \textbf{selective\_pointers}: A array containing pointers on what should be revealed. As already mentioned, in this example we will not reveal anything, so this variable is an empty array [].\\
 \textbf{ph}: The presentation header as a byte array. We will define it as an empty array [] for this example.\\
+
+To create the derived VP we call the algorithm in chapter \ref{subsub:derivevp} with the inputs \textbf{vc}, \textbf{base\_proof}, \textbf{selective\_pointers} and \textbf{ph}
+
+This derived VP may look like this:
+\begin{lstlisting}[language=json,firstnumber=1,caption={Derived VP},captionpos=b]
+{
+	"type": [
+		"VerifiableCredential"
+	],
+	"@context": [
+		"https://www.w3.org/ns/credentials/v2",
+		"https://w3id.org/security/data-integrity/v2",
+		"https://raw.githubusercontent.com/RockstaYT/BA_Thesis_BBS_Signatures/docs/context/example_1.jsonld"
+	],
+	"credentialSubject": {
+		"first_name": "Joel"
+	},
+	"proof": {
+		"type": "DataIntegrityProof",
+		"cryptosuite": "bbs-2023",
+		"created": "2024-04-17T23:41:58.089Z",
+		"verificationMethod": "did:key:zUC7De...",
+		"proofPurpose": "assertionMethod",
+		"proofValue": "u2V0..."
+	}
+}
+\end{lstlisting}
+
+As you can see, the "last\_name" is not shown as it is not being revealed.
 
 \subsubsection{Derive VP}
 \label{subsub:derivevp}
@@ -655,7 +685,6 @@ We follow these steps:
 	\item Set \textbf{reavealed\_document.proof} to \textbf{new\_proof}
 	\item Return \textbf{reavealed\_document}
 \end{itemize}
-
 
 \subsubsection{Create disclosure data}
 \label{subsub:createdisclosuredata}
@@ -694,7 +723,6 @@ We follow these steps:
 	\item Return an object with following key-value pairs: \textit{bbsProof} - \textbf{bbs\_proof}, \textit{verifierLabelMap} - \textbf{label\_map}, \textit{mandatoryIndexes} - \textbf{mandatory\_indexes}, \textit{selectiveIndexes} - \textbf{selective\_indexes} and \textit{revealedDocument} - \textbf{reavealed\_document}
 \end{itemize}
 
-
 \subsubsection{Parse the base proof}
 \label{subsub:parsebaseproof}
 
@@ -716,6 +744,27 @@ With that we parsed the base proof bytes back to objects.
 
 \subsubsection{Serialize the proof value}
 \label{subsub:serializebaseproof}
+
+This algorithm serializes a proof value.
+The inputs of this algorithm are a BBS proof \textbf{bbs\_proof}, a label map \textbf{label\_map}, an array of mandatory indexes \textbf{mandatory\_indexes}, an array of selective indexes \textbf{selective\_pointers} and a presentation header \textbf{ph}.
+The result of this algorithm is \dots
+
+We follow these steps:
+\begin{itemize}
+	\item Set \textbf{compressed\_label\_map} to the result of calling the algorithm in chapter \ref{subsub:compresslabelmap} with \textbf{label\_map} as the input
+	\item Initialize \textbf{proof\_value} as an byte array, where the first three bytes are \textit{0xd9}, \textit{0x5d} and \textit{0x03}
+	\item Set \textbf{components} to an array containing in this order: \textbf{bbs\_proof}, \textbf{compressed\_label\_map}, \textbf{mandatory\_indexes}, \textbf{selective\_pointers} and \textbf{ph}
+	\item Set \textbf{cbor} to result of the application of the CBOR-encoding\cite{cbor} on the components array, where CBOR tagging \textbf{Must NOT} be used.
+	\item Concat \textbf{proof\_value} and \textbf{cbor}
+	\item Set \textbf{derived\_proof} to the value of the base64-url encoding defined in chapter 5 of "RFC 4648"\cite{base64} but without padding as mentioned in chapter 3.2 of the same RFC
+	\item Return \textbf{proof\_value}
+\end{itemize}
+
+\subsubsection{Verify a derived VP}
+\label{subsub:verifyderivedvp}
+
+\subsubsection{Compress a label map}
+\label{subsub:compresslabelmap}
 
 \subsection{Security Considerations of VCs}
 \label{subsec:vcseccons}
