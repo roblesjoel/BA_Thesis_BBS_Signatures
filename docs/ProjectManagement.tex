@@ -322,6 +322,9 @@ In this chapter we define Risks that may happen in this thesis.
 \chapter{Use Cases}
 For this Thesis we will use a small collection of use cases to demonstrate how BBS should work in conjunction with extensions (like VC's, Link Secrets etc.).
 
+\section{Present an ID for identification}
+\label{sec:presid}
+
 \section{Simply buying a train and mobile subscription}
 Lets assume you want to go and buy a train subscription.
 Once at the counter, the employee ask you for your ID card, to verify your identity and to get the required data for the subscription.
@@ -731,6 +734,150 @@ As an input to the RDF algorithm we need to pass a function, which takes the can
 If we now add a HMAC (using SHA-256) to this function, we can randomize how the canonical label values are replaced each time a VC is created.
 
 Note: It was suggested that the possibility to use KMAC with SHA3-256 should be added to the specification. This was declined by the working group on the basis that SHA-256 is more common.
+
+\section{OpenID for Verifiable Presentations}
+Now that we know how to create and sign VCs/VPs, we want to be able to send them the other parties.
+In this thesis we will only look at the communication between a holder and a verifier, so how VPs are transmitted.
+As the message layer we use OpenID for Verifiable Presentations(OIDC4VP)\cite{oidc4vp}.
+The Goal of this chapter is to analyze if OIDC4VP leaks data or even breaks linkability.
+
+\subsection{How does OIDC4VP work?}
+OIDC4VP is a very easy to used protocol.
+There are just two parties, the verifier and the holder (which can be split up into holder and wallet, but for the sake of simplicity we merge them).
+After the initial interaction between a holder and verifier, in just four easy steps these two parties can start a new session, present the VP and close the session.
+
+The see the magic of this protocol in depth, please read chapter 4 of the Analysis document.
+
+Let's use the example from chapter \ref{sec:presid}.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=30mm]{example-image-duck}
+	\label{fig:flowvp}
+	\caption{Flowchart of OIDC4VP session}
+\end{figure}
+
+The flowchart in figure \ref{fig:flowvp} shows the cross device flow of a OIDC4VP session, so the flow if the initial interaction was not made on the same device where the VP is saved (for example scanning a QR code from your Laptop screen with your phone).\\
+In the coming chapters we will examine each step in the session for data leakage and linkability.\\
+It's important to note that in this draft VC and VP can be used interchangeably.
+OIDC4VP doesn't really mean that it is only for sending VPs between parties, it is a protocol that defines how the messaging between a holder and a verifier works, independent of VC or VP.\\
+Also, all the following chapters use HTTP POST/GET requests for the communication.
+
+\subsection{Request}
+The first step in the session is the Authorization Request. 
+In this step the verifier communicates the requirements of the presented VP to the holder, like what type of credential or in which format.
+The verifier can also define which individual attributes must be revealed, which in turn is our beloved selective disclosure.
+
+Such an object might look like this:
+\begin{lstlisting}[language=json,firstnumber=1,caption={Example of a presentation definition},captionpos=b, label={list:presdef}]
+{
+	"id": "example with selective disclosure",
+	"input_descriptors": [
+		{
+			"id": "ID card with constraints",
+			"format": {
+				"ldp_vp": {
+					"proof_type": [
+						"bbs2023"
+					]
+				}
+			},
+			"constraints": {
+				"limit_disclosure": "required",
+				"fields": [
+					{
+						"path": [
+							"$.type"
+						],
+						"filter": {
+							"type": "string",
+							"pattern": "IDCardCredential"
+						}
+					},
+					{
+						"path": [
+							"$.credentialSubject.first_name"
+						]
+					},
+				]
+			}
+		}
+	]
+}
+\end{lstlisting}
+
+Such an object is called \textbf{presentation\_definition}.
+Now there are many new attributes in this object, so let's define them from the top to the bottom. \\
+
+\begin{enumerate}
+	\item The \textit{id} in the root is used to identify a specific presentation\_definition. It \textbf{MUST} be present
+	\item The \textit{input\_descriptors} is an array describing the different credentials that are requested. It \textbf{MUST} at least contain one entry
+	\begin{itemize}
+		\item The \textit{id} inside a input\_descriptor entry is used to identify a specific entry. It \textbf{MUST} be present for each entry in the \textit{input\_descriptors} array
+		\item The \textit{format} describes the format of the requested credential. It \textbf{MUST} be present
+		\begin{itemize}
+			\item For this thesis we use one of two entries for the \textit{format} object, \textit{ldp\_vc} stating that the requested object must be a VC or \textit{ldp\_vp} stating that it must be a VP.
+			\item The \textit{proof\_type} is an array which defines which proof types are accepted. It \textbf{MUST} be present. In this thesis the only proof type that is accepted it \textit{bbs2023}.
+		\end{itemize}
+		\item Next we have the \textit{constraints} object. This defines the constraints of the requested credential. It \textbf{MUST} be present
+		\begin{itemize}
+			\item If we want to use selective disclosure, we must define \textit{limit\_disclosure} as \textit{required}. If we don't want selective disclosure, \textit{limit\_disclosure} is not present
+			\item The \textit{fields} entry is an array which defines which fields must be present, and what the content of those fields might be. It \textbf{MUST} be present
+			\begin{itemize}
+				\item The \textit{path} defines the path of a field that must be present. \$ is the root of the presented credential. In listing \ref{list:presdef}, the first entry in the \textit{fields} array defines that the \textbf{type} attribute must be present in the presented credential
+				\item If \textit{path} is present we may also use \textit{filter} which lets us filter for specific entries. Again, in listing \ref{list:presdef}, the first entry filters for the type \textit{IDCardCredential} inside the \textbf{type} attribute with \textit{patter}, meaning that \textit{IDCardCredential} must be present. We also define the type of the value, which in this case is a \textit{string}
+				\item In the case of selective disclosure, we can also use \textit{path} to define which attributes inside the \textbf{credentialSubject} must be presented. In listing \ref{list:presdef} we define that \textit{\$.credentialSubject.first\_name} must be presented.
+			\end{itemize}
+		\end{itemize}
+	\end{itemize}
+\end{enumerate}
+
+Now that we know how this presentation definition looks, we can integrate it into the Authorization request in two different ways:
+\begin{itemize}
+	\item Send the whole object as a part of the initial HTTP Post request
+	\item Send a \textit{presentation\_definition\_uri} as part of the initial HTTP Post request, which then allows the holder to retrieve the object from a static server
+\end{itemize}
+
+But why are there two different integrations?\\
+If everything is done on the same device, it is easy to send all the data in the background. But if we are using two devices, we might need to scan a QR Code with the device containing the credential from a second device. There might be the problem that the size of the \textit{presentation\_definition} is too large for a QR Code (max. of 4296 alphanumeric characters).\\
+
+But we are not finished there. We also want to tell the holder where to send the presentation to.
+In this thesis we will use the \textit{direct\_post} response mode, which defines that the response must be sent to an endpoint using an HTTP POST request. The verifier must also set the \textit{response\_uri} parameter with the corresponding uri.
+
+\subsection{Response}
+After the holder got the \textit{presentation\_definition} as well as the \textit{response\_uri} and prepared the VP, he can respond to the verifier.\\
+
+For the response, the holder needs two parameters:
+\begin{enumerate}
+	\item A \textit{vp\_token} which just is a VP. This VP must be Base64url encoded. I can also be an array of VPs, which each are Base64url encoded
+	\item A \textit{presentation\_submission}. This contains a map for the VC inside the VP
+\end{enumerate}
+
+\begin{lstlisting}[language=json,firstnumber=1,caption={Example of a presentation submission},captionpos=b, label={list:pressub}]
+{
+	"id": "Presentation example 1",
+	"definition_id": "Example with selective disclosure",
+	"descriptor_map": [
+		{
+			"id": "ID card with constraints",
+			"format": "ldp_vp",
+			"path": "$",
+			"path_nested": {
+				"format": "ldp_vc",
+				"path": "$.verifiableCredential[0]"
+			}
+		}
+	]
+}
+\end{lstlisting}
+
+We already know the use of the \textit{id}. The \textit{definition\_id} is just the \text{id} from the \textit{presentation\_definition}.
+The \textit{descriptor\_map} is an array that contains the definition for all the VPs inside the \textit{vp\_token}.
+In that array we have an \textit{id} for that entry, the \textit{format} of the corresponding credential in the \textit{vp\_token} and the root \textit{path} value.\\
+We then have the \textit{path\_nested} object, which contains the \textit{path} of the corresponding credential inside the root credential (like a VC inside a VP) and the   \textit{format} of that credential.\\
+
+To finish the session, the holder just returns the \textit{vp\_token} and the \textit{presentation\_submission} to the verifier.
+
 
 \section{BBS with Pseudonyms}
 \label{chap:Pseudonyms}
