@@ -171,15 +171,15 @@ In the case of a VP, we also want to use a cryptographic signature to protect th
 In the next sections we will look at the VC concepts that are used in this thesis.
 Please note that there are more concepts, which are out of scope.
 
-\subsection{Used VC concepts}
-In this section we will define which VC concepts are used in this thesis.
+\section{Used VC concepts}
+In this section we will define all the VC concepts that will be used in this thesis.
 
-\subsubsection{@context}
-The \textbf{@context} attribute is used to map human-friendly ids like \textit{type} to an url.
-These urls then help the system understand what the content of the VC is.
+\subsection{@context}
+The \textbf{@context} attribute is used to map human-friendly IDs like \textit{type} to an URL.
+These URLs then help the system understand what the content of the VC is.
 The value of the \textbf{@context} attribute is an ordered list, where the first entry must be \textit{\url{https://www.w3.org/ns/credentials/v2}}.\\
 We will also use the context \textit{\url{https://w3id.org/security/data-integrity/v2}} to signify that the content of the VC is protected.
-Lastly we use a custom context, which describes the content in the credentialSubject.\newpage
+Lastly we use a custom context, which describes the content in the credentialSubject.
 
 Our custom context looks like this:
 \begin{lstlisting}[language=json,firstnumber=1,caption={Example custom context},captionpos=b]
@@ -191,60 +191,61 @@ Our custom context looks like this:
 }
 \end{lstlisting}
 
-The complete \textbf{@context} which we will use in our example, where the different contexts are represented by urls, looks like this:
+The complete \textbf{@context} which we will use in our example, where the different contexts are represented by URLs, looks like this:
 \begin{lstlisting}[language=json,firstnumber=1,caption={Example context},captionpos=b]
 {
 	"@context": [
 		"https://www.w3.org/ns/credentials/v2",
 		"https://w3id.org/security/data-integrity/v2",
-		"https://raw.githubusercontent.com/RockstaYT/BA_Thesis_BBS_Signatures/docs/context/example_1.jsonld"
+		"https://raw.githubusercontent.com/roblesjoel/BA_Thesis_BBS_Signatures/docs/context/example_1.jsonld"
 	],
 }
 \end{lstlisting}
 
-\subsubsection{Id}
-We are able to add an \textbf{Id} to the VC. This Id can be used to identify a VC or to use it for revocation purposes.\\
-There are two places where an \textbf{Id} can be added:
+\subsection{credentialSubject}
+\label{subsub:credentialsubject}
+The \textbf{credentialSubject} contains a set of objects, which each contain one or more statements about the subject of the credential.\\
+In our example we only have one object with three statements about the subject, namely \textit{first\_name}, \textit{last\_name} and \textit{birth\_date}.\\
+Such a credentialSubject may look like this:\newpage
+\begin{lstlisting}[language=json,firstnumber=1,caption={Example credentialSubject},captionpos=b]
+{
+	"credentialSubject":{
+		"first_name": "John",
+		"last_name": "Doe",
+		"birth_date": 1.1.1970
+	}
+}
+\end{lstlisting}
+
+\subsection{ID}
+We are also able to add an \textbf{ID} to the VC. This ID can be used to identify a VC or to use it for revocation purposes.\\
+There are two places where an \textbf{ID} can be added:
 \begin{enumerate}
 	\item In the root of the VC, such that the whole VC can be identified
 	\item Inside an object of a credentialSubject (see chapter \ref{subsub:credentialsubject}) to identify a specific subject
 \end{enumerate}
 
-These Ids must be \textit{urls} and be either a UUID, a DID or an HTTP URL.
+These Ids must be \textit{URLs} and be either a UUID, a DID or an HTTP URL.
 
-\subsubsection{type}
+\subsection{type}
 
-The \textbf{type} defines what the VC is. 
-It is a set containing either urls to the description of the VC or be an ID that can be mapped through \textbf{@context}.
-If we use the standard mapped IDs, the type set must either include \textit{VerifiableCredential} or \textit{VerifiablePresentation}.
+The \textbf{type} defines what the context of a VC is. 
+It is an array containing either URLs to the description of the VC or be an attribute that can be mapped through \textbf{@context}.
+If we use the standard mapped attributes, the type set must either include \textit{VerifiableCredential} or \textit{VerifiablePresentation}.
 If we want, we can also add a more specific type, in which we define more information about the VC.\\
 In this thesis we won't use any custom types.
 
-\subsubsection{credentialSubject}
-\label{subsub:credentialsubject}
-The \textbf{credentialSubject} contains a set of objects, which each contain one or more statements about the subject of the credential.\\
-In our first example we only have one object with two statements about the subject, namely \textit{first\_name} and \textit{last\_name}.\\
-Such a credentialSubject may look like this:
-\begin{lstlisting}[language=json,firstnumber=1,caption={Example credentialSubject},captionpos=b]
-{
-	"credentialSubject":{
-		"first_name": "John",
-		"last_name": "Doe"
-	}
-}
-\end{lstlisting}
-
-\subsubsection{proof}
+\subsection{proof}
 The \textbf{proof} inside a VC guaranties its Integrity. But it can also do much more.
 In this thesis the proof will either contain a BBS Signature, which signed the VC and with that guaranties its integrity, or it contains a BBS proof, which enables selective disclosure between and unlinkability between holder and verifier.\\
 The proof object contains following key-value pairs:
 \begin{itemize}
-	\item Type: The type of the proof. In this thesis we use the type \textit{DataIntegrityProof}
-	\item CryptoSuite: Which cryptosuite was used. In this thesis we use \textit{bbs-2023}
-	\item Created: A timestamp when the proof was created
-	\item VerificationMethod: Which verification method is used. This value must be a string that maps to a URL. In this thesis we will use a URL to a public key
-	\item ProofPurpose: For what purpose is the proof. In this thesis we will use \textit{assertionMethod}
-	\item ProofValue: The proof value. In this thesis this is either a BBS Signature or Proof
+	\item \textbf{type}: The type of the proof. In this thesis we use the type \textit{DataIntegrityProof}, as it defines that the proof is there to protect the integrity of the data
+	\item \textbf{cryptosuite}: Which cryptosuite was used. In this thesis we use \textit{bbs-2023}, as we use the BBS Signature Scheme
+	\item \textbf{created}: A timestamp when the proof was created
+	\item \textbf{verificationMethod}: Which verification method is used. This value must be a string that maps to a URL. In this thesis we will use a URL to a public key
+	\item \textbf{proofPurpose}: The purpose of the proof. There are two different valid values for this attribute \textit{assertionMethod} and \textit{authentication}. In this thesis we will use \textit{assertionMethod}
+	\item \textbf{proofValue}: The proof value. In this thesis this is either a BBS Signature or Proof
 \end{itemize}
 
 \subsection{Prepare VCs for BBS and sign them}
