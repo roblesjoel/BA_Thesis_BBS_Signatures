@@ -3,11 +3,12 @@
 \documentclass[
 	a4paper               % paper format
 %	,10.5pt               % fontsize
-%	,BCOR=18mm            % Binding correction
+	,BCOR=0mm            % Binding correction
 	,bibliography=totoc   % If enabled add bibliography to TOC
 	,listof=totoc         % If enabled add lists to TOC
 %	,bilingual
 	,monolingual
+	,twoside=false
 ]{bfhthesis}              % KOMA-script report
 
 \setcounter{secnumdepth}{4}
@@ -172,6 +173,7 @@ In the next sections we will look at the VC concepts that are used in this thesi
 Please note that there are more concepts, which are out of scope.
 
 \section{Used VC concepts}
+\label{sec:usedvcconcepts}
 In this section we will define all the VC concepts that will be used in this thesis.
 
 \subsection{@context}
@@ -186,7 +188,8 @@ Our custom context looks like this:
 {
     "@context":{
         "first_name": "https://schema.org/givenName",
-        "last_name": "https://schema.org/familyName"
+        "last_name": "https://schema.org/familyName",
+		"birth_date": "https://schema.org/birthDate"
     }
 }
 \end{lstlisting}
@@ -212,7 +215,7 @@ Such a credentialSubject may look like this:\newpage
 	"credentialSubject":{
 		"first_name": "John",
 		"last_name": "Doe",
-		"birth_date": 1.1.1970
+		"birth_date": "1.1.1970"
 	}
 }
 \end{lstlisting}
@@ -248,85 +251,326 @@ The proof object contains following key-value pairs:
 	\item \textbf{proofValue}: The proof value. In this thesis this is either a BBS Signature or Proof
 \end{itemize}
 
-\subsection{Prepare VCs for BBS and sign them}
-\label{sub:preparevc}
-Now that we know all the different concepts needed for this thesis, we can look into how to prepare the VC to be signed by the BBS signature scheme.\\
-VCs are JSON-LD objects with multiple key-value pairs on different levels.\\
-BBS can only sign statements, so somehow we need to transform the JSON-LD object into statements.\\
-To achieve this we will use the \textit{Data Integrity BBS Cryptosuites draft}\cite{bbsvc}.\newpage
+\section{VCs and BBS}
+This section contains all the different algorithms to sign a VC, derive a new VC which is used for presentation, create a BBS proof based on the derived VC, wrap the VC in a VP, present it and finally to verify the selectively disclosed VP.\\
 
-We will be using the following VC as an example.
-\begin{lstlisting}[language=json,firstnumber=1,caption={Example VC},captionpos=b]
+In chapter \ref{sec:usedvcconcepts} we defined all the different VC/VP concepts that will be used in this thesis. With that information, we can now build an example VC, that we will use to demonstrate the results of the algorithms.\\
+The VC that we will use look like this:
+\begin{lstlisting}[language=json,firstnumber=1,caption={Example VC},captionpos=b,label={list:example-vc}]
 {
 	"@context": [
 		"https://www.w3.org/ns/credentials/v2",
 		"https://w3id.org/security/data-integrity/v2",
-		"https://raw.githubusercontent.com/RockstaYT/BA_Thesis_BBS_Signatures/docs/context/example_1.jsonld"
+		"https://raw.githubusercontent.com/roblesjoel/BA_Thesis_BBS_Signatures/docs/context/example_1.jsonld"
 	],
 	"type":  ["VerifiableCredential"],
 	"credentialSubject":{
 		"first_name": "John",
-		"last_name": "Doe"
+		"last_name": "Doe",
+		"birth_date": "1.1.1970"
 	}
 }
 \end{lstlisting}
 
-We define following variables:\\
-\textbf{vc}: The VC document\\
-\textbf{hmac\_key}: A 32-bit random string, which is later used to initialize an HMAC\\
-\textbf{verification\_method}: The url to the verification method\\
-\textbf{mandatory\_attributes}: A set of attributes which are mandatory for the holder to disclose to the verifier. For this example we will set the \textit{first\_name} as mandatory. This may look like this: ["credentialSubject/first\_name"]\\
+\subsection{Sign a VC}
+The first step in the process, is to sign a VC.
+These algorithms are normally called by an issuer, which generated the VC.
+As the next step we define some variables, that will be used as the inputs to our algorithms:\\
+\textbf{vc}: The VC document, see Listing \ref{list:example-vc}\\
+\textbf{hmac\_key}: A 32-byte random string, which is used to initialize a HMAC\\
+\textbf{verification\_method}: The URL to the verification method\\
+\textbf{mandatory\_attributes}: A set of attributes which are mandatory for the holder to disclose to the verifier. For this example we will set the \textit{first\_name} as mandatory. This looks like this: ["credentialSubject/first\_name"]\\
 
-Now follow these steps to transform and sign the VC:
-\begin{itemize}
-	\item Set \textbf{proof\_config} and \textbf{canonical\_proof\_config} to the respective entry in the result of the algorithm described in chapter 1.2 in the Analysis Document, with the inputs \textbf{vc.@context} and \textbf{verification\_method}
-	\item Set \textbf{transformed\_document} to the result of the algorithm described in chapter 1.3 in the Analysis Document, with the inputs \textbf{vc}, \textbf{mandatory\_attributes} and \textbf{hmac\_key}.
-	\item Set \textbf{hash\_data} to the result of the algorithm described in chapter 1.4 in the Analysis Document, with the inputs \textbf{canonical\_proof\_config}, \textbf{mandatory\_attributes} and \textbf{transformed\_document}
-	\item Set \textbf{base\_proof} to the result of the algorithm described in chapter 1.5 in the Analysis Document, with the inputs \textbf{hash\_data} and \textbf{mandatory\_attributes}.
-	\item Set \textbf{signed\_vc} to the result of the algorithm described in chapter chapter 1.6 in the Analysis Document, with the inputs \textbf{vc}, \textbf{proof\_config} and \textbf{base\_proof}.
-\end{itemize}
+We now define the main algorithm, which calls the sub-algorithms and handles the data between them:
+\begin{enumerate}
+	\item Set \textbf{proof\_config} and \textbf{canonical\_proof\_config} to the respective entry in the result of the algorithm described in chapter \ref{subsec:proof_config}, with the inputs \textbf{vc.@context} and \textbf{verification\_method}
+	\item Set \textbf{transformed\_document} to the result of the algorithm described in chapter \ref{sub:transformvc}, with the inputs \textbf{vc}, \textbf{mandatory\_attributes} and \textbf{hmac\_key}.
+	\item Set \textbf{hash\_data} to the result of the algorithm described in chapter \ref{subsec:proofHash}, with the inputs \textbf{canonical\_proof\_config}, \textbf{mandatory\_attributes} and \textbf{transformed\_document}
+	\item Set \textbf{base\_proof} to the result of the algorithm described in chapter \ref{subsec:signvc}, with the inputs \textbf{hash\_data} and \textbf{mandatory\_attributes}.
+	\item Set \textbf{signed\_vc} to the result of the algorithm described in chapter \ref{subsubsec:addsig}, with the inputs \textbf{vc}, \textbf{proof\_config} and \textbf{base\_proof}.
+\end{enumerate}
 
-And with that \textbf{signed\_vc} is a valid signed VC, that can be used to generate a derived VP with selective disclosure and unlinkable proofs.\\
+After these steps have the signed VC in \textbf{signed\_vc}.
+This algorithm is normally used by issuers, which generate the VC and sign it.
+After that, they send the secured VCs to their respective holder, which in turn can use them to create VPs.
+Such a signed VC might look like this:
 
-This VC may look like this:
-
-\begin{lstlisting}[language=json,firstnumber=1,caption={Signed VC},captionpos=b]
+\begin{lstlisting}[language=json,firstnumber=1,caption={Signed VC},captionpos=b, label={list:signed-vc}]
 {
 	"@context": [
-		"https://www.w3.org/ns/credentials/v2"
+		"https://www.w3.org/ns/credentials/v2",
+		"https://w3id.org/security/data-integrity/v2",
+		"https://raw.githubusercontent.com/roblesjoel/BA_Thesis_BBS_Signatures/docs/context/example_1.jsonld"
 	],
 	"type": [
 		"VerifiableCredential"
 	],
 	"credentialSubject": {
 		"first_name": "John",
-		"last_name": "Doe"
+		"last_name": "Doe",
+		"birth_date": "1.1.1970"
 	},
 	"proof": {
 		"type": "DataIntegrityProof",
 		"cryptosuite": "bbs-2023",
-		"created": "2024-04-03T22:11:27.027Z",
+		"created": "2024-05-20T11:40:13.934Z",
 		"verificationMethod": "did:key:zUC7D...",
 		"proofPurpose": "assertionMethod",
-		"proofValue": "u2V0ChdhAWFC2..."
+		"proofValue": "u2V0ChdhAWFC..."
 	}
 }
 \end{lstlisting}
 
-\subsection{Derive selective disclosure VPs}
+In the coming sections we will define all the sub-algorithms used to generate \textbf{signed\_vc}.
+
+\subsubsection{Shuffled label map}
+\label{sec:shuffledlabelmap}
+This algorithm shuffles the content of a canonical ID map, such that nobody without the hmac key knows the original position of the attributes in the VC.\\
+
+The required inputs of this algorithm are a random 32-bit long bit-string named \textbf{hmac\_key} which will be used to initialize a \textit{HMAC} and \textbf{canonical\_id\_map} which contains the map.\\
+
+The output is a function called \textbf{label\_map\_factory\_function}, which shuffles canonical id maps.\\
+
+To shuffle the map, we follow these steps:
+\begin{enumerate}
+	\item Create a function with the name \textbf{label\_map\_factory\_function}, which has one required input named \textbf{canonical\_id\_map}. Add these steps to the function:
+	\begin{enumerate}
+		\item Initialize \textbf{bnode\_id\_map} to a new map.
+		\item For each entry in the \textbf{canonical\_id\_map}, we split them up into \textit{key} and \textit{value}
+		\begin{enumerate}
+			\item Set \textbf{hmac\_result} to result of a HMAC-digest operation, which was initialized with the \textbf{hmac\_key}, with the input of \textit{value}
+			\item Add a new map entry into \textbf{bnode\_id\_map}, where the key is the \textit{key} and the value is \textbf{hmac\_result} encoded in base64-url encoding defined in chapter 5 and 3.2 of RFC 4648\cite{base64}
+		\end{enumerate}
+		\item Initialize \textbf{hmac\_ids} to the sorted values of \textbf{bnode\_id\_map}
+		\item For each entry in \textbf{bnode\_id\_map}, split up into \textit{key} and \textit{value}
+		\begin{enumerate}
+			\item Concatenate \textbf{b} with index of \textit{value} in \textbf{hmac\_ids}. Set the result of this concatenation as the value of the current entry in \textbf{bnode\_id\_map}
+		\end{enumerate}
+		\item Return \textbf{bnode\_id\_map}
+	\end{enumerate}
+	\item Return \textbf{label\_map\_factory\_function}
+\end{enumerate}
+
+\subsubsection{Create the proof config}
+\label{subsec:proof_config}
+This sub algorithm creates the skeleton of the proof config object, which will be appended to the VC.
+This object contains the information about the proof to be generated, like what cryptosuite was used, what type of proof it is etc.\\
+
+The required inputs of this algorithm are the URL of the verification information \textbf{verification\_method} and the context of the VC \textbf{@context}.\\
+
+The output of this algorithm is the proof config \textbf{proof\_config} and the canonicalized proof config \textbf{canonical\_proof\_config}.\\
+
+To generate the proof config, we follow these steps:
+\begin{enumerate}
+	\item Create an empty \textbf{proof\_config} object
+	\item Set \textbf{proof\_config.type} to \textit{DataIntegrityProof}
+	\item Set \textbf{proof\_config.cryptosuite} to \textit{bbs-2023}
+	\item Set \textbf{proof\_config.created} to the current time
+	\item Set \textbf{proof\_config.verificationMethod} to the URL of the verification method \textbf{verification\_method}
+	\item Set \textbf{proof\_config.@context} to \textbf{@context}
+	\item Set \textbf{canonical\_proof\_config} to the canonical representation of the \textbf{proof\_config} using the \textit{Universal RDF Dataset Canonicalization Algorithm}\cite{rdf}
+	\item Return an object containing \textbf{proof\_config} and \textbf{canonical\_proof\_config}.
+\end{enumerate}
+
+If we follow the instructions', we get a JSON object like this:
+\begin{lstlisting}[language=json,firstnumber=1,caption={Example Proof Config},captionpos=b]
+{
+  type: "DataIntegrityProof",
+  cryptosuite: "bbs-2023",
+  created: "2024-05-20T14:25:12.540Z",
+  verificationMethod: "did:key:zUC7De...",
+  proofPurpose: "assertionMethod",
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2",
+    "https://w3id.org/security/data-integrity/v2",
+    "https://raw.githubusercontent.com/roblesjoel/BA_Thesis_BBS_Signatures/docs/context/example_1.jsonld",
+  ],
+}
+\end{lstlisting}
+
+This object is then canonicalized into this:
+\begin{lstlisting}[language=canon,firstnumber=1,caption={Example Proof Config canonicalized},captionpos=b]
+_:c14n0 <http://purl.org/dc/terms/created> \"2024-05-20T14:25:12.540Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+_:c14n0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://w3id.org/security#DataIntegrityProof> .
+_:c14n0 <https://w3id.org/security#cryptosuite> \"bbs-2023\"^^<https://w3id.org/security#cryptosuiteString> .
+_:c14n0 <https://w3id.org/security#proofPurpose> <https://w3id.org/security#assertionMethod> .
+_:c14n0 <https://w3id.org/security#verificationMethod> <did:key:zUC7De...> .
+\end{lstlisting}
+
+Note that \textbf{@context} is missing from the statements.
+This is because it is used by the canonicalization algorithm to determine the type of each attribute in the object.\\
+
+After those steps we now have the skeleton of the proof config object and its canonicalized version.
+
+\subsubsection{Transform the VC}
+\label{sub:transformvc}
+This algorithm transforms a VC into statements, sorted into mandatory and non-mandatory ones. These statements then can be used as an input into the BBS signature algorithm.\\
+
+The required inputs are a VC \textbf{vc}, a 32-byte long \textbf{hmac\_key} to initialize an HMAC and a set of mandatory pointers \textbf{mandatory\_attributes}.\\
+
+The output of this algorithm is an object containing the mandatory and the non-mandatory attributes.\\
+
+To generate the statements, we follow these steps:
+\begin{enumerate}
+	\item Define \textbf{label\_map\_factory\_function} as the function which is returned from \textbf{create\_shuffled\_id\_label\_map\_function} defined in chapter \ref{sec:shuffledlabelmap} with the input \textbf{hmac\_key}
+	\item Set \textbf{group\_definitions} to a map where \textit{mandatory} is the key and the value is \textbf{mandatory\_attributes}.
+	\item Set \textbf{groups} to \textit{response.groups} of the \textit{canonicalizeAndGroup} algorithm specified in the \textit{DataIntegrity for ECDSA specification}\cite{ecdsa}, passing the \textbf{label\_map\_factory\_function}, \textbf{group\_definitions} and \textbf{vc}.
+	\item Set \textbf{mandatory} to the value from \textbf{groups.mandatory.matching}
+	\item Set \textbf{nonMandatory} to the value from \textbf{groups.mandatory.nonMatching}
+	\item Return an object named \textbf{transformed\_data} containing \textit{mandatory} set to \textbf{mandatory} and \textit{nonMandatory} set to \textbf{nonMandatory}
+\end{enumerate}
+
+This object may look like this:
+
+\begin{lstlisting}[language=json,firstnumber=1,caption={Return object of the VC transformation},captionpos=b]
+{
+  mandatory: {
+	[
+		2,
+		"_:b0 <https://schema.org/givenName> \"John\" .\n",
+	],
+	[
+		3,
+		"_:b1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://www.w3.org/2018/credentials#VerifiableCredential> .\n",
+  	],
+  	[
+		4,
+		"_:b1 <https://www.w3.org/2018/credentials#credentialSubject> _:b0 .\n",
+	]
+  },
+  nonMandatory: {
+	[
+		0,
+		"_:b0 <https://schema.org/birthDate> \"1.1.1970\" .\n",
+	],
+	[
+		1,
+		"_:b0 <https://schema.org/familyName> \"Doe\" .\n",
+	]
+  },
+}
+\end{lstlisting}
+
+And with that we transformed the VC into canonical statements that can later be signed by BBS.
+
+\subsubsection{Hash the proof data}
+\label{subsec:proofHash}
+In this algorithm we hash the proof data. This data contains the information about the proof, but also the mandatory attributes which must revealed.
+The hashed data then can be used as the header for the BBS Signature operation, and thus ensuring that no information about the proof is changed, but also that all the correct mandatory data is revealed, as the header value must be the same in the sign, sign verify, proof generate and proof verify process.\\
+
+The input for this algorithm is the proof config as canonical statements \textbf{canonical\_proof\_config} and a transformed document \textbf{transformed\_data}.\\
+
+The output is an object \textbf{hash\_data} which is a copy of the \textbf{transformed\_data} the new hashes of the proof and mandatory data.\\
+
+For the hashing, we follow these steps:
+\begin{enumerate}
+	\item Set \textbf{proof\_hash} to the result of the hashing of \textbf{canonical\_proof\_config} using SHA-256.
+	\item Set the \textbf{mandatory\_hash} to the result of the hashing of \textbf{transformed\_document.mandatory} using SHA-256. Be aware that mandatory is an array that first needs to be concatenated. In this thesis we don't use any delimiter for concatenation
+	\item Initialize \textbf{hash\_data} as a copy of \textbf{transformed\_data}, then add the key-value pairs \textit{proofHash} - \textbf{proof\_hash} and \textit{mandatoryHash} - \textbf{mandatory\_hash}
+	\item Return \textbf{hash\_data}
+\end{enumerate}
+
+After following these steps, we have an object like this:
+\begin{lstlisting}[language=json,firstnumber=1,caption={Return object of the VC transformation},captionpos=b]
+{
+	mandatory: {
+	[
+		2,
+		"_:b0 <https://schema.org/givenName> \"John\" .\n",
+	],
+	[
+		3,
+		"_:b1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://www.w3.org/2018/credentials#VerifiableCredential> .\n",
+		],
+		[
+		4,
+		"_:b1 <https://www.w3.org/2018/credentials#credentialSubject> _:b0 .\n",
+	]
+	},
+	nonMandatory: {
+	[
+		0,
+		"_:b0 <https://schema.org/birthDate> \"1.1.1970\" .\n",
+	],
+	[
+		1,
+		"_:b0 <https://schema.org/familyName> \"Doe\" .\n",
+	]
+	},
+	proofHash: [34, 31, 47, 124, 176, 144, ...],
+	mandatoryHash: [51, 239, 227, 180, 185, ...]
+}
+\end{lstlisting}
+
+Now all the data is in the correct format, to generate a BBS Signature.
+
+\subsubsection{Generate and serialize the signature}
+\label{subsec:signvc}
+This algorithm generates a BBS Signature using the inputed data.\\
+
+The inputs for this algorithm are the hashed data \textbf{hash\_data} and a hmac key \textbf{hmac\_key}.\\
+
+To generate the BBS Signature, we follow these steps:
+\begin{enumerate}
+	\item Set \textbf{proof\_hash}, \textbf{mandatory\_hash}, \textbf{mandatory} and \textbf{non\_mandatory} to the corresponding value in \textbf{hash\_data}
+	\item Set \textbf{bbs\_header} to the concatenation of \textbf{proof\_hash} and \textbf{mandatory\_hash}
+	\item Set \textbf{bbs\_messages} to the messages in the \textbf{non\_mandatory} array, which are represented as byte arrays encoded with UTF-8
+	\item Set \textbf{bbs\_signature} to the result of the BBS signature operation, defined in chapter 3.5.1 of the BBS Signature Scheme\cite{bbs-signature-scheme}, with \textbf{bbs\_header} and \textbf{bbs\_messages} as the inputs
+	\item Initialize \textbf{proof\_value} to the BBS proof header bytes 0xd9, 0x5d and 0x02
+	\item Set \textbf{components} to an array containing (in this order): \textbf{bbs\_signature}, \textbf{bbs\_header}, \textbf{public\_key}, \textbf{hmac\_key}, \textbf{mandatory\_pointers}
+	\item Set \textbf{cbor} to result of the application of the CBOR-encoding\cite{cbor}, where CBOR tagging \textbf{Must NOT} be used.
+	\item Set \textbf{proof\_value} to the concatenation of \textbf{proof\_value} and \textbf{cbor}
+	\item Set \textbf{base\_proof} to the value of the base64-url encoding defined in chapter 5 of \textit{RFC 4648}\cite{base64} but without padding as mentioned in chapter 3.2 of the same RFC.
+	\item Return \textbf{base\_proof}
+\end{enumerate}
+
+\textbf{base\_proof} now contains a valid BBS Signature, generated with the contents of the VC.
+
+\subsubsection{Add signature to VC}
+\label{subsubsec:addsig}
+This algorithm adds a BBS Signature to the proof object of a VC.\\
+
+The inputs to this algorithm are a VC \textbf{vc}, the base proof \textbf{base\_proof} and a proof config \textbf{proof\_config}.\\
+
+The output of this algorithm is a signed VC \textbf{vc}.\\
+
+To add the proof to a VC, we follow these steps:
+\begin{itemize}
+	\item Add a new key-value pair \textit{proof} - \textbf{proof\_config} to \textbf{vc}
+	\item Add a new key-value pair \textit{proofValue} - \textbf{base\_proof} to \textbf{vc.proof}
+	\item Return \textbf{vc}
+\end{itemize}
+
+After following these steps we now a VC signed by BBS as seen in Listing \ref{list:signed-vc}.
+
+\subsection{Derive selective disclosure VP}
 As a holder of a secured VC, one would like to present that VC to a verifier.
 For that we create a Verifiable Presentation (VP), which in turn is just a VC containing \textit{@context}, \textit{type} and the VC as \textit{verifiableCredential}.
 We also want to use the selective disclosure provided by the BBS Signature Scheme, so that we don't need to disclose all the information contained in the VC.
-We will use the same example as in chapter \ref{sub:preparevc}.\\
-In that example we forced the disclosure of the \textit{last\_name}. We define that no more information should be revealed, meaning that the \textit{first\_name} will not be revealed to the verifier.\\
+We will use the signed VC seen in listing \ref{list:signed-vc}.\\
+In that example we forced the disclosure of the \textit{last\_name}.
+We define that we want to reveal the \textit{last\_name}.\\
 
-We define following variables:\\
+As the inputs of the algorithms, we define following variables:\\
 \textbf{vc}: The VC, \textbf{not containing} the proof object\\
 \textbf{base\_proof}: The proof object from the VC\\
-\textbf{selective\_pointers}: A array containing pointers on what should be revealed. As already mentioned, in this example we will not reveal anything, so this variable is an empty array []\\
+\textbf{selective\_pointers}: A array containing pointers on what should be revealed. In this example we also want to reveal the \textit{last\_name}, so the array looks like this: ["/credentialSubject/last\_name"]\\
 \textbf{ph}: The presentation header as a byte array. We will define it as an empty array [] for this example\\
 
-To create the derived VP we call the algorithm in chapter 2.1 of the Analysis document, with the inputs \textbf{vc}, \textbf{base\_proof}, \textbf{selective\_pointers} and \textbf{ph}\\
+This algorithm handles all the data for a selective disclosure proof creation.
+First, it generates the derived VC, that will be included in the VP.
+Then the BBS Proof is created and replaces the original BBS Signature.
+Lastly a VP is created, the VC is added, and a new BBS Signature is generated for the VP.
+After all these steps, the VP is ready to be presented.\\
+
+To create the derived VP, we follow these steps:
+\begin{itemize}
+	\item Set \textbf{bbs\_proof}, \textbf{label\_map}, \textbf{mandatory\_indexes}, \textbf{selective\_indexes} and \textbf{reavealed\_document} to their corresponding entry in the response object from the algorithm described in chapter \ref{subsub:createdisclosuredata}, with the inputs \textbf{vc}, \textbf{base\_proof}, \textbf{selective\_pointers} and \textbf{ph}
+	\item Set \textbf{new\_proof} to a copy of \textbf{base\_proof}
+	\item Replace \textbf{new\_proof.proofValue} with the result of calling the algorithm in chapter \ref{subsub:serializebaseproof}, with the inputs \textbf{bbs\_proof}, \textbf{label\_map}, \textbf{mandatory\_indexes} and \textbf{selective\_indexes}
+	\item Set \textbf{reavealed\_document.proof} to \textbf{new\_proof}
+	\item Return \textbf{reavealed\_document}
+\end{itemize}
 
 This derived VP may look like this:
 \begin{lstlisting}[language=json,firstnumber=1,caption={Derived VP},captionpos=b]
@@ -353,31 +597,149 @@ This derived VP may look like this:
 }
 \end{lstlisting}
 
-As you can see, the \textit{last\_name} is not shown as it is not being revealed.
+As you can see, \textit{first\_name} and \textit{last\_name} are shown in the VP, but \textit{birth\_date} is not.
+This is the version of the VP that will be presented to the verifier.
+
+\subsubsection{Parse the base proof}
+\label{subsub:parsebaseproof}
+This algorithm parses the BBS signature in the proof object back into their respective components\\
+
+The input of this algorithm is a proof object \textbf{base\_proof}.\\
+
+The output is an object \textbf{parsed\_base\_proof} containing the parsed base proof values.\\
+
+We follow these steps to parse the base proof:
+\begin{enumerate}
+	\item Check that the \textbf{base\_proof} start with an \textit{u}, indicating that it is a base64-url encoded string
+	\item Set \textbf{decoded\_proof\_value} to the result of the base64-url decoding with no padding as described in \textit{The Base16, Base32, and Base64 Data Encodings}\cite{base64}
+	\item Check that \textbf{decoded\_proof\_value} starts with the BBS proof header bytes \textit{0xd9}, \textit{0x5d} and \textit{0x02}
+	\item Set \textbf{components} to the CBOR decoding described in \textit{RFC 8949}\cite{cbor}, starting with the fourth byte in \textbf{decoded\_proof\_value}
+	\item Set \textbf{base\_proof\_object} to the key-value pairs \textit{bbs\_signature} - \textbf{components[0]}, \textit{bbs\_header} - \textbf{components[1]}, \textit{public\_key} - \textbf{components[2]}, \textit{hmac\_key} - \textbf{components[3]} and \textit{mandatory\_pointers} - \textbf{components[4]}
+	\item Return \textbf{base\_proof\_object}
+\end{enumerate}
+
+\subsubsection{Create disclosure data}
+\label{subsub:createdisclosuredata}
+This algorithm generates all the data needed to create a selective disclosure proof. It also generates the derived VC.\\
+
+The inputs of this algorithm are a VC \textbf{vc}, the proof containing the signature \textbf{base\_proof}, the selective pointers \textbf{selective\_pointers} and a presentation header \textbf{ph}.\\
+
+The output is an object containing an BBS proof, a label map, mandatory indexes, selective indexes and the document that we want to reveale (the adjusted VC).\\
+
+To generate all this data, we follow these steps:
+\begin{enumerate}
+	\item Set \textbf{bbs\_signature}, \textbf{bbs\_header}, \textbf{public\_key}, \textbf{hmac\_key} and \textbf{mandatory\_pointers} to their respective value in the response of the algorithm described in chapter \ref{subsub:parsebaseproof}
+	\item Define \textbf{label\_map\_factory\_function} as the function which is returned from the \textbf{create\_shuffled\_id\_label\_map\_function} defined in chapter \ref{sec:shuffledlabelmap} with the input \textbf{hmac\_key}
+	\item Set \textbf{combined\_pointers} to the concatenation of \textbf{mandatory\_pointers} and \textbf{selective\_pointers}
+	\item Set \textbf{group\_definitions} to an object with following key-value pairs: \textit{mandatory} - \textbf{mandatory\_pointers}, \textit{selective} - \textbf{selective\_pointers} and \textit{combined} - \textbf{combined\_pointers}
+	\item Set \textbf{groups} and \textbf{label\_map} to \textit{response.groups} and \textit{response.labelMap} respectively of the \textit{canonicalizeAndGroup} algorithm specified in the \textit{DataIntegrity for ECDSA specification}\cite{ecdsa}, passing the \textbf{label\_map\_factory\_function}, \textbf{group\_definitions} and \textbf{vc}.
+	\item Set \textbf{combined\_match} to \textbf{groups.combined.matching}
+	\item Set \textbf{mandatory\_match} to \textbf{groups.mandatory.matching}
+	\item Set \textbf{combined\_indexes} to the ordered list of \textbf{combined\_match.keys}
+	\item Set \textbf{mandatory\_indexes} to an empty array. We want to compute the position of the mandatory indexes in the \textbf{combined\_match} array, so that the verifier knows which indexes were mandatory to reveal
+	\item For each key in \textbf{mandatory\_match} find its index in \textbf{combined\_indexes} and add it to \textbf{mandatory\_indexes}.
+	\item Set \textbf{selective\_match} to \textbf{groups.selective.matching}
+	\item Set \textbf{mandatory\_non\_match} to \textbf{groups.mandatory.nonMatching}
+	\item Set \textbf{non\_mandatory\_indexes} to the ordered list of \textbf{mandatory\_non\_match.keys}
+	\item Set \textbf{selective\_indexes} to an empty array. This time we want to compute the position of the selective indexes in the \textbf{non\_mandatory\_indexes} list. This list will be used for the BBS proof generation process, to define which messages are going to be revealed.
+	\item For each key in \textbf{selective\_match} find its index in \textbf{non\_mandatory\_indexes} and add it to \textbf{selective\_indexes}
+	\item Set \textbf{bbs\_messages} to the values of \textbf{non\_mandatory.values} as byte arrays
+	\item Set \textbf{bbs\_proof} to the result of the BBS proof operation defined in chapter 3.5.3 of \textit{The BBS Signature Scheme}\cite{bbs-signature-scheme}, with the input \textbf{public\_key}, \textbf{bbs\_signature}, \textbf{bbs\_header}, \textbf{ph}, \textbf{bbs\_messages} and \textbf{selective\_indexes}
+	\item Set \textbf{reavealed\_document} to the result of the algorithm described in chapter 3.4.13 of \textit{Data Integrity ECDSA Cryptosuites v1.0}\cite{ecdsa}, with the inputs \textbf{vc} and \textbf{combined\_pointers}
+	\item Set \textbf{deskolemized\_n\_quads} to the joined string from the \textbf{groups.combined.deskolemizedNQuads} array. In this thesis we do not use a delimiter
+	\item Set \textbf{canonical\_id\_map} to the result of the JSON-LD canonicalization algorithm with the input \textbf{deskolemized\_n\_quads}
+	\item Set \textbf{verifier\_label\_map} to an empty map. This maps the canonical blank node identifiers like \textit{c14n0} from the revealed VC to the blank node identifiers created by the issuer
+	\item For each entry in \textbf{canonical\_id\_map}, where key is \textit{key} and the value is \textit{value}:
+	\begin{enumerate}
+		\item Add an entry to \textbf{verifier\_label\_map} where the key \textit{value} and the value is the entry in \textbf{label\_map} with the key \textit{key}
+	\end{enumerate}
+	\item Return an object with following key-value pairs: \textit{bbsProof} - \textbf{bbs\_proof}, \textit{verifierLabelMap} - \textbf{label\_map}, \textit{mandatoryIndexes} - \textbf{mandatory\_indexes}, \textit{selectiveIndexes} - \textbf{selective\_indexes} and \textit{revealedDocument} - \textbf{reavealed\_document}
+\end{enumerate}
+
+\subsubsection{Serialize the proof value}
+\label{subsub:serializebaseproof}
+This algorithm serializes the BBS proof value.\\
+
+The inputs of this algorithm are a BBS proof \textbf{bbs\_proof}, a label map \textbf{label\_map}, an array of mandatory indexes \textbf{mandatory\_indexes}, an array of selective indexes \textbf{selective\_pointers} and a presentation header \textbf{ph}.\\
+
+The result of this algorithm is the serialized proof value \textbf{proof\_value}.\\
+
+We follow these steps:
+\begin{itemize}
+	\item Set \textbf{compressed\_label\_map} to the result of calling the algorithm in chapter 3.5.5 of the \textit{Data Integrity ECDSA Cryptosuites v1.0}\cite{ecdsa} with \textbf{label\_map} as the input
+	\item Initialize \textbf{proof\_value} as a byte array, where the first three bytes are \textit{0xd9}, \textit{0x5d} and \textit{0x03}
+	\item Set \textbf{components} to an array containing (in this order): \textbf{bbs\_proof}, \textbf{compressed\_label\_map}, \textbf{mandatory\_indexes}, \textbf{selective\_pointers} and \textbf{ph}
+	\item Set \textbf{cbor} to result of the application of the CBOR-encoding\cite{cbor} on the components array, where CBOR tagging \textbf{Must NOT} be used.
+	\item Set \textbf{derfived\_proof\_value} to the concatenation of \textbf{proof\_value} and \textbf{cbor}
+	\item Set \textbf{derived\_proof} to the the base64-url encoding of \textbf{derfived\_proof\_value}, as defined in chapter 5 of "RFC 4648"\cite{base64} but without padding as mentioned in chapter 3.2 of the same RFC
+	\item Return \textbf{proof\_value}
+\end{itemize}
 
 \subsection{Verify derived VP}
 \label{subsub:verifyvp}
-A verifier has now received a selectively disclosed VP, which he would like to verify.\\
+The VP was presented by a holder to a verifier. 
+The verifier now wants to verify the received VP.\\
 
 We define following variable:\\
-\textbf{secured\_document}: This is the VP that was received from the holder\newpage
+\textbf{secured\_document}: This is the VP that was received from the holder\\
 
 To verify the VP we follow these steps:
-\begin{itemize}
+\begin{enumerate}
+	\item Set \textbf{pk} to the value returned when using the URL from \textbf{secured\_document.proof.verificationMethod}
 	\item Set \textbf{unsecured\_document} to the copy of \textbf{secured\_document} but with the \textit{proof} value removed
-	\item Set \textbf{proof\_config} to the copy of \textbf{secured\_document.proof} but with \textit{proofValue} value removed
 	\item Set \textbf{proof} to the copy of \textbf{secured\_document.proof}
-	\item Set \textbf{bbs\_proof}, \textbf{proof\_hash}, \textbf{non\_mandatory}, \textbf{mandatory\_hash}, \textbf{selective\_indexes}, \textbf{ph} and \textbf{feature\_option} to their respective entries in the result of the algorithm described in chapter 3.1 of the Analysis Document, with \textbf{unsecured\_document} and \textbf{proof} as the input
+	\item Set \textbf{bbs\_proof}, \textbf{proof\_hash}, \textbf{non\_mandatory}, \textbf{mandatory\_hash}, \textbf{selective\_indexes}, \textbf{ph} and \textbf{feature\_option} to their respective entries in the result of the algorithm described in chapter \ref{subsub:parseproof}, with \textbf{proof} as the input
 	\item Set \textbf{bbs\_header} to the concatenation of \textbf{proof\_hash} and \textbf{mandatory\_hash}
-	\item Set \textbf{verify} to the result of the BBS Proof Verification algorithm defined in \textit{THE BBS Signature Scheme}\cite{bbs-signature-scheme} with the inputs \textbf{pk}, \textbf{bbs\_proof}, \textbf{bbs\_header}, \textbf{ph}
+	\item Set \textbf{disclosed\_messages} to the contents of the \textbf{non\_mandatory}, each UTF-8 encoded
+	\item Set \textbf{verify} to the result of the BBS Proof Verification algorithm defined in \textit{THE BBS Signature Scheme}\cite{bbs-signature-scheme} with the inputs' \textbf{pk}, \textbf{bbs\_proof}, \textbf{bbs\_header}, \textbf{ph}, \textbf{disclosed\_messages} and \textbf{selective\_indexes}
+\end{enumerate}
+
+After running the algorithm, the verifier has the variable \textbf{verify}. If it's \textit{true}, the verifier knows that the VP is valid and was not tampered with.
+
+\subsubsection{Parse Proof Value}
+\label{subsub:parseproof}
+This algorithm parses the proof value.\\
+
+The input is a proof value \textbf{proof\_value}.\\
+
+The output is a map containing the BBS proof, a label map, the mandatory indexes, the selective indexes, the presentation header and the feature options\\
+
+We follow these steps:
+\begin{itemize}
+	\item Make sure that \textbf{proof\_value} starts with \textit{u}, which indicates that it is a base64-url encoded value with no padding
+	\item Set \textbf{decoded\_proof\_value} to the decoding of \textbf{proof\_value}
+	\item Make sure that the three first bytes of \textbf{decoded\_proof\_value} are \textit{0xd9}, \textit{0x5d} and \textit{0x03} in that order
+	\item Set \textbf{feature\_option} to \textit{baseline}
+	\item Set \textbf{components} to the result of the CBOR decoding of the \textbf{decoded\_proof\_value} starting with the fourth byte. The resulting array must have 5 elements
+	\item Replace the second object in \textbf{components} with the result of the algorithm in chapter 3.5.6 of \textit{Data Integrity ECDSA Cryptosuites v1.0}\cite{ecdsa}, with the second object of \textbf{components} as input value
+	\item Return a map containing the key-value pairs: \textit{bbsProof} - \textbf{components[0]}, \textit{labelMap} - \textbf{components[1]}, \textit{mandatoryIndexes} - \textbf{components[2]}, \textit{selectiveIndexes} - \textbf{components[3]}, \textit{presentationHeader} - \textbf{components[5]} and \textit{featureOption} - \textbf{feature\_option}
 \end{itemize}
 
-If \textbf{verify} is true, the verifier knows that the VP is valid and was not tampered with. 
+\subsubsection{Create Verify data}
+\label{subsub:createverifydata}
+This algorithm generates the data for the proof verification process.\\
 
-\subsection{Security Considerations of VCs}
+The input of this algorithm are the VP without the proof value \textbf{document}, the proof \textbf{proof}, and the proof without \textit{proofValue} \textbf{proof\_config}.\\
 
-Important!!! Signatures in VC also are identifying, vc changes from sig to proof
+The output of this algorithm is a label map containing the BBS proof, the proof hash, the non mandatory indexes, the mandatory hash, the selective indexes and the feature options.\\
 
+We follow these steps:
+\begin{itemize}
+	\item Set \textbf{proof\_hash} to the hashed (using SHA-256) canonical representation of the \textbf{proof\_config} using the \textit{Universal RDF Dataset Canonicalization Algorithm}\cite{rdf}
+	\item Set \textbf{bbs\_proof}, \textbf{label\_map}, \textbf{mandatory\_indexes}, \textbf{selective\_indexes}, \textbf{} and \textbf{feature\_option} to their respective entries in the result of the algorithm described in chapter \ref{subsub:parseproof} with \textbf{proof} as the input
+	\item Set \textbf{label\_map\_factory\_function} to the algorithm in chapter 3.4.3 of \textit{Data Integrity ECDSA Cryptosuites v1.0}\cite{ecdsa}
+	\item Set \textbf{nquads} to the result of the algorithm \textit{labelReplacementCanonicalize} described in chapter 3.4.1 of \textit{Data Integrity ECDSA Cryptosuites v1.0}\cite{ecdsa} with the inputs \textbf{document} and \textbf{label\_map\_factory\_function}
+	\item Set \textbf{mandatory} and \textbf{non\_mandatory} to an empty array
+	\item For each entry in nquads, the key is \textbf{key} and the value is \textbf{value}, separate them into mandatory and non mandatory
+	\begin{itemize}
+		\item If \textbf{mandatory\_indexes} contains \textbf{key}, add \textbf{value} to \textbf{mandatory}
+		\item Else add \textbf{value} to \textbf{non\_mandatory}
+	\end{itemize}
+	\item Set \textbf{mandatory\_hash} to hash of \textbf{mandatory} using SHA-256. We concatenate the elements of the array without a separator
+	\item Return a map containing the key-value pairs: \textit{bbsProof} - \textbf{bbs\_proof}, \textit{proofHash} - \textbf{proof\_hash}, \textit{nonMandatory} - \textbf{non\_mandatory}, \textit{mandatoryHash} - \textbf{mandatory\_hash}, \textit{selectiveIndexes} - \textbf{selective\_indexes}, \textit{presentationHeader} - \textbf{ph} and \textit{featureOption} - \textbf{feature\_option}
+\end{itemize}
+
+\section{Security Considerations of VCs}
 \label{subsec:vcseccons}
 The combination of BBS and VC raises two security questions:
 \begin{enumerate}
@@ -385,7 +747,7 @@ The combination of BBS and VC raises two security questions:
 	\item The RDF canonicalization algorithm creates data leakage which leads to linkability
 \end{enumerate}
 
-\subsubsection{IDs in VCs}
+\subsection{IDs in VCs}
 While creating a VC, the issuer might add an ID to the VC to enable revocation.
 A verifier can then check if the ID of the VC which was presented to them is in the revocation list of the issuer, and thus accept or reject the presentation.\\
 But there is a big problem with this.
@@ -394,12 +756,12 @@ With that we would break the unlinkability provided by BBS.\\
 
 To preserve the unlinkability between the presentations, the holder would need to be able to prove that the ID of the VC is not in the revocation list of the issuer.
 
-As a solution to that problem, we can use a solution like ALLOSAUR\cite{allosaur}. 
-With this solution a holder can prove to a verifier that his ID is not in the revocation list, without presenting a unique identifier.
+As a solution to that problem, we can use something like ALLOSAUR\cite{allosaur}. 
+With this a holder can prove to a verifier that his ID is not in the revocation list, without presenting a unique identifier.
 In this thesis we will assume that the concept shown in ALLOSAUR works without compromising unlinkability.
 We also won't look at how it works, as this would be out-of-scope for this thesis.
 
-\subsubsection{RDF canonicalization algorithm}
+\subsection{RDF canonicalization algorithm}
 In the algorithms described in the Analysis Document, we use RDF multiple times to transform the JSON-LD Document into statements.
 Using this algorithm can lead to data leakage which in turn can lead to linkability.
 
@@ -507,18 +869,16 @@ If we now add a HMAC (using SHA-256) to this function, we can randomize how the 
 
 Note: It was suggested that the possibility to use KMAC with SHA3-256 should be added to the specification. This was declined by the working group on the basis that SHA-256 is more common.
 
-\section{OpenID for Verifiable Presentations}
+\chapter{OpenID for Verifiable Presentations}
 Now that we know how to create and sign VCs/VPs, we want to be able to send them the other parties.
 In this thesis we will only look at the communication between a holder and a verifier, so how VPs are transmitted.
 As the message layer we use OpenID for Verifiable Presentations(OIDC4VP)\cite{oidc4vp}.
 The Goal of this chapter is to analyze if OIDC4VP leaks data or even breaks linkability.
 
-\subsection{How does OIDC4VP work?}
-OIDC4VP is a very easy to used protocol.
+\section{How does OIDC4VP work?}
+OIDC4VP is a very easy to use protocol.
 There are just two parties, the verifier and the holder (which can be split up into holder and wallet, but for the sake of simplicity we merge them).
-After the initial interaction between a holder and verifier, in just four easy steps these two parties can start a new session, present the VP and close the session.
-
-The see the magic of this protocol in depth, please read chapter 4 of the Analysis document.
+After the initial interaction between a holder and verifier, these two parties can start a new session, present the VP and close the session.
 
 Let's use the example from chapter \ref{sec:presid}.
 
@@ -535,7 +895,7 @@ It's important to note that in this draft VC and VP can be used interchangeably.
 OIDC4VP doesn't really mean that it is only for sending VPs between parties, it is a protocol that defines how the messaging between a holder and a verifier works, independent of VC or VP.\\
 Also, all the following chapters use HTTP POST/GET requests for the communication.
 
-\subsection{Request}
+\subsection{Presentation definition}
 The first step in the session is the Authorization Request. 
 In this step the verifier communicates the requirements of the presented VP to the holder, like what type of credential or in which format.
 The verifier can also define which individual attributes must be revealed, which in turn is our beloved selective disclosure.
@@ -616,7 +976,7 @@ If everything is done on the same device, it is easy to send all the data in the
 But we are not finished there. We also want to tell the holder where to send the presentation to.
 In this thesis we will use the \textit{direct\_post} response mode, which defines that the response must be sent to an endpoint using an HTTP POST request. The verifier must also set the \textit{response\_uri} parameter with the corresponding uri.
 
-\subsection{Response}
+\subsection{Presentation submission}
 After the holder got the \textit{presentation\_definition} as well as the \textit{response\_uri} and prepared the VP, he can respond to the verifier.\\
 
 For the response, the holder needs two parameters:
@@ -643,355 +1003,14 @@ For the response, the holder needs two parameters:
 }
 \end{lstlisting}
 
-We already know the use of the \textit{id}. The \textit{definition\_id} is just the \text{id} from the \textit{presentation\_definition}.
+Figure \ref{list:pressub} is an example of a presentation definition. We already know the use of the \textit{id}. The \textit{definition\_id} is just the \text{id} from the \textit{presentation\_definition}.
 The \textit{descriptor\_map} is an array that contains the definition for all the VPs inside the \textit{vp\_token}.
 In that array we have an \textit{id} for that entry, the \textit{format} of the corresponding credential in the \textit{vp\_token} and the root \textit{path} value.\\
 We then have the \textit{path\_nested} object, which contains the \textit{path} of the corresponding credential inside the root credential (like a VC inside a VP) and the   \textit{format} of that credential.\\
 
 To finish the session, the holder just returns the \textit{vp\_token} and the \textit{presentation\_submission} to the verifier.
 
-
-\section{BBS with Pseudonyms}
-\label{chap:Pseudonyms}
-
-\section{BBS with Link Secrets}
-\label{chap:linksecrets}
-
-\section{BBS with Blind Signatures}
-\label{chap:blindsignatures}
-
-
-
-
-\appendix
-
-
-\chapter{VC Preparation}
-\label{chap:vctobbs}
-
-\section{Shuffled label map}
-\label{sec:shuffledlabelmap}
-
-Because of security considerations mentioned in chapter 6.1.5.1 of the Project Management document the canonicalised \textbf{vc} needs to be shuffled.\\
-
-The required inputs of this algorithm are a random 32-bit long bit-string named \textbf{hmac\_key} which will be used to initialize a \textit{HMAC} and \textbf{canonical\_id\_map} which contains the map.\\
-
-The output is a function called \textbf{label\_map\_factory\_function}.\\
-
-We follow these steps:
-\begin{itemize}
-	\item Create a function with the name \textbf{label\_map\_factory\_function}, which has one required input named \textbf{canonical\_id\_map}. Inside the function do these steps:
-	\begin{itemize}
-		\item Initialize \textbf{bnode\_id\_map} to a new map.
-		\item For each entry in the \textbf{canonical\_id\_map}, which are split up into key - value
-		\begin{itemize}
-			\item Set \textbf{hmac\_result} to result of a HMAC-digest operation, which was initialized with the \textbf{hmac\_key}, on the value of the entry. 
-			\item Add a new map entry into \textbf{bnode\_id\_map}, where the key is the key from \textbf{canonical\_id\_map} and the value is \textbf{hmac\_result} encoded in base64-url encoding defined in chapter 5 and 3.2 of "RFC 4648"\cite{base64}.
-		\end{itemize}
-		\item Initialize \textbf{hmac\_ids} to the sorted values of \textbf{bnode\_id\_map}
-		\item For each key in the \textbf{bnode\_id\_map}
-		\begin{itemize}
-			\item Set the value for the given key in \textbf{bnode\_id\_map} with \textbf{b} concatenated with the index of the correspoing value in \textbf{hmac\_ids}. The value should then look like \textbf{b0}.
-		\end{itemize}
-		\item Finally return \textbf{bnode\_id\_map}.
-	\end{itemize}
-	\item Return \textbf{label\_map\_factory\_function}
-\end{itemize}
-
-\section{Create the proof config}
-\label{subsubsec:proof_config}
-The proof config contains the information about the proof to be generated, like what cryptosuite was used, what type of proof it is etc.\\
-
-The required inputs of this algorithm are the url of the verification information \textbf{verification\_method} and the context of the VC \textbf{@context}.\\
-
-The output of this algorithm is the proof config \textbf{proof\_config} and the canonicalised proof config \textbf{canonical\_proof\_config}.\\
-
-We follow these steps:
-\begin{itemize}
-	\item Create an empty \textbf{proof\_config} object
-	\item Set \textbf{proof\_config.type} to \textit{DataIntegrityProof}
-	\item Set \textbf{proof\_config.cryptosuite} to \textit{bbs-2023}
-	\item Set \textbf{proof\_config.created} to the current time
-	\item Set \textbf{proof\_config.verificationMethod} to the url of the verification information \textbf{verification\_method} (see: \url{https://www.w3.org/TR/vc-di-bbs/#multikey})
-	\item Set \textbf{proof\_config.@context} to \textbf{@context}
-	\item Set \textbf{canonical\_proof\_config} to the canonical representation of the \textbf{proof\_config} using the \textit{Universal RDF Dataset Canonicalization Algorithm}\cite{rdf}
-	\item Return an object containing \textbf{proof\_config} and \textbf{canonical\_proof\_config}.
-\end{itemize}
-
-If we follow the instructions step by step we get a JSON object like this:
-\begin{lstlisting}[language=json,firstnumber=1,caption={Example Proof Config},captionpos=b]
-{
-	"type": "DataIntegrityProof",
-	"cryptosuite": "bbs-2023",
-	"created": "2024-04-01T21:28:52.401Z",
-	"verificationMethod": "www.example.com/keys",
-	"proofPurpose": "assertionMethod",
-	"@context": [
-		"https://www.w3.org/ns/credentials/v2"
-	],
-}
-\end{lstlisting}\newpage
-
-Which in turn is canonicalised into this:
-
-\begin{lstlisting}[language=canon,firstnumber=1,caption={Example Proof Config canonicalized},captionpos=b]
-_:c14n0 <http://purl.org/dc/terms/created> "2024-04-01T21:35:10.679Z"^^<http://www.w3.org/2001/XMLSchema\#dateTime> .
-_:c14n0 <http://www.w3.org/1999/02/22-rdf-syntax-ns\#type> <https://w3id.org/security\#DataIntegrityProof> .
-_:c14n0 <https://w3id.org/security\#cryptosuite> "bbs-2023"^^<https://w3id.org/security\#cryptosuiteString> .
-_:c14n0 <https://w3id.org/security\#proofPurpose> <https://w3id.org/security\#assertionMethod> .
-_:c14n0 <https://w3id.org/security\#verificationMethod> www.example.com/keys .
-\end{lstlisting}
-
-With that we have our \textbf{canonical\_proof\_config} and the first step is finished.
-
-\section{Transform the VC}
-\label{chap:transform}
-This algorithm transforms VC into statements which can later be signed by BBS.\\
-
-The required inputs are a VC document \textbf{vc}, a 32-byte long \textbf{hmac\_key} to initialize a HMAC and a set of mandatory pointers \textbf{mandatory\_attributes}.\\
-
-We follow these steps:
-\begin{itemize}
-	\item Define \textbf{label\_map\_factory\_function} as the function which is returned from the \textbf{create\_shuffled\_id\_label\_map\_function} defined in chapter \ref{sec:shuffledlabelmap} with the input \textbf{hmac\_key}.
-	\item Set \textbf{group\_definitions} to a map where \textit{mandatory} is the key and the value is \textbf{mandatory\_attributes}.
-	\item Set \textbf{groups} to the \textit{response.groups} of the \textit{canonicalizeAndGroup} algorithm specified in the DataIntegrity for ECDSA specification\cite{ecdsa}, passing the \textbf{label\_map\_factory\_function}, \textbf{group\_definitions} and \textbf{vc}.
-	\item Set \textbf{mandatory} to the value from \textbf{groups.mandatory.matching}
-	\item Set \textbf{nonMandatory} to the value from \textbf{groups.mandatory.nonMatching}
-	\item Return an object named \textbf{transformed\_data} containing \textit{mandatory} set to \textbf{mandatory}, \textit{nonMandatory} set to \textbf{nonMandatory} and \textit{hmacKey} set to \textbf{hmacKey}.
-\end{itemize}\newpage
-
-This object may look like this:
-
-\begin{lstlisting}[language=json,firstnumber=1,caption={Return object of the VC transformation},captionpos=b]
-{
-	"mandatory": [[
-		0,
-		"_:b0 <https://www.w3.org/ns/credentials/issuer-dependent#first_name> \"Joel\" .\n",
-		],
-		[
-		2,
-		"_:b1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://www.w3.org/2018/credentials#VerifiableCredential> .\n",
-		],
-		[
-		3,
-		"_:b1 <https://www.w3.org/2018/credentials#credentialSubject> _:b0 .\n",
-		]],
-	"nonMandatory": [[
-		1,
-		"_:b0 <https://www.w3.org/ns/credentials/issuer-dependent#last_name> \"Robles\" .\n",
-	  ]],
-	"hmacKey": [0, 17, ...],
-}
-\end{lstlisting}
-
-And with that we transformed the VC into canonical statements that can later be signed by BBS.
-
-\section{Hash the proof data}
-\label{subsubsec:proofHash}
-This algorithm creates a hash of the proof data, which will be used as the header of for the bbs signature operation.\\
-
-The input for this algorithm is the proof config as canonical staments \textbf{canonical\_proof\_config}, a set of mandatory pointers \textbf{mandatory\_attributes} and a transformed document \textbf{transformed\_data}.\\
-
-The output is an object \textbf{hash\_data} which is a copy of the \textbf{transformed\_data} with new key-value pairs.\\
-
-We follow these steps:
-\begin{itemize}
-	\item Set \textbf{proof\_hash} as the result of the hashing of \textbf{canonical\_proof\_config} using SHA-256.
-	\item Set the \textbf{mandatory\_hash} as the result of the hashing of \textbf{transformed\_document.mandatory} using SHA-256. Be aware that mandatory is an array that first needs to be concatenated. In this thesis we don't use any delimiter for concatenation
-	\item Initialise \textbf{hash\_data} as a copy of \textbf{transformed\_data}, then adding the key-value pairs \textit{proofHash} - \textbf{proof\_hash} and \textit{mandatoryHash} - \textbf{mandatory\_hash}
-	\item Return \textbf{hash\_data}
-\end{itemize}
-
-With this object we now have all data to be able to create a bbs signature.
-
-\section{Generate and serialize the signature}
-\label{subsubsec:sign}
-This algorithm shows how the different data prepared in the algorithms before, is used to generate a valid bbs signature.\\
-
-The inputs for this algorithm are the hashed proof data \textbf{hash\_data} and a set of mandatory pointers \textbf{mandatory\_attributes}.\\
-
-We follow these steps:
-\begin{itemize}
-	\item Set \textbf{proof\_hash}, \textbf{mandatory\_hash}, \textbf{non\_mandatory} and \textbf{hmac\_key} to the corresponding value in \textbf{hash\_data}.
-	\item Set \textbf{bbs\_header} to the concatenation of \textbf{proof\_hash} and \textbf{mandatory\_hash}
-	\item Set \textbf{bbs\_messages} to the messages in the \textbf{non\_mandatory} array, which are represented as byte arrays encoded with UTF-8
-	\item Set \textbf{bbs\_signature} to the result of the bbs signature operation, defined in chapter 3.5.1 of the BBS Siganture Scheme\cite{bbs-signature-scheme}.
-	\item Initialise \textbf{proof\_value} to the bbs proof header bytes 0xd9, 0x5d and 0x02
-	\item Set \textbf{components} to an array containing(in this order): \textbf{bbs\_signature}, \textbf{bbs\_header}, \textbf{public\_key}, \textbf{hmac\_key}, \textbf{mandatory\_pointers}
-	\item Set \textbf{cbor} to result of the application of the CBOR-encoding\cite{cbor}, where CBOR tagging \textbf{Must NOT} be used.
-	\item Set \textbf{proof\_value} to the concatenation of \textbf{proof\_value} and \textbf{cbor}
-	\item Set \textbf{base\_proof} to the value of the base64-url encoding defined in chapter 5 of "RFC 4648"\cite{base64} but without padding as mentioned in chapter 3.2 of the same RFC.
-	\item Return \textbf{base\_proof}
-\end{itemize}
-
-We now have a valid BBS signature, which we can append to the VC.
-
-\section{Add signature to VC}
-\label{subsubsec:signed}
-This algorithm adds a bbs signature to a VC document.
-
-The input to this algorithm is a VC \textbf{vc}, the base proof \textbf{base\_proof} and a proof config \textbf{proof\_config}.
-
-The output of this algorithm is a signed VC \textbf{vc} with the proof information attached.
-
-We follow these steps:
-\begin{itemize}
-	\item Add a new key-value pair \textit{proof} - \textbf{proof\_config} to \textbf{vc}
-	\item Add a new key-value pair \textit{proofValue} - \textbf{base\_proof} to \textbf{vc.proof}
-	\item Return \textbf{vc}
-\end{itemize}
-
-And with that we now have a fully functional VC which was signed with BBS.
-
-
-\chapter{VP Derivation}
-
-\section{Derive VP}
-\label{subsub:derivevp}
-
-This algorithm handles all the data for a selective disclosure proof creation.\\
-
-The inputs of this algorithm are a VC \textbf{vc}, the proof \textbf{base\_proof}, the selective pointers \textbf{selective\_pointers} and a presentation header \textbf{ph}.\\
-
-The output is an altered VC \textbf{reavealed\_document} only containing the data to be revealed.\\
-
-We follow these steps:
-\begin{itemize}
-	\item Set \textbf{bbs\_proof}, \textbf{label\_map}, \textbf{mandatory\_indexes}, \textbf{selective\_indexes} and \textbf{reavealed\_document} to their corresponding entry in the response object from the algorithm described in chapter \ref*{subsub:createdisclosuredata}, with the inputs \textbf{vc}, \textbf{base\_proof}, \textbf{selective\_pointers} and \textbf{ph}
-	\item Set \textbf{new\_proof} to a copy of \textbf{base\_proof}
-	\item Replace \textbf{new\_proof.proofValue} with the result of calling the algorithm in chapter \ref{subsub:parsebaseproof}, with the inputs \textbf{bbs\_proof}, \textbf{label\_map}, \textbf{mandatory\_indexes} and \textbf{selective\_indexes}
-	\item Set \textbf{reavealed\_document.proof} to \textbf{new\_proof}
-	\item Return \textbf{reavealed\_document}
-\end{itemize}
-
-\section{Create disclosure data}
-\label{subsub:createdisclosuredata}
-
-This algorithm creates the data for the selective disclosure of a VP.\\
-
-The inputs of this algorithm are a VC \textbf{vc}, the proof \textbf{base\_proof}, the selective pointers \textbf{selective\_pointers} and a presentation header \textbf{ph}.\\
-
-The output is an object containing the BBS proof, a label map, mandatory indexes, selective indexes and the revealed document.\\
-
-We follow these steps:
-\begin{itemize}
-	\item Set \textbf{bbs\_signature}, \textbf{bbs\_header}, \textbf{public\_key}, \textbf{hmac\_key} and \textbf{mandatory\_pointers} to their respective value in the response of the algorithm described in chapter \ref{subsub:parsebaseproof}
-	\item Define \textbf{label\_map\_factory\_function} as the function which is returned from the \textbf{create\_shuffled\_id\_label\_map\_function} defined in chapter \ref{sec:shuffledlabelmap} with the input \textbf{hmac\_key}
-	\item Set \textbf{combined\_pointers} to the concatenation of \textbf{mandatory\_pointers} and \textbf{selective\_pointers}
-	\item Set \textbf{group\_definitions} to an object with following key-value pairs: \textit{mandatory} - \textbf{mandatory\_pointers}, \textit{selective} - \textbf{selective\_pointers} and \textit{combined} - \textit{combined\_pointers}
-	\item Set \textbf{groups} and \textbf{label\_map} to \textit{response.groups} and \textit{response.labelMap} respectively of the \textit{canonicalizeAndGroup} algorithm specified in the DataIntegrity for ECDSA specification\cite{ecdsa}, passing the \textbf{label\_map\_factory\_function}, \textbf{group\_definitions} and \textbf{vc}.
-	\item Set \textbf{combined\_match} to \textbf{groups.combined.matching}
-	\item Set \textbf{mandatory\_match} to \textbf{groups.mandatory.matching}
-	\item Set \textbf{combined\_indexes} to the ordered list of \textbf{combined\_match.keys}
-	\item Set \textbf{mandatory\_indexes} to an empty array. We want to compute the position of the mandatory indexes in the \textbf{combined\_match} array, so that the verifier knows which indexes were mandatory to reveal
-	\item For each key in \textbf{mandatory\_match} find its index in \textbf{combined\_indexes} and add it to \textbf{mandatory\_indexes}.
-	\item Set \textbf{selective\_match} to \textbf{groups.selective.matching}
-	\item Set \textbf{mandatory\_non\_match} to \textbf{groups.mandatory.nonMatching}
-	\item Set \textbf{non\_mandatory\_indexes} to the ordered list of \textbf{mandatory\_non\_match.keys}
-	\item Set \textbf{selective\_indexes} to an empty array. This time we want to compute the position of the selective indexes in the \textbf{non\_mandatory\_indexes} list. This list will be used for the bbs proof generation process, to define which messages are going to be revealed.
-	\item For each key in \textbf{selective\_match} find its index in \textbf{non\_mandatory\_indexes} and add it to \textbf{selective\_indexes}
-	\item Set \textbf{bbs\_messages} to the values of \textbf{non\_mandatory.values} as byte arrays
-	\item Set \textbf{bbs\_proof} to the result of the bbs proof operation defined in chapter 3.5.3 of \textit{The BBS Signature Scheme}\cite{bbs-signature-scheme}, with the input \textbf{public\_key}, \textbf{bbs\_signature}, \textbf{bbs\_header}, \textbf{ph}, \textbf{bbs\_messages} and \textbf{selective\_indexes}
-	\item Set \textbf{reavealed\_document} to the result of the algorithm described in chapter 3.4.13 of \textit{Data Integrity ECDSA Cryptosuites v1.0}\cite{ecdsa}, with the inputs \textbf{vc} and \textbf{combined\_pointers}
-	\item Set \textbf{deskolemized\_n\_quads} to the joined string from the \textbf{groups.combined.deskolemizedNQuads} array. In this thesis we do not use a delimiter
-	\item Set \textbf{canonical\_id\_map} to the result of the JSON-LD canonicalization algorithm
-	\item Set \textbf{verifier\_label\_map} to an empty map. This maps the canonical blank node identifiers like \textit{c14n0} from the revealed vc to the blank node identifiers created by the issuer
-	\item For each entry in \textbf{canonical\_id\_map}:
-	\begin{itemize}
-		\item Add an entry to \textbf{verifier\_label\_map} where the key is the current value of the \textbf{canonical\_id\_map} entry and the value is the entry where the key the in \textbf{label\_map} is the same as the current key from \textbf{canonical\_id\_map}
-	\end{itemize}
-	\item Return an object with following key-value pairs: \textit{bbsProof} - \textbf{bbs\_proof}, \textit{verifierLabelMap} - \textbf{label\_map}, \textit{mandatoryIndexes} - \textbf{mandatory\_indexes}, \textit{selectiveIndexes} - \textbf{selective\_indexes} and \textit{revealedDocument} - \textbf{reavealed\_document}
-\end{itemize}
-
-\section{Parse the base proof}
-\label{subsub:parsebaseproof}
-
-This algorithm parses a base proof value back to objects.\\
-
-The input of this algorithm is a base proof \textbf{base\_proof}.\\
-
-The output is an object \textbf{parsed\_base\_proof} containing the parsed base proof values.\\
-
-We follow these steps to parse the base proof:
-\begin{itemize}
-	\item Check that the \textbf{base\_proof} start with a \textit{u}, indicating that it is a base64-url encoded string.
-	\item Set \textbf{decoded\_proof\_value} to the result of the base64-url decoding with no padding as described in \textit{The Base16, Base32, and Base64 Data Encodings}\cite{base64}
-	\item Check that \textbf{decoded\_proof\_value} starts with the proof header bytes \textit{0xd9}, \textit{0x5d} and \textit{0x02}
-	\item Set \textbf{components} to the cbor decoding described in \textit{RFC 8949}\cite{cbor}, starting with the fourth byte in \textbf{decoded\_proof\_value}
-	\item Set \textbf{base\_proof\_object} to the key-value pairs \textit{bbs\_signature} - \textbf{components[0]}, \textit{bbs\_header} - \textbf{components[1]}, \textit{public\_key} - \textbf{components[2]}, \textit{hmac\_key} - \textbf{components[3]} and \textit{mandatory\_pointers} - \textbf{components[4]}
-	\item Return \textbf{base\_proof\_object}
-\end{itemize}
-
-With that we parsed the base proof bytes back to objects.
-
-\section{Serialize the proof value}
-\label{subsub:serializebaseproof}
-
-This algorithm serializes a proof value.\\
-
-The inputs of this algorithm are a BBS proof \textbf{bbs\_proof}, a label map \textbf{label\_map}, an array of mandatory indexes \textbf{mandatory\_indexes}, an array of selective indexes \textbf{selective\_pointers} and a presentation header \textbf{ph}.\\
-
-The result of this algorithm is the serialized proof value \textbf{proof\_value}.\\
-
-We follow these steps:
-\begin{itemize}
-	\item Set \textbf{compressed\_label\_map} to the result of calling the algorithm in chapter 3.5.5 of the \textit{Data Integrity ECDSA Cryptosuites v1.0}\cite{ecdsa} with \textbf{label\_map} as the input
-	\item Initialize \textbf{proof\_value} as an byte array, where the first three bytes are \textit{0xd9}, \textit{0x5d} and \textit{0x03}
-	\item Set \textbf{components} to an array containing in this order: \textbf{bbs\_proof}, \textbf{compressed\_label\_map}, \textbf{mandatory\_indexes}, \textbf{selective\_pointers} and \textbf{ph}
-	\item Set \textbf{cbor} to result of the application of the CBOR-encoding\cite{cbor} on the components array, where CBOR tagging \textbf{Must NOT} be used.
-	\item Concat \textbf{proof\_value} and \textbf{cbor}
-	\item Set \textbf{derived\_proof} to the value of the base64-url encoding defined in chapter 5 of "RFC 4648"\cite{base64} but without padding as mentioned in chapter 3.2 of the same RFC
-	\item Return \textbf{proof\_value}
-\end{itemize}
-
-
-\chapter{VP verification}
-
-\section{Create Verify data}
-\label{subsub:createverifydata}
-This algorithm generates the data for the proof verification process.\\
-
-The input of this algorithm are the VP without the proof value \textbf{document}, the proof \textbf{proof}, and the proof without \textit{proofValue} \textbf{proof\_config}.\\
-
-The output of this algorithm is a label map containing the BBS proof, the proof hash, the non mandatory indexes, the mandatory hash, the selective indexes and the feature options.\\
-
-We follow these steps:
-\begin{itemize}
-	\item Set \textbf{proof\_hash} to the hashed (using SHA-256) canonical representation of the \textbf{proof\_config} using the \textit{Universal RDF Dataset Canonicalization Algorithm}\cite{rdf}
-	\item Set \textbf{bbs\_proof}, \textbf{label\_map}, \textbf{mandatory\_indexes}, \textbf{selective\_indexes}, \textbf{} and \textbf{feature\_option} to their respective entries in the result of the algorithm described in chapter \ref{subsub:parseproof} with \textbf{proof} as the input
-	\item Set \textbf{label\_map\_factory\_function} to the algorithm in chapter 3.4.3 of \textit{Data Integrity ECDSA Cryptosuites v1.0}\cite{ecdsa}
-	\item Set \textbf{nquads} to the result of the algorithm \textit{labelReplacementCanonicalize} described in chapter 3.4.1 of \textit{Data Integrity ECDSA Cryptosuites v1.0}\cite{ecdsa} with the inputs \textbf{document} and \textbf{label\_map\_factory\_function}
-	\item Set \textbf{mandatory} and \textbf{non\_mandatory} to an empty array
-	\item For each entry in nquads, the key is \textbf{key} and the value is \textbf{value}, separate them into mandatory and non mandatory
-	\begin{itemize}
-		\item If \textbf{mandatory\_indexes} contains \textbf{key}, add \textbf{value} to \textbf{mandatory}
-		\item Else add \textbf{value} to \textbf{non\_mandatory}
-	\end{itemize}
-	\item Set \textbf{mandatory\_hash} to hash of \textbf{mandatory} using SHA-256. We concatenate the elements of the array without a separator
-	\item Return a map containing the key-value pairs: \textit{bbsProof} - \textbf{bbs\_proof}, \textit{proofHash} - \textbf{proof\_hash}, \textit{nonMandatory} - \textbf{non\_mandatory}, \textit{mandatoryHash} - \textbf{mandatory\_hash}, \textit{selectiveIndexes} - \textbf{selective\_indexes}, \textit{presentationHeader} - \textbf{ph} and \textit{featureOption} - \textbf{feature\_option}
-\end{itemize}
-
-\section{Parse Proof Value}
-\label{subsub:parseproof}
-This algorithm parses the proof value.\\
-
-The input is a proof value \textbf{proof\_value}.\\
-
-The output is a map containing the BBS proof, a label map, the mandatory indexes, the selective indexes, the presentation header and the feature options\\
-
-We follow these steps:
-\begin{itemize}
-	\item Make sure that \textbf{proof\_value} starts with \textit{u}, which indicates that it is a base64-url encoded value with no padding
-	\item Set \textbf{decoded\_proof\_value} to the decoding of \textbf{proof\_value}
-	\item Make sure that the three first bytes of \textbf{decoded\_proof\_value} are \textit{0xd9}, \textit{0x5d} and \textit{0x03} in that order
-	\item Set \textbf{feature\_option} to \textit{baseline}
-	\item Set \textbf{components} to the result of the CBOR decoding of the \textbf{decoded\_proof\_value} starting with the fourth byte. The resulting array must have 5 elements
-	\item Replace the second object in \textbf{components} with the result of the algorithm in chapter 3.5.6 of \textit{Data Integrity ECDSA Cryptosuites v1.0}\cite{ecdsa}, with the second object of \textbf{components} as input value
-	\item Return a map containing the key-value pairs: \textit{bbsProof} - \textbf{components[0]}, \textit{labelMap} - \textbf{components[1]}, \textit{mandatoryIndexes} - \textbf{components[2]}, \textit{selectiveIndexes} - \textbf{components[3]}, \textit{presentationHeader} - \textbf{components[5]} and \textit{featureOption} - \textbf{feature\_option}
-\end{itemize}
-
-
-\chapter{OpenID Connect for Verifiable Presentations flow}
+\section{OIDC4VP Flow}
 In this chapter we will look at all the steps between the initial interaction until the verification is complete.
 We have 3 entities in this session:
 \begin{itemize}
@@ -999,8 +1018,6 @@ We have 3 entities in this session:
 	\item The verifier. This entity requests the VP and verifies it
 	\item The verifier response endpoint. This entity is a part of the verifier. It receives the VP from the holder and stores it until the verifier requests it
 \end{itemize}
-
-\textbf{Define vp token and presentation submission, and presentation definition}
 
 The flow between these three parties is shown following flow chart
 \begin{figure}[h]
@@ -1016,7 +1033,7 @@ With all this information, let's go step by step and look what exactly needs to 
 	\item The verifier wants to receive a VP from a holder. The first step is to generate a random number called a \textbf{nonce}. This value is used to counter replay attacks. These attacks try to use data from old sessions and re-submit them to a verifier. With the \textbf{nonce}, the verifier can check if there is an open session connected to it, and if not the invalid presentation is rejected (Step 1 in figure \ref{fig:flowoid})
 	\item The next step is to initiate a transaction between the verifier and the verifier response endpoint. The endpoint responds with two random numbers, the \textbf{transaction\_id} and the \textbf{request\_id}. The endpoints then keeps a map both values as they belong together. The \textbf{request\_id} is given to the holder, who uses it to tell the endpoint to which session (transaction) the presentation belongs. At the end of the session, a verifier can then fetch the presentation from the endpoint using the \textbf{transaction\_id} (Step 2 and 3 in figure \ref{fig:flowoid})
 	\item The verifier now generates a QR code for the holder to scan. In this thesis we will use the response mode \textit{direct\_post}. This mode allows to the holder to send the response to the verifier using a redirect. The QR Code must contain following information (Step 4 in figure \ref{fig:flowoid}):
-	\begin{itemize}
+	\begin{enumerate}
 		\item \textbf{response\_mode}: In this thesis, we set this value to \textit{direct\_post}
 		\item \textbf{response\_uri}: This value contains the uri where the holder need to send the VP to
 		\item \textbf{client\_id\_scheme}: This value defines the type of the \textbf{client\_id} value
@@ -1025,7 +1042,7 @@ With all this information, let's go step by step and look what exactly needs to 
 		\item \textbf{nonce}: The \textbf{nonce} as defined above
 		\item \textbf{state}: The \textbf{request\_id} as defined above
 		\item \textbf{presentation\_definition}: The presentation definition as defined in \dots
-	\end{itemize}
+	\end{enumerate}
 	\item After scanning the QR Code, the holder generates the VP corresponding with the \textbf{presentation\_definition}. This VP is called the \textit{vp\_token}. The holder also generates the \textit{presentation\_submission}. These values are then sent together with the \textbf{state} to the verifier response endpoint defined in \textbf{response\_uri} !!! Add nonce to VP (Step 5 in figure \ref{fig:flowoid})
 	\item The verifier response endpoint receives the response from the holder. Using the \textit{state} (which initially was the \textbf{request\_id}) the endpoint can match the response from the holder to an open transaction with the verifier. Then the endpoint returns a \textit{redirect\_uri} and \textit{response\_code} to the holder. This points the holder back to the verifier to message him that the presentation was sent to the endpoint. The code is again a random number, which is linked to the respective presentation. There would be a possible implementation without this response to the holder. In that implementation the verifier would continuously pull the new data from the endpoint to check if the VP was presented. This would enable a Session fixation attack, as the holder doesn't directly notify the verifier that the presentation is done. \dots (Step 6 in figure \ref{fig:flowoid})
 	\item The holder now has the \textit{redirect\_uri} and \textit{response\_code}. They now send an HTTP POST request to the \textit{redirect\_uri} with the \textit{response\_code} to the verifier. After sending the request, the session is finished for the holder (Step 7 in figure \ref{fig:flowoid})
@@ -1033,7 +1050,16 @@ With all this information, let's go step by step and look what exactly needs to 
 	\item In the last step, the verifier now verifies the nonce included in the \textit{vp\_token}. If that nonce is correct, they can verify the VP and either accept or reject it (Step 10 in figure \ref{fig:flowoid})
 \end{enumerate}
 
-And with that we now know how the whole process for OIDC4VP works!
+
+
+\chapter{BBS with Pseudonyms}
+\label{chap:Pseudonyms}
+
+\chapter{BBS with Link Secrets}
+\label{chap:linksecrets}
+
+\chapter{BBS with Blind Signatures}
+\label{chap:blindsignatures}
 
 
 \chapter{Sandbox}
