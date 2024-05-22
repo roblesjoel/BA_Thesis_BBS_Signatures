@@ -100,8 +100,8 @@ This signature scheme is based on the trust triangle seen in figure \ref{fig:tru
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=4cm]{example-image-duck}
-	\caption{The trust triangle}
+	\includegraphics[width=12cm]{./img/trusttriangle.png}
+	\caption{The trust triangle, url={https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/VC\_triangle\_of\_Trust.svg/1280px\-VC\_triangle\_of\_Trust.svg.png}}
 	\label{fig:trusttringle}
 \end{figure}
 
@@ -123,18 +123,14 @@ For the presentation of the credentials there is an extension of VCs called a Ve
 To present the VP we use OpenID-Connect for Verifiable-Presentations (OIDC4VP)\cite{oidc4vp}.
 For OIDC4VP we assume that all communication is secured and encrypted.\\
 
-\textit{Why not login?}
-First of we would like to simply the process of a returning customer.
-Think about how often you log in into Netflix, either with your email and password or with the cached login token.
-It would be very unnecessary to present your VC each time you would like to watch a show, so we would like recognition.
-To solve that problem we will look at Pseudonyms\cite{pseudonyms} in chapter \ref{}.\\
-
-These Pseudonyms are used for a verifier to recognize already before seen individual.
+We would also like to simplify the process of a returning customer. 
+If a holder has already presented the same data to the same verifier, they can generate a value called a Pseudonyms\cite{pseudonyms}.
+These Pseudonyms are used for a verifier to recognize a before seen individual.
 This extension of the BBS Signature scheme should not break the unlinkability of the BBS proofs as they are only linkable between one verifier and the holder, but will still be analyzed.\\
 
 Lastly we will look at the problem, where if we need to present two different VCs (like a driver's license and the vehicle registration document), how can we proof that both documents are owned by the same holder.
 For that we will make use of link secrets\cite{linksecrets}, which is a secret value that only the holder knows.
-In this thesis we want to analyse these concepts in conjunction with the BBS Signature scheme, to see if there is any data leakage or if the unlinkability provided by the BBS Signature Scheme will break.
+In this thesis we want to analyze these concepts in conjunction with the BBS Signature scheme, to see if there is any data leakage or if the unlinkability provided by the BBS Signature Scheme will break.
 For this we will investigate each concept step by step, based on their respective specifications, and implement them if needed.
 
 
@@ -880,11 +876,9 @@ OIDC4VP is a very easy to use protocol.
 There are just two parties, the verifier and the holder (which can be split up into holder and wallet, but for the sake of simplicity we merge them).
 After the initial interaction between a holder and verifier, these two parties can start a new session, present the VP and close the session.
 
-Let's use the example from chapter \ref{sec:presid}.
-
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=30mm]{example-image-duck}
+	\includegraphics[width=12cm]{./img/oidc4vpflow.png}
 	\label{fig:flowvp}
 	\caption{Flowchart of OIDC4VP session}
 \end{figure}
@@ -896,6 +890,7 @@ OIDC4VP doesn't really mean that it is only for sending VPs between parties, it 
 Also, all the following chapters use HTTP POST/GET requests for the communication.
 
 \subsection{Presentation definition}
+\label{subsec:presdef}
 The first step in the session is the Authorization Request. 
 In this step the verifier communicates the requirements of the presented VP to the holder, like what type of credential or in which format.
 The verifier can also define which individual attributes must be revealed, which in turn is our beloved selective disclosure.
@@ -1022,18 +1017,17 @@ We have 3 entities in this session:
 The flow between these three parties is shown following flow chart
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=30mm]{example-image-duck}
+	\includegraphics[width=12cm]{./img/oidc4vpflowextended.png}
 	\label{fig:flowoid}
 	\caption{Full flowchart of OIDC4VP session}
 \end{figure}
 
-With all this information, let's go step by step and look what exactly needs to be done.
-
+With all this information, let's go step by step and look what exactly needs to be done:
 \begin{enumerate}
 	\item The verifier wants to receive a VP from a holder. The first step is to generate a random number called a \textbf{nonce}. This value is used to counter replay attacks. These attacks try to use data from old sessions and re-submit them to a verifier. With the \textbf{nonce}, the verifier can check if there is an open session connected to it, and if not the invalid presentation is rejected (Step 1 in figure \ref{fig:flowoid})
 	\item The next step is to initiate a transaction between the verifier and the verifier response endpoint. The endpoint responds with two random numbers, the \textbf{transaction\_id} and the \textbf{request\_id}. The endpoints then keeps a map both values as they belong together. The \textbf{request\_id} is given to the holder, who uses it to tell the endpoint to which session (transaction) the presentation belongs. At the end of the session, a verifier can then fetch the presentation from the endpoint using the \textbf{transaction\_id} (Step 2 and 3 in figure \ref{fig:flowoid})
 	\item The verifier now generates a QR code for the holder to scan. In this thesis we will use the response mode \textit{direct\_post}. This mode allows to the holder to send the response to the verifier using a redirect. The QR Code must contain following information (Step 4 in figure \ref{fig:flowoid}):
-	\begin{enumerate}
+	\begin{itemize}
 		\item \textbf{response\_mode}: In this thesis, we set this value to \textit{direct\_post}
 		\item \textbf{response\_uri}: This value contains the uri where the holder need to send the VP to
 		\item \textbf{client\_id\_scheme}: This value defines the type of the \textbf{client\_id} value
@@ -1041,15 +1035,21 @@ With all this information, let's go step by step and look what exactly needs to 
 		\item \textbf{response\_type}: This value defines the type of the response. For OIDC4VP this value must be set to \textit{vp\_token}
 		\item \textbf{nonce}: The \textbf{nonce} as defined above
 		\item \textbf{state}: The \textbf{request\_id} as defined above
-		\item \textbf{presentation\_definition}: The presentation definition as defined in \dots
-	\end{enumerate}
-	\item After scanning the QR Code, the holder generates the VP corresponding with the \textbf{presentation\_definition}. This VP is called the \textit{vp\_token}. The holder also generates the \textit{presentation\_submission}. These values are then sent together with the \textbf{state} to the verifier response endpoint defined in \textbf{response\_uri} !!! Add nonce to VP (Step 5 in figure \ref{fig:flowoid})
-	\item The verifier response endpoint receives the response from the holder. Using the \textit{state} (which initially was the \textbf{request\_id}) the endpoint can match the response from the holder to an open transaction with the verifier. Then the endpoint returns a \textit{redirect\_uri} and \textit{response\_code} to the holder. This points the holder back to the verifier to message him that the presentation was sent to the endpoint. The code is again a random number, which is linked to the respective presentation. There would be a possible implementation without this response to the holder. In that implementation the verifier would continuously pull the new data from the endpoint to check if the VP was presented. This would enable a Session fixation attack, as the holder doesn't directly notify the verifier that the presentation is done. \dots (Step 6 in figure \ref{fig:flowoid})
+		\item \textbf{presentation\_definition}: The presentation definition as defined in \ref{subsec:presdef}
+	\end{itemize}
+	\item After scanning the QR Code, the holder generates the VP corresponding with the \textbf{presentation\_definition}. It is important to note that there are two special things that the holder needs to add to the VP. First the \textit{nonce} needs to added in the proof object of the VP. Then the \textit{client\_id} also needs to be added to the proof object, but as the domain. This domain value must also be used by the holder as an input to the BBS proof generation algorithm. This VP is called the \textit{vp\_token}. The holder also generates the \textit{presentation\_submission}. These values are then sent together with the \textbf{state} to the verifier response endpoint defined in \textbf{response\_uri} (Step 5 in figure \ref{fig:flowoid})
+	\item The verifier response endpoint receives the response from the holder. Using the \textit{state} (which initially was the \textbf{request\_id}) the endpoint can match the response from the holder to an open transaction with the verifier. Then the endpoint returns a \textit{redirect\_uri} and \textit{response\_code} to the holder. This points the holder back to the verifier to message him that the presentation was sent to the endpoint. The code is again a random number, which is linked to the respective presentation. There would be a possible implementation without this response to the holder. In that implementation the verifier would continuously pull the new data from the endpoint to check if the VP was presented. This would enable a Session fixation attack (Step 6 in figure \ref{fig:flowoid})
 	\item The holder now has the \textit{redirect\_uri} and \textit{response\_code}. They now send an HTTP POST request to the \textit{redirect\_uri} with the \textit{response\_code} to the verifier. After sending the request, the session is finished for the holder (Step 7 in figure \ref{fig:flowoid})
-	\item After receiving the \textit{response\_code} from the holder, the verifier now fetches the \textit{vp\_token} and \textit{presentation\_submission} from the endpoint. For that they send an HTTP POST request containing the \textbf{transaction\_id} and \textbf{response\_code}. The \textit{transaction\_id} is only known by the verifier, but it might be that the system is compromised. As the \textit{response\_code} is only known to the part of the system where the holder was redirected to, \dots Session fixation??? The endpoint then responds with the corresponding \textit{vp\_token} and \textit{presentation\_submission} (Step 8 and 9 in figure \ref{fig:flowoid})
+	\item After receiving the \textit{response\_code} from the holder, the verifier now fetches the \textit{vp\_token} and \textit{presentation\_submission} from the endpoint. For that they send an HTTP POST request containing the \textbf{transaction\_id} and \textbf{response\_code}. The \textit{transaction\_id} is only known by the verifier, but it might be that the system is compromised. As the \textit{response\_code} is only known to the part of the system where the holder was redirected to, the compromised part of the system is not able to pull the data of the holder. The endpoint then responds with the corresponding \textit{vp\_token} and \textit{presentation\_submission} (Step 8 and 9 in figure \ref{fig:flowoid})
 	\item In the last step, the verifier now verifies the nonce included in the \textit{vp\_token}. If that nonce is correct, they can verify the VP and either accept or reject it (Step 10 in figure \ref{fig:flowoid})
 \end{enumerate}
 
+\section{Security concerns}
+All what is generated is random, no linkability woohooo!
+
+\subsection{Replay attacks}
+
+\subsection{Session Fixation}
 
 
 \chapter{BBS with Pseudonyms}
