@@ -157,10 +157,9 @@ For this we will investigate each concept step by step, based on their respectiv
 % BBS also supports selective disclosure, to only disclose a subset of the information contained in the credential.\\
 
 
-
-
 \chapter{The BBS Signature Scheme}
 \label{chap:bbs}
+
 
 \chapter{Use Cases}
 
@@ -169,6 +168,7 @@ For this we will investigate each concept step by step, based on their respectiv
 \section{Use Case 2 (why use pseudonyms)}
 
 \section{Use Case 3 (why use link secrets)}
+
 
 \chapter{Verifiable credentials and verifiable presentations}
 \label{chap:vpnvc}
@@ -590,7 +590,12 @@ To create the derived VP, we follow these steps:
 	\item Set \textbf{new\_proof} to a copy of \textbf{base\_proof}
 	\item Replace \textbf{new\_proof.proofValue} with the result of calling the algorithm in chapter \ref{subsub:serializebaseproof}, with the inputs \textbf{bbs\_proof}, \textbf{label\_map}, \textbf{mandatory\_indexes} and \textbf{selective\_indexes}
 	\item Set \textbf{reavealed\_document.proof} to \textbf{new\_proof}
-	\item Return \textbf{reavealed\_document}
+	\item Create an empty object \textbf{vp}
+	\item Add the key-value pair \textit{@context} - \textbf{reavealed\_document.@context} to \textbf{vp}
+	\item Add the key-value pair \textit{type} - \textbf{["VerifiablePresentation"]} to \textbf{vp}
+	\item Create a map with \textbf{verifiableCredential} as the key and an array, with \textbf{reavealed\_document} as the only entry, as the value
+	\item Add \textbf{verifiableCredential} to \textbf{vp}
+	\item Return \textbf{vp}
 \end{itemize}
 
 This derived VP may look like this:
@@ -602,19 +607,29 @@ This derived VP may look like this:
 		"https://raw.githubusercontent.com/RockstaYT/BA_Thesis_BBS_Signatures/docs/context/example_1.jsonld"
 	],
 	"type": [
-		"VerifiableCredential"
+		"VerifiablePresentation"
 	],
-	"credentialSubject": {
-		"first_name": "Joel"
-	},
-	"proof": {
-		"type": "DataIntegrityProof",
-		"cryptosuite": "bbs-2023",
-		"created": "2024-04-17T23:41:58.089Z",
-		"verificationMethod": "did:key:zUC7De...",
-		"proofPurpose": "assertionMethod",
-		"proofValue": "u2V0..."
-	}
+		"verifiableCredential": [{
+			"@context": [
+			"https://www.w3.org/ns/credentials/v2",
+			"https://w3id.org/security/data-integrity/v2",
+			"https://raw.githubusercontent.com/RockstaYT/BA_Thesis_BBS_Signatures/docs/context/example_1.jsonld"
+		],
+		"type": [
+			"VerifiableCredential"
+		],
+		"credentialSubject": {
+			"first_name": "Joel"
+		},
+		"proof": {
+			"type": "DataIntegrityProof",
+			"cryptosuite": "bbs-2023",
+			"created": "2024-04-17T23:41:58.089Z",
+			"verificationMethod": "did:key:z...",
+			"proofPurpose": "assertionMethod",
+			"proofValue": "u2V0..."
+		}
+	}]
 }
 \end{lstlisting}
 
@@ -702,7 +717,7 @@ The VP was presented by a holder to a verifier.
 The verifier now wants to verify the received VP.\\
 
 We define following variable:\\
-\textbf{secured\_document}: This is the VP that was received from the holder\\
+\textbf{secured\_document}: This is the VC inside the received VP, so \textbf{vp.verifiableCredential}\\
 
 To verify the VP we follow these steps:
 \begin{enumerate}
@@ -889,6 +904,7 @@ As an input to the RDF algorithm we need to pass a function, which takes the can
 If we now add a HMAC (using SHA-256) to this function, we can randomize how the canonical label values are replaced each time a VC is created.
 
 Note: It was suggested that the possibility to use KMAC with SHA3-256 should be added to the specification. This was declined by the working group on the basis that SHA-256 is more common.
+
 
 \chapter{OpenID for Verifiable Presentations}
 Now that we know how to create and sign VCs/VPs, we want to be able to send them the other parties.
