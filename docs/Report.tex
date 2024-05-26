@@ -1086,11 +1086,32 @@ With all this information, let's go step by step and look what exactly needs to 
 \end{enumerate}
 
 \section{Security concerns}
-All what is generated is random, no linkability woohooo!
+Adding OIDC4VP to the VC/VP-BBS stack raises two new security concerns:
+\begin{itemize}
+	\item We want to use nonce to avoid replay attacks
+	\item Session fixation attacks are possible if the holder is not re-reouted
+\end{itemize}
+As all the data is generated randomly, no problems with unlinkability and selective disclosure is created.
 
 \subsection{Replay attacks}
+If a holder sends data to an verifier trought a channel that has a middle man in it, a replay attack is possible even if the data is encrypted.
+A replay attack is an attack where data that was already presented once, is presented again to for example gain access to an account.
+To prevent such attacks, values called \textit{nonce} are used. When a session is created, a \textit{nonce} is given to the holder.
+The holder then can use that value once. After receiving the data, the verifier then adds to a used \textit{nonce} list, so that presenting the same data with the same nonce again is rejected.
+A basic way to create a \textit{nonce} is a counter. Using a counter is only secure until the current value is known. To then replay already presented data, an attacker would just need to add a higher value as the current counter as the \textit{nonce} value.
+A more secure version, would be to generate random numbers, and then adding those numbers to a used list.
+For efficiency, values older than the lifespan of the presentation can be deleted from the list.
 
 \subsection{Session Fixation}
+A session fixation attack works when an attacker steals a token from a holder and uses that to keep a session open.
+In OIDC4VP a session fixation attack can be used to get the unencrypted data from a presentation.
+If attacker infiltrated a verifier, they could get the transaction id and request id for a session (see figure \ref{fig:flowoid}).
+Using those ids, the attack could then query the verifier backend to get the response data from the session.
+This attack can only happen if steps 6 and 7 in figure \ref{fig:flowoid} are not implemented, thus letting the verifier and the verifier query the endpoint until they get a response.\\
+To prevent this attack from happening, steps 6 and 7 in figure \ref{fig:flowoid} should be implemented. This adds to security features to the flow.
+First a random response code is generated. The verifier and the attacker wouldn't receive the data from the backend with just the transaction and request id, as they would also need the response code. 
+If the holder then would just send back the response code to the verifier, the attacker would also have it, which defeats the point of that code. That is why the holder also gets a redirect uri from the endpoint.\\
+The holder send the reponse code to the redirect uri, which is in another part of the verifiers system. With that the attacker never has all pieces and thus isn't able to access the presented data.
 
 
 \chapter{BBS with Pseudonyms}
