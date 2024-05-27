@@ -260,6 +260,7 @@ If we want, we can also add a more specific type, in which we define more inform
 In this thesis we won't use any custom types.
 
 \subsection{proof}
+\label{subsec:vcproof}
 The \textbf{proof} inside a VC guaranties its Integrity. But it can also do much more.
 In this thesis the proof will either contain a BBS Signature, which signed the VC and with that guaranties its integrity, or it contains a BBS proof, which enables selective disclosure between and unlinkability between holder and verifier.\\
 The proof object contains following key-value pairs:
@@ -306,7 +307,7 @@ We now define the main algorithm, which calls the sub-algorithms and handles the
 \begin{enumerate}
 	\item Set \textbf{proof\_config} and \textbf{canonical\_proof\_config} to the respective entry in the result of the algorithm described in chapter \ref{subsec:proof_config}, with the inputs \textbf{vc.@context} and \textbf{verification\_method}
 	\item Set \textbf{transformed\_document} to the result of the algorithm described in chapter \ref{sub:transformvc}, with the inputs \textbf{vc}, \textbf{mandatory\_attributes} and \textbf{hmac\_key}.
-	\item Set \textbf{hash\_data} to the result of the algorithm described in chapter \ref{subsec:proofHash}, with the inputs \textbf{canonical\_proof\_config}, \textbf{mandatory\_attributes} and \textbf{transformed\_document}
+	\item Set \textbf{hash\_data} to the result of the algorithm described in chapter \ref{subsec:proofHash}, with the inputs \textbf{canonical\_proof\_config} and \textbf{transformed\_document}
 	\item Set \textbf{base\_proof} to the result of the algorithm described in chapter \ref{subsec:signvc}, with the inputs \textbf{hash\_data} and \textbf{mandatory\_attributes}.
 	\item Set \textbf{signed\_vc} to the result of the algorithm described in chapter \ref{subsubsec:addsig}, with the inputs \textbf{vc}, \textbf{proof\_config} and \textbf{base\_proof}.
 \end{enumerate}
@@ -577,6 +578,7 @@ As the inputs of the algorithms, we define following variables:\\
 \textbf{base\_proof}: The proof object from the VC\\
 \textbf{selective\_pointers}: A array containing pointers on what should be revealed. In this example we also want to reveal the \textit{last\_name}, so the array looks like this: ["/credentialSubject/last\_name"]\\
 \textbf{ph}: The presentation header as a byte array. We will define it as an empty array [] for this example\\
+\textbf{verification\_method}: The URL to the verification method\\
 
 This algorithm handles all the data for a selective disclosure proof creation.
 First, it generates the derived VC, that will be included in the VP.
@@ -585,7 +587,7 @@ Lastly a VP is created, the VC is added, and a new BBS Signature is generated fo
 After all these steps, the VP is ready to be presented.\\
 
 To create the derived VP, we follow these steps:
-\begin{itemize}
+\begin{enumerate}
 	\item Set \textbf{bbs\_proof}, \textbf{label\_map}, \textbf{mandatory\_indexes}, \textbf{selective\_indexes} and \textbf{reavealed\_document} to their corresponding entry in the response object from the algorithm described in chapter \ref{subsub:createdisclosuredata}, with the inputs \textbf{vc}, \textbf{base\_proof}, \textbf{selective\_pointers} and \textbf{ph}
 	\item Set \textbf{new\_proof} to a copy of \textbf{base\_proof}
 	\item Replace \textbf{new\_proof.proofValue} with the result of calling the algorithm in chapter \ref{subsub:serializebaseproof}, with the inputs \textbf{bbs\_proof}, \textbf{label\_map}, \textbf{mandatory\_indexes} and \textbf{selective\_indexes}
@@ -595,8 +597,13 @@ To create the derived VP, we follow these steps:
 	\item Add the key-value pair \textit{type} - \textbf{["VerifiablePresentation"]} to \textbf{vp}
 	\item Create a map with \textbf{verifiableCredential} as the key and an array, with \textbf{reavealed\_document} as the only entry, as the value
 	\item Add \textbf{verifiableCredential} to \textbf{vp}
+	\item Set \textbf{proof\_config} and \textbf{canonical\_proof\_config} to the respective entry in the result of the algorithm described in chapter \ref{subsec:proof_config}, with the inputs \textbf{reavealed\_document.@context} and \textbf{verification\_method}
+	\item Add \textbf{proof\_config} to \textbf{vp}
+	\item Set \textbf{bbs\_message} to \textbf{vp} as a string
+	\item Set \textbf{bbs\_signature} to the result of the BBS signature operation, defined in chapter 3.5.1 of the BBS Signature Scheme\cite{bbs-signature-scheme}, with \textbf{bbs\_message} and the public key stored at \textbf{verification\_method} as the inputs
+	\item Add the key-value pair \textit{proofValue} - \textbf{bbs\_signature} to \textbf{vp.proof}
 	\item Return \textbf{vp}
-\end{itemize}
+\end{enumerate}
 
 This derived VP may look like this:
 \begin{lstlisting}[language=json,firstnumber=1,caption={Derived VP},captionpos=b]
@@ -721,6 +728,12 @@ We define following variable:\\
 
 To verify the VP we follow these steps:
 \begin{enumerate}
+	\item Set \textbf{bbs\_signature} to \textbf{vp.proof.proofValue}
+	\item Remove the key-value pair \textbf{vp.proof.proofValue}
+	\item Set \textbf{bbs\_message} to \textbf{vp} as a string
+	\item Set \textbf{vp\_pk} to the value stored at \textbf{vp.proof.verificationMethod}
+	\item Set \textbf{verified\_vp} to the result of the BBS Signature Verification algorithm defined in \textit{THE BBS Signature Scheme}\cite{bbs-signature-scheme} with the inputs' \textbf{vp\_pk}, \textbf{bbs\_signature} and\textbf{bbs\_message}
+	\item If \textbf{verified\_vp} is false, reject the presented VP
 	\item Set \textbf{pk} to the value returned when using the URL from \textbf{secured\_document.proof.verificationMethod}
 	\item Set \textbf{unsecured\_document} to the copy of \textbf{secured\_document} but with the \textit{proof} value removed
 	\item Set \textbf{proof} to the copy of \textbf{secured\_document.proof}
@@ -777,10 +790,11 @@ We follow these steps:
 
 \section{Security Considerations of VCs}
 \label{subsec:vcseccons}
-The combination of BBS and VC raises two security questions:
+The combination of BBS and VC raises three security questions:
 \begin{enumerate}
 	\item If we want to use IDs to identify a revoked VC, we run into linkability problems
 	\item The RDF canonicalization algorithm creates data leakage which leads to linkability
+	\item How do we sign the VP without creating linkability
 \end{enumerate}
 
 \subsection{IDs in VCs}
@@ -904,6 +918,29 @@ As an input to the RDF algorithm we need to pass a function, which takes the can
 If we now add a HMAC (using SHA-256) to this function, we can randomize how the canonical label values are replaced each time a VC is created.
 
 Note: It was suggested that the possibility to use KMAC with SHA3-256 should be added to the specification. This was declined by the working group on the basis that SHA-256 is more common.
+
+\subsection{Signing a VP}
+When creating a VP for a presentation, a holder should sign the VP for data integrity reasons. If the holder has his own key pair and uses that to sign the VP, they must make the public key of that key pair public. Making a key public is not very difficult, but a problem arises when the same keys are used multiple times to sign a VP. The VPs would then be linkable based on the unique public key of the holder. To prevent that, a holder could generate a key pair for each VP that they generate, but then making the public key known would be a lot of work, depending on how many presentations are done.\\
+To solve that issue we found two possibilities:
+\begin{itemize}
+	\item Let the wallet sign the VP
+	\item Add the public key to the VP
+\end{itemize}
+
+\subsubsection{Wallet signs VP}
+The holder must save their credentials somewhere on their device. To make the process of receiving and presenting those credentials easier, digital wallets are used.
+One could think of them as physical wallets, storing all the physical credentials, but just digitally.
+To remove the linkability between presentations, we can now use the big user base of those wallets. If the developer of the wallet uses one key pair the sign all the presentations for all their users, the only information that the verifier would know, is which wallet application a holder is using. For this to work, the user base must be sufficient in size to allow for a big enough anonymity pool. This option has two small draw backs:
+\begin{enumerate}
+	\item The verifier knows which wallet application the holder is using
+	\item The wallet application must have enough users to be able to have a big enough anonymity pool
+\end{enumerate}
+
+\subsubsection{Adding public key to VP}
+The second option is that the holder generates a key pair and instead of making the public key public with a link pointing to it, they could directly add it to the VP.
+In the VC specification\cite{verifiable-credentials} it states that the \textit{verificationMethod} value in the proof object must be a URL (see chapter \ref{subsec:vcproof}).
+If we ignore the specification and add the signature as a value of \textit{verificationMethod}, we could bypass the publication of the public key, which in turn would make this process easier.
+Then the holder could generate a new key pair for each new VP, thus removing the links between presentations. Using the process the verifier learns no information about the holder
 
 
 \chapter{OpenID for Verifiable Presentations}
