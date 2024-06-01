@@ -102,33 +102,32 @@ Self-sovereign Identity (SSI)\cite{self-sovereign-identity} is a concept where i
 	\label{fig:trusttringle}
 \end{figure}
 
-Besides the individual that owns the data, there are more entities in SSI, seen in the trust triangle in figure \ref{fig:trusttringle}. The issuer is the entity issuing credentials. A comparison of a credential might be an identity card, which was issued by a state. The third entity is the verifier. This party requests data from a holder, then verifies the response. An example would be the request and the subsequent presentation of a government issued ID when signing a contract. The signing party trusts the issuer and checks for issuer-specific security features like holograms. For this to work the verifier must trust that the issuer does not issue malicious credentials, that is why it's called the \textit{trust} triangle. \\
+Besides the individual that owns the data, there are more entities in SSI, seen in the trust triangle in figure \ref{fig:trusttringle}. The issuer is the entity issuing credentials. A comparison of a credential might be an identity card, which was issued by a state. The third entity is the verifier. This party requests data from a holder, then verifies the response. An example would be the request and the subsequent presentation of a government issued ID when the identity of a holder is challenged. The verifying party is able to trust the presented data, because it is backed by the issuer. For this to work, the issuer must play fair (honest but curious) and does not issue malicious credentials. Only then the verifier can establish trust, hence the name the \textit{trust} triangle. \\
 
-One of the key technologies enabling SSI is the BBS signature scheme (BBS)\cite{bbs-signature-scheme}. This cryptographic signature scheme provides mechanisms for both important SSI features, selective-disclosure and unlinkability. This enables the creation of secure and private verifiable credentials and the digital representation of physical credentials. \\
+One of the key technologies used in this thesis enabling SSI is the BBS signature scheme (BBS)\cite{bbs-signature-scheme}. This cryptographic signature scheme provides mechanisms for both important SSI features, selective-disclosure and unlinkability. This enables the creation of secure and private verifiable credentials and the digital representation of physical credentials. \\
 
-It is important to understand the difference between physical and digital credentials. First we need to establish that physical credentials can only be used in the physical world, where digital credentials can be both used in the physical and digital world and provide more security and privacy. It is possible that a verifier would accept a physical credential, where all the information that is not needed is taped over, as long as they can verify the validity of the credential (even tho one would get weird looks). With that selective disclosure is achieved. Also, for example when signing a contract, no identifying data is stored by the verifier, as they only check if the individual really is who they say they are. And with that we have the unlinkability. But in the digital world this is different, everything is logged and saved. An individual cannot use their physical credential for a digital interaction. That is why physical credentials need to be translated to digital credentials. Selectively disclosing information get easier for an individual, then instead of having to change tape over the hidden information, they can just select what they want to share. But the translation also brings new problems with it. All physical credentials from the same type, like a Swiss government ID, have the same security mechanisms, so using those mechanisms for verification does not reveal any information. In the digital world, cryptographic signatures are used as a sign of validity, integrity and authenticity of the data. Those signatures are deterministic, which means if the data is different, the signature is different. This means that each credential has its own identifier as the signature that is used to protect it. \\
+It is important to understand the difference between physical and digital credentials. First we need to establish that physical credentials can only be used in the physical world, where digital credentials can be both used in the physical and digital world and provide more security and privacy. It is possible that a verifier would accept a physical credential, where all the information that is not needed is taped over, as long as they can verify the validity of the credential (even though one would get weird looks). With that selective disclosure is achieved. Also, for example when signing a contract, no identifying data is stored by the verifier, as they only check if the individual really is who they say they are. And with that we have the unlinkability. But in the digital world this is different, everything is logged and saved. An individual cannot use their physical credential for a digital interaction. That is why physical credentials need to be translated to digital credentials. Selectively disclosing information gets easier for an individual, when instead of having to change tape over the hidden information, they can just select what they want to share. But the translation also brings new problems with it. All physical credentials from the same type, like a Swiss government ID, have general security mechanisms, so using those mechanisms for individual verification does not reveal any information. In the digital world, cryptographic signatures are used as a sign of validity, integrity and authenticity of the data. Those signatures are individual per VC. This means that each credential has its own identifier: the signature that is used to protect it. \\
 
-BBS has a solution for this problem. Besides creating the signatures that protect the data and letting the individuals selectively disclose that data, it can also generate proofs. These BBS proofs are random for each generation and hide the signature, thus making each presentation unlinkable again. \\
+BBS has a solution for this problem. Besides creating the signatures that protect the data and letting the individuals selectively disclose that data, there is a mechanism that allows randomize the signature, without invalidating it. This allows the verifier to verify an unlinkable presentation.  \\
 
-The data also needs to be saved in some type of construct. In the physical world, that data is written on a neat little credit-card sized piece of plastic. That card also has all the security on/in it. In this thesis we use Verifiable Credentials (VC)\cite{verifiable-credentials} as the digital representation. These credentials are JSON data structures which support BBS. Within that structure an issuer can save the data, but also the security mechanisms, namely the digital signatures. For a holder of a VC it is also easy to store it. Instead of adding an ID card to a wallet, a holder adds the VC to a digital wallet on their device. \\
+The credentials also needs to be persisted in some type of construct. In the physical world, it is written on a neat little credit-card sized piece of plastic. That card also has all the security on/in it. In the digital world persistence is usually done with files. These files contain data in a structured way, for example JSON. In our thesis we are using the Verifiable credentials data structure (VC)\cite{verifiable-credentials}, a JSON extension. For a holder of a VC it is also easy to store. Instead of adding an ID card to a wallet, a holder adds the presisted VC to a digital wallet on their device. \\
 
 In this thesis we want to investigate the use of the BBS Signature Scheme in a real world scenario.
-We assume that the BBS Signature scheme has no flaws, and the promoted unlinkability of the scheme holds in every situation.
-We will also only use verifiable-credentials with data integrity, to not only protect the attributes of the credential but to also protect the meta-data of the verifiable credential. For the data integrity we will also use the BBS Signature Scheme.\\
+We assume a working BBS Signature scheme within the security setting, comprising unlinkability and data integrity.\\
 
-The digital credentials need to be sent digitally from issuer to holder and presented from a holder to a verifier. 
-For this thesis we will only look at the messaging between the holder and the verifier and assume that the VC creation and transportation to the holder is secure.
-For the presentation of the credentials there is an extension of VCs called Verifiable presentations (VP)\cite{verifiable-credentials}, which are a wrapper around VCs.
-To present VPs we use OpenID Connect for Verifiable Presentations (OIDC4VP)\cite{oidc4vp}.
-For OIDC4VP we assume that all communication is secured and encrypted.\\
+The VCs need to be sent digitally from issuer to holder and presented from a holder to a verifier. 
+For this thesis we will only look at the messaging between the holder and the verifier and exclude VC creation and transportation to the holder.
+This way with in this thesis we will use an extension of VCs called Verifiable presentations (VP)\cite{verifiable-credential}.
+To send a VP between a holder and a verifier, we use OpenID Connect for Verifiable Presentations (OIDC4VP)\cite{oidc4vp}.
+We assume secure channels are used for the OIDC4VP communication.\\
 
-Individuals might often go to the same place, where some sort of identification is a must, for example a golf club. The first few times they might need to identify themselves, but after some visits the staff recognizes the individual, which simplifies the verification process. In the digital realm, this is difficult to do, as there are no visual identifiers. As a replacement and an extension of the BBS Signature Scheme there is value called a Pseudonyms\cite{pseudonyms}. This is a value between one holder and one verifier used to recognize a returning individual. This value is random for each holder-verifier binding, to avoid linkability. Even tho this is an extension to BBS and thus probably doesn't contain any linkability, it will be still analyzed for any data leaks. \\
+% Individuals might often go to the same place, where some sort of identification is a must, for example a golf club. The first few times they might need to identify themselves, but after some visits the staff recognizes the individual, which simplifies the verification process. In the digital realm, this is difficult to do, as there are no visual identifiers. As a replacement and an extension of the BBS Signature Scheme there is value called a Pseudonyms\cite{pseudonyms}. This is a value between one holder and one verifier used to recognize a returning individual. This value is random for each holder-verifier binding, to avoid linkability. Even tho this is an extension to BBS and thus probably doesn't contain any linkability, it will be still analyzed for any data leaks. \\
 
 
-Lastly we will look at the problem, where if we need to present two different VCs (like a driver's license and the vehicle registration document), how can we proof that both documents are owned by the same holder.
-For that we will make use of link secrets\cite{linksecrets}, which is a secret value that only the holder knows.
-In this thesis we want to analyze these concepts in conjunction with the BBS Signature scheme, to see if there is any data leakage or if the unlinkability provided by the BBS Signature Scheme will break.
-For this we will investigate each concept step by step, based on their respective specifications, and implement them if needed.
+% Lastly we will look at the problem, where if we need to present two different VCs (like a driver's license and the vehicle registration document), how can we proof that both documents are owned by the same holder.
+% For that we will make use of link secrets\cite{linksecrets}, which is a secret value that only the holder knows.
+% In this thesis we want to analyze these concepts in conjunction with the BBS Signature scheme, to see if there is any data leakage or if the unlinkability provided by the BBS Signature Scheme will break.
+% For this we will investigate each concept step by step, based on their respective specifications, and implement them if needed.
 
 
 % We would also like to simplify the process of a returning customer. 
@@ -924,7 +923,7 @@ When creating a VP for a presentation, a holder should sign the VP for data inte
 To solve that issue we found two possibilities:
 \begin{itemize}
 	\item Let the wallet sign the VP
-	\item Add the public key to the VP
+	\item Binding a secret to the original signature (Bound Proof) and creating a keypair for each presentaion
 \end{itemize}
 
 \subsubsection{Wallet signs VP}
@@ -936,11 +935,16 @@ To remove the linkability between presentations, we can now use the big user bas
 	\item The wallet application must have enough users to be able to have a big enough anonymity pool
 \end{enumerate}
 
-\subsubsection{Adding public key to VP}
+\subsubsection{Bound BBS Proofs}
+
+Not usable!!
+
 The second option is that the holder generates a key pair and instead of making the public key public with a link pointing to it, they could directly add it to the VP.
-In the VC specification\cite{verifiable-credentials} it states that the \textit{verificationMethod} value in the proof object must be a URL (see chapter \ref{subsec:vcproof}).
-If we ignore the specification and add the signature as a value of \textit{verificationMethod}, we could bypass the publication of the public key, which in turn would make this process easier.
-Then the holder could generate a new key pair for each new VP, thus removing the links between presentations. Using the process the verifier learns no information about the holder
+In the VC specification\cite{verifiable-credentials} it states that the \textit{verificationMethod} value in the proof object must be a URL (see chapter \ref{subsec:vcproof}).\\
+If we ignore the specification and add the signature as a value of \textit{verificationMethod}, we could bypass the publication of the public key, which in turn would make this process easier.\\
+Then the holder could generate a new key pair for each new VP, thus removing the links between presentations. Using the process the verifier learns no information about the holder.\\
+A small problem here is the trust. How is the verifier able to know that the VP was really signed by the holder of that VP and not by attacker in the middle, who changed the content of the VP? \\
+To solve that specific problem, we can use bound BBS signatures\cite{bound-bbs}, which produces signatures are bound to a specific value only known to the holder. Using this extension of BBS, the holder then can only generate a proof
 
 
 \chapter{OpenID for Verifiable Presentations}
