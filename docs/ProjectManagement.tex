@@ -3,12 +3,12 @@
 \documentclass[
 	a4paper               % paper format
 %	,10.5pt               % fontsize
-%	,BCOR=18mm            % Binding correction
+	,BCOR=0mm            % Binding correction
 	,bibliography=totoc   % If enabled add bibliography to TOC
 	,listof=totoc         % If enabled add lists to TOC
 %	,bilingual
 	,monolingual
-	twoside=false,
+	,twoside=false
 ]{bfhthesis}              % KOMA-script report
 
 \setcounter{secnumdepth}{4}
@@ -92,7 +92,7 @@ Here an abstract might be placed.
 %------------ START MAIN PART ----------------
 \mainmatter
 
-\chapter{Goals}
+\chapter{Goal}
 
 \chapter{Risks}
 In this chapter we define Risks that may happen in this thesis.
@@ -177,8 +177,54 @@ In this chapter we define Risks that may happen in this thesis.
 	\item Possibility: Low
 \end{itemize}
 
+\chapter{Meetings}
 
 \chapter{Found Issues}
+
+While researching for this thesis, many issues where found. This chapter summarizes all the raised issues/written mails.
+
+\section{Github Issues}
+
+\textbf{Typo \& missing check}\\
+see: \url{https://github.com/w3c/vc-di-bbs/issues/154}\\
+In this issue I mentioned a typo. I also mentioned that there is a missing check for a value in a object, as if that value is empty i could raise an error.
+The typo was fixed, but the check was not added.\\
+
+\noindent
+\textbf{Missing attibutes}\\
+see: \url{https://github.com/w3c/vc-di-bbs/issues/155}\\
+In this issue I mentioned that some attibutes used in the algorithm were not passed as parameters. At the same time the authors were changing where all the parameters come from, as the part of the addition of optional features. Error was fixed with the optional features update.\\
+
+\noindent
+\textbf{Missing reference}\\
+see: \url{https://github.com/w3c/vc-di-bbs/issues/157}\\
+In this issue I noted that there was a missing reference to a used algorithm. After search for a bit I found that algorithm defined in an other specification. The error was fixed a standalone pull request.\\
+
+\noindent
+\textbf{Missing reference: The second}\\
+see: \url{https://github.com/w3c/vc-di-bbs/issues/163}\\
+Same as in the above mentioned issue, there was a missing reference. At the same time, the wrong algorithm was called. The called algorithm has been corrected and the reference was added, but the pull request was not approved yet.\\
+
+\noindent
+\textbf{Unused variables}\\
+see: \url{https://github.com/w3c/vc-di-bbs/issues/164}\\
+In a algorithm a variable was defined, but never used. The error was corrected, but the pull request was not accepted yet.\\
+
+\noindent
+\textbf{Typo \& missing information}\\
+see: \url{https://github.com/w3c/vc-di-bbs/issues/166}\\
+There was another small type, which was changed with the next pull request. There was also the problem of how to retrive the public key, as it is used as an input to an algorithm. This information was also added in the same pull request but was not accepted and merged yet.\\
+
+\noindent
+\textbf{Add SHA-3}\\
+see: \url{https://github.com/w3c/vc-di-bbs/issues/162}\\
+In the Data Integrity BBS Cryptosuites\cite{bbsvc} specification, SHA-256 is used for all hashing operation. I suggested adding the information that SHA-3 would also be a possiblity, as the BBS specification also allows hashing with a kmac. This suggestion was rejected, the reason being that a big part of the internet is using SHA-256 and thus the implementation using SHA-256 instead of SHA-3 would be easier.
+
+
+\section{Written Mails}
+While researching OIDC4VP, in the chapters 11.5 and 6 of OpenID for Verifiable Presentations\cite{oidc4vp} it wasn't stated in where the nonce value and the client\_id values should be included. After contacting the authors of the specification, Olivier Terbu responded with the instruction where to add these values in the VP.
+
+
 % \chapter{Recap of BLS12-381, BBS and Pairings}
 % This chapter contains a quick recap about BBS and BLS12-381.
 % The Mathematics of these topics are out of scope for this Thesis, so only the top level ideas will be discussed.
