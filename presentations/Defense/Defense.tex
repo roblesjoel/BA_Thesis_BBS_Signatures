@@ -24,7 +24,7 @@
 \author[J. Robles]{Joel Robles}
 \institute{TI}
 \titlegraphic*{\includegraphics{example-image-duck}}%is only used with BFH-graphic and BFH-fullgraphic
-\date{April 23, 2024}
+\date{June 5, 2024}
 
 % \setbeamertemplate{page number in foot}[framenumber]
 
@@ -44,9 +44,9 @@
 
 \section{Ziel}
 
-\begin{frame}{Was is das Ziel?}
+\begin{frame}{Was ist das Ziel?}
     \centering
-    Die analyse, ob eine echt-welt implementation von Verifiable Credentials mit dem BBS Signature Scheme, unlinkability beibehält
+    Die Analyse, ob eine echt-welt implementation von Verifiable Credentials mit dem BBS Signature Scheme, unverknüpfbarkeit beibehält
 \end{frame}
 
 \section{Self-sovereign Identity}
@@ -156,20 +156,42 @@
     \end{columns}
 \end{frame}
 
+\begin{frame}{Der RDF Algorithmus}
+
+    aus einer unsortiereten geschachtelten json struktur werden staments gemacht
+    staments sortiert basierend auf ihren hash wert
+    determinsitische sotierte folge von staments (kanonisch)
+
+
+    \begin{enumerate}
+        \item Erzeuge eine Map zwischen den blank node identifiers (z.B. e0) und den attributen
+        \item Kreiere ein hash der blank node identifiers
+        \item Kreiere eine Map zwischen den hashes und den blank node identifiers
+        \item Sortiere die Map von klein zu gross basierend auf den hashes
+        \item Kreiere canonical identifiers (z.B. c14n0) für jede blank node identifier, basierend auf der position in der hash-identifier map
+    \end{enumerate}
+\end{frame}
+
 \section{Sicherheitsüberlegungen von VC/VPs}
 
-\begin{frame}{Shuffling of statements}
+\begin{frame}{Permutation von statements}
     \begin{itemize}
-        \item Der verifier bekommt ein VP von einem holder, welches gegen den public key vom issuer geprüft werden kann
-        \item Der holder bekommnt eine version des credentials, wo ein attribut gewechselt wurde
-        \item In einem sehr spezifischen fall für der RDF canonicalization Algorithmus zu einem Daten Leck
-        \item Bei jedem gebrauch des Algorithmus, müssen die canonical staments mit einer Hahs function gemischt werden
+        \item Holder präsentiert ein VP mit verborgenen Zivilstands-Attributen
+        \item Holder heiratet bekommt ein neues VP mit geändertem Zvilistand
+        \item Holder präsentiert das aktualisierte VP mit verborgenem Zivilstand
+        \item \textbf{Datenleck}: Der Verifier kann herausfinden, dass sich der Zivilistand geändert hat
+        \item Damit das passieren kann, muss der issuer immer die staments zufällig permutieren
+        \item Der issuer muss die Permutation dem holder bekannt geben, nicht dem verifier
     \end{itemize}
+\end{frame}
+
+\begin{frame}{Verknüpfbarkeit von Identifikatoren \& Metadaten}
+    Test
 \end{frame}
 
 \section{OpenID Connect for Verifiable Presentations}
 
-\begin{frame}{OIDC4VP}
+\begin{frame}{Transport zwischen holder und verifier}
     \begin{figure}
         \centering
         \includegraphics[width=70mm]{../img/OIDC4VP.png}
@@ -190,19 +212,24 @@
 \begin{frame}{Replay attack}
     \begin{itemize}
         \item Der Holder sendet dem Verifier ein VP
-        \item Ein Man in the Middle speichert die Vorstellung
-        \item Der Man in the Middle kann das gespreicherte VP nutzen um sich als der Holder auszugeben
-        \item Um dieses Problem zu umgehen, wird eine random nummer genutzt (nonce)
+        \item Ein \textit{Man in the Middle} speichert die Vorstellung
+        \item Der \textit{Man in the Middle} kann das gespeicherte VP wiederverwenden
+        \item Um dieses Problem zu umgehen, wird eine random nummer genutzt (challange-response)
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Session fixation attack}
-    \begin{itemize}
-        \item Der Holder legt das VP im Endpoint des Verifiers ab
-        \item Falls das System des Verifiers infisziert ist, kann ein Angreifer das VP einsehen
-        \item Der endpoint des Verifiers retourniert eine redirect URL und ein response code
-        \item Dieser code wird an das Terminal weitergeleitet, somit kann das infiszierte System das VP nicht einsehen
-    \end{itemize}
+% \begin{frame}{Session fixation attack}
+%     \begin{itemize}
+%         \item Der Holder legt das VP im Endpoint des Verifiers ab
+%         \item Falls das System des Verifiers infisziert ist, kann ein Angreifer das VP einsehen
+%         \item Der endpoint des Verifiers retourniert eine redirect URL und ein response code
+%         \item Dieser code wird an das Terminal weitergeleitet, somit kann das infiszierte System das VP nicht einsehen
+%     \end{itemize}
+% \end{frame}
+
+\section{Fazit}
+
+\begin{frame}{Fazit}
 \end{frame}
 
 \section{Ausblick}
