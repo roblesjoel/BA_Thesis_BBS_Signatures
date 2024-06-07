@@ -73,6 +73,7 @@
 \department{Engineering and Computer Science}
 \institute{Computer Science}
 \version{1.0}
+\date{June 13, 2024}
 \advisor{Prof. Dr. Annett Laube \and Prof. Dr. Reto Koenig}
 \expert{Dr. Andreas Spichiger}
 \degreeprogram{Bachelor of Science in Computer Science}
@@ -117,47 +118,22 @@ We assume a working BBS Signature scheme within the security setting, comprising
 
 The VCs need to be sent digitally from issuer to holder and presented from a holder to a verifier. 
 For this thesis we will only look at the messaging between the holder and the verifier and exclude VC creation and transportation to the holder.
-This way with in this thesis we will use an extension of VCs called Verifiable presentations (VP)\cite{verifiable-credential}.
+This way with in this thesis we will use an extension of VCs called Verifiable presentations (VP)\cite{verifiable-credentials}.
 To send a VP between a holder and a verifier, we use OpenID Connect for Verifiable Presentations (OIDC4VP)\cite{oidc4vp}.
 We assume secure channels are used for the OIDC4VP communication.\\
 
-% Individuals might often go to the same place, where some sort of identification is a must, for example a golf club. The first few times they might need to identify themselves, but after some visits the staff recognizes the individual, which simplifies the verification process. In the digital realm, this is difficult to do, as there are no visual identifiers. As a replacement and an extension of the BBS Signature Scheme there is value called a Pseudonyms\cite{pseudonyms}. This is a value between one holder and one verifier used to recognize a returning individual. This value is random for each holder-verifier binding, to avoid linkability. Even tho this is an extension to BBS and thus probably doesn't contain any linkability, it will be still analyzed for any data leaks. \\
-
-
-% Lastly we will look at the problem, where if we need to present two different VCs (like a driver's license and the vehicle registration document), how can we proof that both documents are owned by the same holder.
-% For that we will make use of link secrets\cite{linksecrets}, which is a secret value that only the holder knows.
-% In this thesis we want to analyze these concepts in conjunction with the BBS Signature scheme, to see if there is any data leakage or if the unlinkability provided by the BBS Signature Scheme will break.
-% For this we will investigate each concept step by step, based on their respective specifications, and implement them if needed.
-
-
-% We would also like to simplify the process of a returning customer. 
-% If a holder has already presented the same data to the same verifier, they can generate a value called a Pseudonyms\cite{pseudonyms}.
-% These Pseudonyms are used for a verifier to recognize a before seen individual.
-% This extension of the BBS Signature scheme should not break the unlinkability of the BBS proofs as they are only linkable between one verifier and the holder, but will still be analyzed.\\
-
-
-
-
-% Self-sovereign Identity (SSI)\cite{self-sovereign-identity} is a concept where individuals can control their digital identity and what data is shared with whom.
-% In the real world physical credentials like an ID or a driver's license are used, which makes selectively disclosing information hard, as there is more information on the credentials as there is needed in one presentation.
-% If we digitalize these credentials, we create the option for individuals to selectively disclose information. 
-% Verifiable credentials (VCs)\cite{verifiable-credentials} are a type of digital credentials that can be used to represent physical credentials.
-% These digital credentials support multiple signing themes, one of which is the BBS Signature scheme (BBS)\cite{bbs-signature-scheme}.
-% This signature scheme is based on the trust triangle seen in figure \ref{fig:trusttringle}, where there are three involved parties.
-
-
-
-
-% These parties are the issuer, holder and verifier.
-% The issuer supplies the credential to the holder, which stores it. The holder is then able to present it to a verifier, which checks its validity and content.
-% The verifier uses the signature to also check the authenticity and integrity of the supplied credential.
-% Besides signing, this signature scheme also supports proof creation, which enables unlinkability.
-% Unlinkability is the concept that there is no link between each credential presentation and different verifiers.
-% BBS also supports selective disclosure, to only disclose a subset of the information contained in the credential.\\
-
 
 \chapter{The BBS Signature Scheme}
-\label{chap:bbs}
+The BBS Signature scheme\cite{bbs-signature-scheme} multi-message signature scheme, supporting selective-disclosure and the proof of the knowledge of a signature which in turn creates unlinkability. These features makes this signature scheme an integral part of SSI.\\
+
+\noindent
+But what do these features really mean? \\
+
+Normal cryptographic sigantures are only able to sign one message at a time, which is viable for digital credentials which contain multiple messages. To sign those credentials, a multi message signature is needed, which is provided by BBS. The resulting signature provides data integrity for the messages. Important to note is also the fixed size of the signature. No matter the amount and sizes of the messages, the signature lenght stays the same, thus removing any links between the signature and the signed messages.\\
+
+Now we have a signed set of messages and we would like to present them. All the messages can be presented and verified together using the original signature. The holder may want to only present a sub set of the original messages, selectively disclosing them. To verify a BBS signature, the verifier would need all the data that was signed, so only revealing a part of the data would not work. To be able to that, the holder must generate a new BBS signature, called a BBS proof, which is generated using the original siganture. This new signature is valid for the sub set of the revealed messages with the added protection of proving to the verifier the knowledge of the original signature. This last part is important, as a verifier only trusts the original issuer of a credential and with that only trusts the original signature.\\
+
+The holder has generated a BBS proof and presented it to a verifier. Now the same holder would like to present the same data to the same verifier. The easy way would be to use the same proof from the previous presentation. This would create a link to the previous presentation, as the proof value would be an identifier. To prevent the linking of presentations, a new proof must be created for each presentation, as these proofs are random for each generation. With that we have unlinkablity between presentations.
 
 
 \chapter{Use Cases}
@@ -1153,16 +1129,6 @@ To prevent this attack from happening, steps 6 and 7 in figure \ref{fig:flowoid}
 First a random response code is generated. The verifier and the attacker wouldn't receive the data from the backend with just the transaction and request id, as they would also need the response code. 
 If the holder then would just send back the response code to the verifier, the attacker would also have it, which defeats the point of that code. That is why the holder also gets a redirect uri from the endpoint.\\
 The holder send the reponse code to the redirect uri, which is in another part of the verifiers system. With that the attacker never has all pieces and thus isn't able to access the presented data.
-
-
-\chapter{BBS with Pseudonyms}
-\label{chap:Pseudonyms}
-
-\chapter{BBS with Link Secrets}
-\label{chap:linksecrets}
-
-\chapter{BBS with Blind Signatures}
-\label{chap:blindsignatures}
 
 
 \chapter{Sandbox}
