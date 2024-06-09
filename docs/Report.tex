@@ -67,14 +67,14 @@
 \frontmatter
 
 \title{Bachelor's Thesis}
-\subtitle{Unlinkability of Verfiable Credentials in a practical approach: Report}
+\subtitle{Unlinkability of Verifiable Credentials in a practical approach: Report}
 \author{Joël Gabriel Robles Gasser}
 \institution{Bern University of Applied Sciences}
 \department{Engineering and Computer Science}
 \institute{Computer Science}
 \version{1.0}
 \date{June 13, 2024}
-\advisor{Prof. Dr. Annett Laube \and Prof. Dr. Reto Koenig}
+\advisor{Prof. Dr. Annett Laube\and Prof. Dr. Reto Koenig}
 \expert{Dr. Andreas Spichiger}
 \degreeprogram{Bachelor of Science in Computer Science}
 
@@ -94,7 +94,7 @@ Here an abstract might be placed.
 \chapter{Introduction}
 In today's digital world, digital identities are mostly managed by centralized entities, like big corporations or governments. This may be easier for individuals as they don't need to manage their data. As the individuals don't have the control how their data is handled, this approach leads to problems with privacy and security. \\
 
-Self-sovereign Identity (SSI)\cite{self-sovereign-identity} is a concept where individuals can control their digital identity and what data is shared with whom. The Idea is to allow those individuals to store their data on their own devices, without centralized entities playing middleman. With the data on the device of the individual, they may selectively disclose information and thus preserve privacy. Another important aspect of SSI is the unlinkability between presentations, meaning that there is no link back to an individual when different data is presented to different verifying parties. Today's centralized entities always know which page an individual visited or what they bought, as they can link all this information back to one individual. A good example for this are targeted ads, which are based on previously revealed information. \\
+Self-sovereign Identity (SSI)\cite{self-sovereign-identity} is a concept where individuals can control their digital identity and what data is shared with whom. The idea is to allow those individuals to store their data on their own devices, without centralized entities playing middleman. With the data on the device of the individual, they may selectively disclose information and thus preserve privacy. Another important aspect of SSI is the unlinkability between presentations, meaning that there is no link back to an individual when different data is presented to different verifying parties. Today's centralized entities always know which page an individual visited or what they bought, as they can link all this information back to one individual. A good example for this are targeted ads, which are based on previously revealed information. \\
 
 \begin{figure}[h]
 	\centering
@@ -102,41 +102,42 @@ Self-sovereign Identity (SSI)\cite{self-sovereign-identity} is a concept where i
 	\caption{The trust triangle, url={https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/VC\_triangle\_of\_Trust.svg/1280px\-VC\_triangle\_of\_Trust.svg.png}}
 	\label{fig:trusttringle}
 \end{figure}
+\newpage
+Besides the individual that owns the data, there are more involved entities in SSI, seen in the trust triangle in figure \ref{fig:trusttringle}. The issuer is the entity issuing credentials. A comparison of a credential might be an identity card, which was issued by a state. The third entity is the verifier. This party requests data from a holder, then verifies the response. An example would be the request and the subsequent presentation of a government issued ID when the identity of a holder is challenged. The verifying party is able to trust the presented data, because it is backed by the issuer. For this to work, the issuer must play fair (honest but curious) and does not issue malicious credentials. Only then the verifier can establish trust, hence the name the \textit{trust} triangle. \\
 
-Besides the individual that owns the data, there are more entities in SSI, seen in the trust triangle in figure \ref{fig:trusttringle}. The issuer is the entity issuing credentials. A comparison of a credential might be an identity card, which was issued by a state. The third entity is the verifier. This party requests data from a holder, then verifies the response. An example would be the request and the subsequent presentation of a government issued ID when the identity of a holder is challenged. The verifying party is able to trust the presented data, because it is backed by the issuer. For this to work, the issuer must play fair (honest but curious) and does not issue malicious credentials. Only then the verifier can establish trust, hence the name the \textit{trust} triangle. \\
+One of the key technologies used in this thesis enabling SSI, is the BBS Signature Scheme (BBS)\cite{bbs-signature-scheme}. This cryptographic signature scheme provides mechanisms for both important SSI features, selective-disclosure and unlinkability. This enables the creation of secure and private verifiable credentials and the digital representation of physical credentials. \\
 
-One of the key technologies used in this thesis enabling SSI is the BBS signature scheme (BBS)\cite{bbs-signature-scheme}. This cryptographic signature scheme provides mechanisms for both important SSI features, selective-disclosure and unlinkability. This enables the creation of secure and private verifiable credentials and the digital representation of physical credentials. \\
+It is important to understand the difference between physical and digital credentials. First we need to establish that physical credentials can only be used in the physical world, where digital credentials can be used both in the physical and digital world and provide more security and privacy. It is possible that a verifier would accept a physical credential, where all the information that is not needed is taped over, as long as they can verify the validity of the credential (even though one would get weird looks). With that selective disclosure is achieved. Also, for example when signing a contract, no identifying data is stored by the verifier, as they only check if the individual really is who they say they are. And with that we have the unlinkability. But in the digital world this is different, everything is logged and saved. An individual cannot use their physical credential for a digital interaction. That is why physical credentials need to be translated to digital credentials. Selectively disclosing information gets easier for an individual, when instead of having to change the tape over the hidden information, they can just select what they want to share. But the translation also brings new problems with it. All physical credentials from the same type, like a Swiss government ID, have general security mechanisms, so using those mechanisms for individual verification does not reveal any information. In the digital world, cryptographic signatures are used as a sign of validity, integrity and authenticity of the data. Those signatures are individual per VC. This means that each credential has its own identifier: the signature that is used to protect it. \\
 
-It is important to understand the difference between physical and digital credentials. First we need to establish that physical credentials can only be used in the physical world, where digital credentials can be both used in the physical and digital world and provide more security and privacy. It is possible that a verifier would accept a physical credential, where all the information that is not needed is taped over, as long as they can verify the validity of the credential (even though one would get weird looks). With that selective disclosure is achieved. Also, for example when signing a contract, no identifying data is stored by the verifier, as they only check if the individual really is who they say they are. And with that we have the unlinkability. But in the digital world this is different, everything is logged and saved. An individual cannot use their physical credential for a digital interaction. That is why physical credentials need to be translated to digital credentials. Selectively disclosing information gets easier for an individual, when instead of having to change tape over the hidden information, they can just select what they want to share. But the translation also brings new problems with it. All physical credentials from the same type, like a Swiss government ID, have general security mechanisms, so using those mechanisms for individual verification does not reveal any information. In the digital world, cryptographic signatures are used as a sign of validity, integrity and authenticity of the data. Those signatures are individual per VC. This means that each credential has its own identifier: the signature that is used to protect it. \\
+BBS has a solution for this problem. Besides creating the signatures that protect the data and letting the individuals selectively disclose that data, there is a mechanism that allows to randomize the signature, without invalidating it. This allows the verifier to confirm an unlinkable presentation.  \\
 
-BBS has a solution for this problem. Besides creating the signatures that protect the data and letting the individuals selectively disclose that data, there is a mechanism that allows randomize the signature, without invalidating it. This allows the verifier to verify an unlinkable presentation.  \\
-
-The credentials also needs to be persisted in some type of construct. In the physical world, it is written on a neat little credit-card sized piece of plastic. That card also has all the security on/in it. In the digital world persistence is usually done with files. These files contain data in a structured way, for example JSON. In our thesis we are using the Verifiable credentials data structure (VC)\cite{verifiable-credentials}, a JSON extension. For a holder of a VC it is also easy to store. Instead of adding an ID card to a wallet, a holder adds the presisted VC to a digital wallet on their device. \\
+The credentials also need to be persisted in some type of construct. In the physical world, it is written on a neat little credit-card sized piece of plastic. That card also has all the security on/in it. In the digital world persistence is usually done with files. These files contain data in a structured way, for example JSON. In our thesis we are using the verifiable credentials data structure (VC)\cite{verifiable-credentials}, a JSON extension. For a holder of a VC it is also easy to store. Instead of adding an ID card to a wallet, a holder adds the persisted VC to a digital wallet on their device. \\
 
 In this thesis we want to investigate the use of the BBS Signature Scheme in a real world scenario.
-We assume a working BBS Signature scheme within the security setting, comprising unlinkability and data integrity.\\
+We assume a working BBS Signature Scheme within the security setting, comprising unlinkability and data integrity.\\
 
 The VCs need to be sent digitally from issuer to holder and presented from a holder to a verifier. 
 For this thesis we will only look at the messaging between the holder and the verifier and exclude VC creation and transportation to the holder.
-This way with in this thesis we will use an extension of VCs called Verifiable presentations (VP)\cite{verifiable-credentials}.
+Furthermore we will use an extension of VCs called verifiable presentations (VP)\cite{verifiable-credentials}.
 To send a VP between a holder and a verifier, we use OpenID Connect for Verifiable Presentations (OIDC4VP)\cite{oidc4vp}.
 We assume secure channels are used for the OIDC4VP communication.\\
 
 
 \chapter{The BBS Signature Scheme}
-The BBS Signature scheme\cite{bbs-signature-scheme} multi-message signature scheme, supporting selective-disclosure and the proof of the knowledge of a signature which in turn creates unlinkability. These features makes this signature scheme an integral part of SSI.\\
+The BBS Signature Scheme\cite{bbs-signature-scheme} is a multi-message signature scheme, supporting selective-disclosure and the proof of the knowledge of a signature which in turn creates unlinkability. These features makes this signature scheme an integral part of SSI.\\
 
 \noindent
 But what do these features really mean? \\
 
-Normal cryptographic sigantures are only able to sign one message at a time, which is viable for digital credentials which contain multiple messages. To sign those credentials, a multi message signature is needed, which is provided by BBS. The resulting signature provides data integrity for the messages. Important to note is also the fixed size of the signature. No matter the amount and sizes of the messages, the signature lenght stays the same, thus removing any links between the signature and the signed messages.\\
+Normal cryptographic signatures are only able to sign one message at a time, which is viable for digital credentials which contain multiple messages. To sign those credentials, a multi-message signature is needed, which is provided by BBS. The resulting signature provides data integrity for the messages. Important to note is also the fixed size of the signature. No matter the amount and sizes of the messages, the signature lenght stays the same, thus removing any links between the signature and the signed messages.\\
 
-Now we have a signed set of messages and we would like to present them. All the messages can be presented and verified together using the original signature. The holder may want to only present a sub set of the original messages, selectively disclosing them. To verify a BBS signature, the verifier would need all the data that was signed, so only revealing a part of the data would not work. To be able to that, the holder must generate a new BBS signature, called a BBS proof, which is generated using the original siganture. This new signature is valid for the sub set of the revealed messages with the added protection of proving to the verifier the knowledge of the original signature. This last part is important, as a verifier only trusts the original issuer of a credential and with that only trusts the original signature.\\
+Now we have a signed set of messages and we would like to present them. All the messages can be presented and verified together using the original signature. The holder may want to only present a sub set of the original messages, selectively disclosing them. To verify a BBS signature, the verifier would need all the data that was signed, so only revealing a part of the data would not work. To be able to that, the holder must generate a new BBS signature, called a BBS proof, which is generated using the original siganture. This new signature is valid for the sub set of the revealed messages with the added protection of proving to the verifier the knowledge of the original signature. This last part is important, as a verifier only trusts the original issuer of a credential and therefore only trusts the original signature.\\
 
-The holder has generated a BBS proof and presented it to a verifier. Now the same holder would like to present the same data to the same verifier. The easy way would be to use the same proof from the previous presentation. This would create a link to the previous presentation, as the proof value would be an identifier. To prevent the linking of presentations, a new proof must be created for each presentation, as these proofs are random for each generation. With that we have unlinkablity between presentations.
+The holder has generated a BBS proof and presented it to a verifier. Now the same holder would like to present the same data to the same verifier again. The easy way would be to use the same proof from the previous presentation. This would create a link to the previous presentation, as the proof value would be an identifier. To prevent the linking of presentations, a new proof must be created for each presentation, as these proofs are random for each generation. With that we have unlinkablity between presentations.
 
 
 \chapter{Use Cases}
+\label{chap:usecase}
 
 \section{Use Case 1 (why use vc)}
 
@@ -145,23 +146,23 @@ The holder has generated a BBS proof and presented it to a verifier. Now the sam
 \section{Use Case 3 (why use link secrets)}
 
 
-\chapter{Verifiable credentials and verifiable presentations}
+\chapter{Verifiable Credentials and Verifiable Presentations}
 \label{chap:vpnvc}
 In this chapter, verifiable credentials (VC) and verifiable presentations (VP) are analyzed for data leakage and linkability.
 Then we will investigate how we need to manipulate these credentials and presentations, so that they can be signed by the BBS Signature Scheme.
 
 \section{What are VCs and VPs?}
 Verifiable credentials\cite{verifiable-credentials} are JSON-LD data models, designed to represent different types of digital credentials.
-The Idea, is to be able to translate physical credentials, like an ID or a driver's license, into the digital world.
+The idea is to be able to translate physical credentials, like an ID or a driver's license, into the digital world.
 These VCs are generated and signed cryptographically by an issuer, like a government.
 In this thesis we will use the BBS Signature Scheme to sign the VC.
 The content of VC is meta-data, like the life-time or an ID, and an object containing the data that wants to be stored, most of the time data that belongs to a specific holder.
-In the case of a government issued ID, this can be attributes like birthday, first and last name and so on.
+In the case of a government issued ID, these can be attributes like birthday, first and last name and so on.
 After creation, the issuer send the VC to the holder.\\
 
-Now the holder would like to present this VC to verifier.
-Using the VC, the holder can generate a Verifiable Presentation\cite{verifiable-credentials}, which is very close to a VC in structure.
-It also contains meta-data that follows the same rule as the meta-data in a VC.
+Now the holder would like to present this VC to a verifier.
+Using the VC, the holder can generate a verifiable presentation\cite{verifiable-credentials}, which is very close to a VC in structure.
+It also contains meta-data that follows the same rules as the meta-data in a VC.
 The only difference between a VP and a VC is that a VP contains a whole VC instead of the holder data.
 In the case of a VP, we also want to use a cryptographic signature to protect the content against tampering. Here we also use the BBS Signature Scheme.\\
 
@@ -224,35 +225,35 @@ There are two places where an \textbf{ID} can be added:
 	\item Inside an object of a credentialSubject (see chapter \ref{subsub:credentialsubject}) to identify a specific subject
 \end{enumerate}
 
-These Ids must be \textit{URLs} and be either a UUID, a DID or an HTTP URL.
+These IDs must be \textit{URLs} and be either a UUID, a DID or an HTTP URL.
 
 \subsection{type}
 
 The \textbf{type} defines what the context of a VC is. 
-It is an array containing either URLs to the description of the VC or be an attribute that can be mapped through \textbf{@context}.
+It is an array containing either URLs to the description of the VC or can be attributes that must be mapped through \textbf{@context}.
 If we use the standard mapped attributes, the type set must either include \textit{VerifiableCredential} or \textit{VerifiablePresentation}.
 If we want, we can also add a more specific type, in which we define more information about the VC.\\
 In this thesis we won't use any custom types.
 
 \subsection{proof}
 \label{subsec:vcproof}
-The \textbf{proof} inside a VC guaranties its Integrity. But it can also do much more.
-In this thesis the proof will either contain a BBS Signature, which signed the VC and with that guaranties its integrity, or it contains a BBS proof, which enables selective disclosure between and unlinkability between holder and verifier.\\
+The \textbf{proof} inside a VC guaranties its integrity. But it can also do much more.
+In this thesis the proof will either contain a BBS Signature, which signs the VC and with that guaranties its integrity, or it contains a BBS proof, which enables selective disclosure and unlinkability between holder and verifier.\\
 The proof object contains following key-value pairs:
 \begin{itemize}
 	\item \textbf{type}: The type of the proof. In this thesis we use the type \textit{DataIntegrityProof}, as it defines that the proof is there to protect the integrity of the data
 	\item \textbf{cryptosuite}: Which cryptosuite was used. In this thesis we use \textit{bbs-2023}, as we use the BBS Signature Scheme
 	\item \textbf{created}: A timestamp when the proof was created
 	\item \textbf{verificationMethod}: Which verification method is used. This value must be a string that maps to a URL. In this thesis we will use a URL to a public key
-	\item \textbf{proofPurpose}: The purpose of the proof. There are two different valid values for this attribute \textit{assertionMethod} and \textit{authentication}. In this thesis we will use \textit{assertionMethod}
-	\item \textbf{proofValue}: The proof value. In this thesis this is either a BBS Signature or Proof
+	\item \textbf{proofPurpose}: The purpose of the proof. There are two different valid values for this attribute: \textit{assertionMethod} and \textit{authentication}. In this thesis we will use \textit{assertionMethod}
+	\item \textbf{proofValue}: The proof value. In this thesis this is either a BBS signature or proof
 \end{itemize}
 
 \section{VCs and BBS}
 This section contains all the different algorithms to sign a VC, derive a new VC which is used for presentation, create a BBS proof based on the derived VC, wrap the VC in a VP, present it and finally to verify the selectively disclosed VP.\\
 
 In chapter \ref{sec:usedvcconcepts} we defined all the different VC/VP concepts that will be used in this thesis. With that information, we can now build an example VC, that we will use to demonstrate the results of the algorithms.\\
-The VC that we will use look like this:
+The VC that we will use looks like this:
 \begin{lstlisting}[language=json,firstnumber=1,caption={Example VC},captionpos=b,label={list:example-vc}]
 {
 	"@context": [
@@ -270,10 +271,10 @@ The VC that we will use look like this:
 \end{lstlisting}
 
 \subsection{Sign a VC}
-The first step in the process, is to sign a VC.
+The first step in the process is to sign a VC.
 These algorithms are normally called by an issuer, which generated the VC.
 As the next step we define some variables, that will be used as the inputs to our algorithms:\\
-\textbf{vc}: The VC document, see Listing \ref{list:example-vc}\\
+\textbf{vc}: The VC document, see listing \ref{list:example-vc}\\
 \textbf{hmac\_key}: A 32-byte random string, which is used to initialize a HMAC\\
 \textbf{verification\_method}: The URL to the verification method\\
 \textbf{mandatory\_attributes}: A set of attributes which are mandatory for the holder to disclose to the verifier. For this example we will set the \textit{first\_name} as mandatory. This looks like this: ["credentialSubject/first\_name"]\\
@@ -281,10 +282,10 @@ As the next step we define some variables, that will be used as the inputs to ou
 We now define the main algorithm, which calls the sub-algorithms and handles the data between them:
 \begin{enumerate}
 	\item Set \textbf{proof\_config} and \textbf{canonical\_proof\_config} to the respective entry in the result of the algorithm described in chapter \ref{subsec:proof_config}, with the inputs \textbf{vc.@context} and \textbf{verification\_method}
-	\item Set \textbf{transformed\_document} to the result of the algorithm described in chapter \ref{sub:transformvc}, with the inputs \textbf{vc}, \textbf{mandatory\_attributes} and \textbf{hmac\_key}.
+	\item Set \textbf{transformed\_document} to the result of the algorithm described in chapter \ref{sub:transformvc}, with the inputs \textbf{vc}, \textbf{mandatory\_attributes} and \textbf{hmac\_key}
 	\item Set \textbf{hash\_data} to the result of the algorithm described in chapter \ref{subsec:proofHash}, with the inputs \textbf{canonical\_proof\_config} and \textbf{transformed\_document}
-	\item Set \textbf{base\_proof} to the result of the algorithm described in chapter \ref{subsec:signvc}, with the inputs \textbf{hash\_data} and \textbf{mandatory\_attributes}.
-	\item Set \textbf{signed\_vc} to the result of the algorithm described in chapter \ref{subsubsec:addsig}, with the inputs \textbf{vc}, \textbf{proof\_config} and \textbf{base\_proof}.
+	\item Set \textbf{base\_proof} to the result of the algorithm described in chapter \ref{subsec:signvc}, with the inputs \textbf{hash\_data} and \textbf{mandatory\_attributes}
+	\item Set \textbf{signed\_vc} to the result of the algorithm described in chapter \ref{subsubsec:addsig}, with the inputs \textbf{vc}, \textbf{proof\_config} and \textbf{base\_proof}
 \end{enumerate}
 
 After these steps have the signed VC in \textbf{signed\_vc}.
@@ -369,7 +370,7 @@ To generate the proof config, we follow these steps:
 	\item Return an object containing \textbf{proof\_config} and \textbf{canonical\_proof\_config}.
 \end{enumerate}
 
-If we follow the instructions', we get a JSON object like this:
+If we follow the instructions, we get a JSON object like this:
 \begin{lstlisting}[language=json,firstnumber=1,caption={Example Proof Config},captionpos=b]
 {
   type: "DataIntegrityProof",
@@ -410,8 +411,8 @@ The output of this algorithm is an object containing the mandatory and the non-m
 To generate the statements, we follow these steps:
 \begin{enumerate}
 	\item Define \textbf{label\_map\_factory\_function} as the function which is returned from \textbf{create\_shuffled\_id\_label\_map\_function} defined in chapter \ref{sec:shuffledlabelmap} with the input \textbf{hmac\_key}
-	\item Set \textbf{group\_definitions} to a map where \textit{mandatory} is the key and the value is \textbf{mandatory\_attributes}.
-	\item Set \textbf{groups} to \textit{response.groups} of the \textit{canonicalizeAndGroup} algorithm specified in the \textit{DataIntegrity for ECDSA specification}\cite{ecdsa}, passing the \textbf{label\_map\_factory\_function}, \textbf{group\_definitions} and \textbf{vc}.
+	\item Set \textbf{group\_definitions} to a map where \textit{mandatory} is the key and the value is \textbf{mandatory\_attributes}
+	\item Set \textbf{groups} to \textit{response.groups} of the \textit{canonicalizeAndGroup} algorithm specified in the \textit{DataIntegrity for ECDSA specification}\cite{ecdsa}, passing the \textbf{label\_map\_factory\_function}, \textbf{group\_definitions} and \textbf{vc}
 	\item Set \textbf{mandatory} to the value from \textbf{groups.mandatory.matching}
 	\item Set \textbf{nonMandatory} to the value from \textbf{groups.mandatory.nonMatching}
 	\item Return an object named \textbf{transformed\_data} containing \textit{mandatory} set to \textbf{mandatory} and \textit{nonMandatory} set to \textbf{nonMandatory}
@@ -452,12 +453,12 @@ And with that we transformed the VC into canonical statements that can later be 
 
 \subsubsection{Hash the proof data}
 \label{subsec:proofHash}
-In this algorithm we hash the proof data. This data contains the information about the proof, but also the mandatory attributes which must revealed.
-The hashed data then can be used as the header for the BBS Signature operation, and thus ensuring that no information about the proof is changed, but also that all the correct mandatory data is revealed, as the header value must be the same in the sign, sign verify, proof generate and proof verify process.\\
+In this algorithm we hash the proof data. This data contains the information about the proof, but also the mandatory attributes, which must be revealed.
+The hashed data then can be used as the header for the BBS Signature operation, and thus ensures that no information about the proof has changed. It also guarantees that all the correct mandatory data is revealed, as the header value must be the same in the sign, sign verify, proof generate and proof verify process.\\
 
 The input for this algorithm is the proof config as canonical statements \textbf{canonical\_proof\_config} and a transformed document \textbf{transformed\_data}.\\
 
-The output is an object \textbf{hash\_data} which is a copy of the \textbf{transformed\_data} the new hashes of the proof and mandatory data.\\
+The output is an object \textbf{hash\_data} which is a copy of the \textbf{transformed\_data}, the new hashes of the proof and mandatory data.\\
 
 For the hashing, we follow these steps:
 \begin{enumerate}
@@ -499,7 +500,7 @@ After following these steps, we have an object like this:
 }
 \end{lstlisting}
 
-Now all the data is in the correct format, to generate a BBS Signature.
+Now all the data is in the correct format to generate a BBS Signature.
 
 \subsubsection{Generate and serialize the signature}
 \label{subsec:signvc}
@@ -515,9 +516,9 @@ To generate the BBS Signature, we follow these steps:
 	\item Set \textbf{bbs\_signature} to the result of the BBS signature operation, defined in chapter 3.5.1 of the BBS Signature Scheme\cite{bbs-signature-scheme}, with \textbf{bbs\_header} and \textbf{bbs\_messages} as the inputs
 	\item Initialize \textbf{proof\_value} to the BBS proof header bytes 0xd9, 0x5d and 0x02
 	\item Set \textbf{components} to an array containing (in this order): \textbf{bbs\_signature}, \textbf{bbs\_header}, \textbf{public\_key}, \textbf{hmac\_key}, \textbf{mandatory\_pointers}
-	\item Set \textbf{cbor} to result of the application of the CBOR-encoding\cite{cbor}, where CBOR tagging \textbf{Must NOT} be used.
+	\item Set \textbf{cbor} to result of the application of the CBOR-encoding\cite{cbor}, where CBOR tagging \textbf{Must NOT} be used
 	\item Set \textbf{proof\_value} to the concatenation of \textbf{proof\_value} and \textbf{cbor}
-	\item Set \textbf{base\_proof} to the value of the base64-url encoding defined in chapter 5 of \textit{RFC 4648}\cite{base64} but without padding as mentioned in chapter 3.2 of the same RFC.
+	\item Set \textbf{base\_proof} to the value of the base64-url encoding defined in chapter 5 of \textit{RFC 4648}\cite{base64} but without padding as mentioned in chapter 3.2 of the same RFC
 	\item Return \textbf{base\_proof}
 \end{enumerate}
 
@@ -538,41 +539,41 @@ To add the proof to a VC, we follow these steps:
 	\item Return \textbf{vc}
 \end{itemize}
 
-After following these steps we now a VC signed by BBS as seen in Listing \ref{list:signed-vc}.
+After following these steps we now have a VC signed by BBS as seen in listing \ref{list:signed-vc}.
 
 \subsection{Derive selective disclosure VP}
 As a holder of a secured VC, one would like to present that VC to a verifier.
-For that we create a Verifiable Presentation (VP), which in turn is just a VC containing \textit{@context}, \textit{type} and the VC as \textit{verifiableCredential}.
+For that we create a verifiable presentation (VP), which in turn is just a VC containing \textit{@context}, \textit{type} and the VC as \textit{verifiableCredential}.
 We also want to use the selective disclosure provided by the BBS Signature Scheme, so that we don't need to disclose all the information contained in the VC.
 We will use the signed VC seen in listing \ref{list:signed-vc}.\\
-In that example we forced the disclosure of the \textit{last\_name}.
+In that example we forced the disclosure of the \textit{first\_name}.
 We define that we want to reveal the \textit{last\_name}.\\
 
 As the inputs of the algorithms, we define following variables:\\
 \textbf{vc}: The VC, \textbf{not containing} the proof object\\
 \textbf{base\_proof}: The proof object from the VC\\
-\textbf{selective\_pointers}: A array containing pointers on what should be revealed. In this example we also want to reveal the \textit{last\_name}, so the array looks like this: ["/credentialSubject/last\_name"]\\
+\textbf{selective\_pointers}: An array containing pointers on what should be revealed. In this example we also want to reveal the \textit{last\_name}, so the array looks like this: ["/credentialSubject/last\_name"]\\
 \textbf{ph}: The presentation header as a byte array. We will define it as an empty array [] for this example\\
 \textbf{verification\_method}: The URL to the verification method\\
 
 This algorithm handles all the data for a selective disclosure proof creation.
 First, it generates the derived VC, that will be included in the VP.
 Then the BBS Proof is created and replaces the original BBS Signature.
-Lastly a VP is created, the VC is added, and a new BBS Signature is generated for the VP.
+Lastly a VP is created, the VC is added and a new BBS proof is generated for the VP.
 After all these steps, the VP is ready to be presented.\\
 
 To create the derived VP, we follow these steps:
 \begin{enumerate}
-	\item Set \textbf{bbs\_proof}, \textbf{label\_map}, \textbf{mandatory\_indexes}, \textbf{selective\_indexes} and \textbf{reavealed\_document} to their corresponding entry in the response object from the algorithm described in chapter \ref{subsub:createdisclosuredata}, with the inputs \textbf{vc}, \textbf{base\_proof}, \textbf{selective\_pointers} and \textbf{ph}
+	\item Set \textbf{bbs\_proof}, \textbf{label\_map}, \textbf{mandatory\_indexes}, \textbf{selective\_indexes} and \textbf{revealed\_document} to their corresponding entry in the response object from the algorithm described in chapter \ref{subsub:createdisclosuredata}, with the inputs \textbf{vc}, \textbf{base\_proof}, \textbf{selective\_pointers} and \textbf{ph}
 	\item Set \textbf{new\_proof} to a copy of \textbf{base\_proof}
 	\item Replace \textbf{new\_proof.proofValue} with the result of calling the algorithm in chapter \ref{subsub:serializebaseproof}, with the inputs \textbf{bbs\_proof}, \textbf{label\_map}, \textbf{mandatory\_indexes} and \textbf{selective\_indexes}
-	\item Set \textbf{reavealed\_document.proof} to \textbf{new\_proof}
+	\item Set \textbf{revealed\_document.proof} to \textbf{new\_proof}
 	\item Create an empty object \textbf{vp}
-	\item Add the key-value pair \textit{@context} - \textbf{reavealed\_document.@context} to \textbf{vp}
+	\item Add the key-value pair \textit{@context} - \textbf{revealed\_document.@context} to \textbf{vp}
 	\item Add the key-value pair \textit{type} - \textbf{["VerifiablePresentation"]} to \textbf{vp}
-	\item Create a map with \textbf{verifiableCredential} as the key and an array, with \textbf{reavealed\_document} as the only entry, as the value
+	\item Create a map with \textbf{verifiableCredential} as the key and an array, with \textbf{revealed\_document} as the only entry, as the value
 	\item Add \textbf{verifiableCredential} to \textbf{vp}
-	\item Set \textbf{proof\_config} and \textbf{canonical\_proof\_config} to the respective entry in the result of the algorithm described in chapter \ref{subsec:proof_config}, with the inputs \textbf{reavealed\_document.@context} and \textbf{verification\_method}
+	\item Set \textbf{proof\_config} and \textbf{canonical\_proof\_config} to the respective entry in the result of the algorithm described in chapter \ref{subsec:proof_config}, with the inputs \textbf{revealed\_document.@context} and \textbf{verification\_method}
 	\item Add \textbf{proof\_config} to \textbf{vp}
 	\item Set \textbf{bbs\_message} to \textbf{vp} as a string
 	\item Set \textbf{bbs\_signature} to the result of the BBS signature operation, defined in chapter 3.5.1 of the BBS Signature Scheme\cite{bbs-signature-scheme}, with \textbf{bbs\_message} and the public key stored at \textbf{verification\_method} as the inputs
@@ -585,33 +586,36 @@ This derived VP may look like this:
 {
 	"@context": [
 		"https://www.w3.org/ns/credentials/v2",
-		"https://w3id.org/security/data-integrity/v2",
-		"https://raw.githubusercontent.com/RockstaYT/BA_Thesis_BBS_Signatures/docs/context/example_1.jsonld"
+		"https://w3id.org/security/data-integrit...",
+		"https://raw.githubusercontent.com/ro..."
 	],
 	"type": [
 		"VerifiablePresentation"
 	],
-		"verifiableCredential": [{
+	verifiableCredential: {[
+		{
 			"@context": [
-			"https://www.w3.org/ns/credentials/v2",
-			"https://w3id.org/security/data-integrity/v2",
-			"https://raw.githubusercontent.com/RockstaYT/BA_Thesis_BBS_Signatures/docs/context/example_1.jsonld"
-		],
-		"type": [
-			"VerifiableCredential"
-		],
-		"credentialSubject": {
-			"first_name": "Joel"
-		},
-		"proof": {
-			"type": "DataIntegrityProof",
-			"cryptosuite": "bbs-2023",
-			"created": "2024-04-17T23:41:58.089Z",
-			"verificationMethod": "did:key:z...",
-			"proofPurpose": "assertionMethod",
-			"proofValue": "u2V0..."
+				"https://www.w3.org/ns/credentials/v2",
+				"https://w3id.org/security/data-integrity/v2",
+				"https://raw.githubusercontent.com/ro..."
+			],
+			"type": [
+				"VerifiableCredential"
+			],
+			"credentialSubject": {
+				"first_name": "John",
+				"last_name": "Doe"
+			},
+			"proof": {
+				"type": "DataIntegrityProof",
+				"cryptosuite": "bbs-2023",
+				"created": "2024-06-09T14:40:03.606Z",
+				"verificationMethod": "...",
+				"proofPurpose": "assertionMethod",
+				"proofValue": "u2V0Dhd..."
+			}
 		}
-	}]
+	]}
 }
 \end{lstlisting}
 
@@ -620,7 +624,7 @@ This is the version of the VP that will be presented to the verifier.
 
 \subsubsection{Parse the base proof}
 \label{subsub:parsebaseproof}
-This algorithm parses the BBS signature in the proof object back into their respective components\\
+This algorithm parses the BBS signature in the proof object back into its respective components.\\
 
 The input of this algorithm is a proof object \textbf{base\_proof}.\\
 
@@ -650,20 +654,20 @@ To generate all this data, we follow these steps:
 	\item Define \textbf{label\_map\_factory\_function} as the function which is returned from the \textbf{create\_shuffled\_id\_label\_map\_function} defined in chapter \ref{sec:shuffledlabelmap} with the input \textbf{hmac\_key}
 	\item Set \textbf{combined\_pointers} to the concatenation of \textbf{mandatory\_pointers} and \textbf{selective\_pointers}
 	\item Set \textbf{group\_definitions} to an object with following key-value pairs: \textit{mandatory} - \textbf{mandatory\_pointers}, \textit{selective} - \textbf{selective\_pointers} and \textit{combined} - \textbf{combined\_pointers}
-	\item Set \textbf{groups} and \textbf{label\_map} to \textit{response.groups} and \textit{response.labelMap} respectively of the \textit{canonicalizeAndGroup} algorithm specified in the \textit{DataIntegrity for ECDSA specification}\cite{ecdsa}, passing the \textbf{label\_map\_factory\_function}, \textbf{group\_definitions} and \textbf{vc}.
+	\item Set \textbf{groups} and \textbf{label\_map} to \textit{response.groups} and \textit{response.labelMap} respectively of the \textit{canonicalizeAndGroup} algorithm specified in the \textit{DataIntegrity for ECDSA specification}\cite{ecdsa}, passing the \textbf{label\_map\_factory\_function}, \textbf{group\_definitions} and \textbf{vc}
 	\item Set \textbf{combined\_match} to \textbf{groups.combined.matching}
 	\item Set \textbf{mandatory\_match} to \textbf{groups.mandatory.matching}
 	\item Set \textbf{combined\_indexes} to the ordered list of \textbf{combined\_match.keys}
 	\item Set \textbf{mandatory\_indexes} to an empty array. We want to compute the position of the mandatory indexes in the \textbf{combined\_match} array, so that the verifier knows which indexes were mandatory to reveal
-	\item For each key in \textbf{mandatory\_match} find its index in \textbf{combined\_indexes} and add it to \textbf{mandatory\_indexes}.
+	\item For each key in \textbf{mandatory\_match} find its index in \textbf{combined\_indexes} and add it to \textbf{mandatory\_indexes}
 	\item Set \textbf{selective\_match} to \textbf{groups.selective.matching}
 	\item Set \textbf{mandatory\_non\_match} to \textbf{groups.mandatory.nonMatching}
 	\item Set \textbf{non\_mandatory\_indexes} to the ordered list of \textbf{mandatory\_non\_match.keys}
-	\item Set \textbf{selective\_indexes} to an empty array. This time we want to compute the position of the selective indexes in the \textbf{non\_mandatory\_indexes} list. This list will be used for the BBS proof generation process, to define which messages are going to be revealed.
+	\item Set \textbf{selective\_indexes} to an empty array. This time we want to compute the position of the selective indexes in the \textbf{non\_mandatory\_indexes} list. This list will be used for the BBS proof generation process, to define which messages are going to be revealed
 	\item For each key in \textbf{selective\_match} find its index in \textbf{non\_mandatory\_indexes} and add it to \textbf{selective\_indexes}
 	\item Set \textbf{bbs\_messages} to the values of \textbf{non\_mandatory.values} as byte arrays
 	\item Set \textbf{bbs\_proof} to the result of the BBS proof operation defined in chapter 3.5.3 of \textit{The BBS Signature Scheme}\cite{bbs-signature-scheme}, with the input \textbf{public\_key}, \textbf{bbs\_signature}, \textbf{bbs\_header}, \textbf{ph}, \textbf{bbs\_messages} and \textbf{selective\_indexes}
-	\item Set \textbf{reavealed\_document} to the result of the algorithm described in chapter 3.4.13 of \textit{Data Integrity ECDSA Cryptosuites v1.0}\cite{ecdsa}, with the inputs \textbf{vc} and \textbf{combined\_pointers}
+	\item Set \textbf{revealed\_document} to the result of the algorithm described in chapter 3.4.13 of \textit{Data Integrity ECDSA Cryptosuites v1.0}\cite{ecdsa}, with the inputs \textbf{vc} and \textbf{combined\_pointers}
 	\item Set \textbf{deskolemized\_n\_quads} to the joined string from the \textbf{groups.combined.deskolemizedNQuads} array. In this thesis we do not use a delimiter
 	\item Set \textbf{canonical\_id\_map} to the result of the JSON-LD canonicalization algorithm with the input \textbf{deskolemized\_n\_quads}
 	\item Set \textbf{verifier\_label\_map} to an empty map. This maps the canonical blank node identifiers like \textit{c14n0} from the revealed VC to the blank node identifiers created by the issuer
@@ -671,7 +675,7 @@ To generate all this data, we follow these steps:
 	\begin{enumerate}
 		\item Add an entry to \textbf{verifier\_label\_map} where the key \textit{value} and the value is the entry in \textbf{label\_map} with the key \textit{key}
 	\end{enumerate}
-	\item Return an object with following key-value pairs: \textit{bbsProof} - \textbf{bbs\_proof}, \textit{verifierLabelMap} - \textbf{label\_map}, \textit{mandatoryIndexes} - \textbf{mandatory\_indexes}, \textit{selectiveIndexes} - \textbf{selective\_indexes} and \textit{revealedDocument} - \textbf{reavealed\_document}
+	\item Return an object with following key-value pairs: \textit{bbsProof} - \textbf{bbs\_proof}, \textit{verifierLabelMap} - \textbf{label\_map}, \textit{mandatoryIndexes} - \textbf{mandatory\_indexes}, \textit{selectiveIndexes} - \textbf{selective\_indexes} and \textit{revealedDocument} - \textbf{revealed\_document}
 \end{enumerate}
 
 \subsubsection{Serialize the proof value}
@@ -688,8 +692,8 @@ We follow these steps:
 	\item Initialize \textbf{proof\_value} as a byte array, where the first three bytes are \textit{0xd9}, \textit{0x5d} and \textit{0x03}
 	\item Set \textbf{components} to an array containing (in this order): \textbf{bbs\_proof}, \textbf{compressed\_label\_map}, \textbf{mandatory\_indexes}, \textbf{selective\_pointers} and \textbf{ph}
 	\item Set \textbf{cbor} to result of the application of the CBOR-encoding\cite{cbor} on the components array, where CBOR tagging \textbf{Must NOT} be used.
-	\item Set \textbf{derfived\_proof\_value} to the concatenation of \textbf{proof\_value} and \textbf{cbor}
-	\item Set \textbf{derived\_proof} to the the base64-url encoding of \textbf{derfived\_proof\_value}, as defined in chapter 5 of "RFC 4648"\cite{base64} but without padding as mentioned in chapter 3.2 of the same RFC
+	\item Set \textbf{derived\_proof\_value} to the concatenation of \textbf{proof\_value} and \textbf{cbor}
+	\item Set \textbf{derived\_proof} to the the base64-url encoding of \textbf{derived\_proof\_value}, as defined in chapter 5 of "RFC 4648"\cite{base64} but without padding as mentioned in chapter 3.2 of the same RFC
 	\item Return \textbf{proof\_value}
 \end{itemize}
 
@@ -707,15 +711,17 @@ To verify the VP we follow these steps:
 	\item Remove the key-value pair \textbf{vp.proof.proofValue}
 	\item Set \textbf{bbs\_message} to \textbf{vp} as a string
 	\item Set \textbf{vp\_pk} to the value stored at \textbf{vp.proof.verificationMethod}
-	\item Set \textbf{verified\_vp} to the result of the BBS Signature Verification algorithm defined in \textit{THE BBS Signature Scheme}\cite{bbs-signature-scheme} with the inputs' \textbf{vp\_pk}, \textbf{bbs\_signature} and\textbf{bbs\_message}
+	\item Set \textbf{verified\_vp} to the result of the BBS Signature Verification algorithm defined in \textit{The BBS Signature Scheme}\cite{bbs-signature-scheme} with the inputs' \textbf{vp\_pk}, \textbf{bbs\_signature} and \textbf{bbs\_message}
 	\item If \textbf{verified\_vp} is false, reject the presented VP
-	\item Set \textbf{pk} to the value returned when using the URL from \textbf{secured\_document.proof.verificationMethod}
+	\item Set \textbf{pk} to the value returned when using the URL from \textbf{secured\_document.proof.}\\
+	\noindent
+	\textbf{verificationMethod}
 	\item Set \textbf{unsecured\_document} to the copy of \textbf{secured\_document} but with the \textit{proof} value removed
 	\item Set \textbf{proof} to the copy of \textbf{secured\_document.proof}
 	\item Set \textbf{bbs\_proof}, \textbf{proof\_hash}, \textbf{non\_mandatory}, \textbf{mandatory\_hash}, \textbf{selective\_indexes}, \textbf{ph} and \textbf{feature\_option} to their respective entries in the result of the algorithm described in chapter \ref{subsub:parseproof}, with \textbf{proof} as the input
 	\item Set \textbf{bbs\_header} to the concatenation of \textbf{proof\_hash} and \textbf{mandatory\_hash}
 	\item Set \textbf{disclosed\_messages} to the contents of the \textbf{non\_mandatory}, each UTF-8 encoded
-	\item Set \textbf{verify} to the result of the BBS Proof Verification algorithm defined in \textit{THE BBS Signature Scheme}\cite{bbs-signature-scheme} with the inputs' \textbf{pk}, \textbf{bbs\_proof}, \textbf{bbs\_header}, \textbf{ph}, \textbf{disclosed\_messages} and \textbf{selective\_indexes}
+	\item Set \textbf{verify} to the result of the BBS Proof Verification algorithm defined in \textit{The BBS Signature Scheme}\cite{bbs-signature-scheme} with the inputs \textbf{pk}, \textbf{bbs\_proof}, \textbf{bbs\_header}, \textbf{ph}, \textbf{disclosed\_messages} and \textbf{selective\_indexes}
 \end{enumerate}
 
 After running the algorithm, the verifier has the variable \textbf{verify}. If it's \textit{true}, the verifier knows that the VP is valid and was not tampered with.
@@ -726,7 +732,7 @@ This algorithm parses the proof value.\\
 
 The input is a proof value \textbf{proof\_value}.\\
 
-The output is a map containing the BBS proof, a label map, the mandatory indexes, the selective indexes, the presentation header and the feature options\\
+The output is a map containing the BBS proof, a label map, the mandatory indexes, the selective indexes, the presentation header and the feature options.\\
 
 We follow these steps:
 \begin{itemize}
@@ -754,7 +760,7 @@ We follow these steps:
 	\item Set \textbf{label\_map\_factory\_function} to the algorithm in chapter 3.4.3 of \textit{Data Integrity ECDSA Cryptosuites v1.0}\cite{ecdsa}
 	\item Set \textbf{nquads} to the result of the algorithm \textit{labelReplacementCanonicalize} described in chapter 3.4.1 of \textit{Data Integrity ECDSA Cryptosuites v1.0}\cite{ecdsa} with the inputs \textbf{document} and \textbf{label\_map\_factory\_function}
 	\item Set \textbf{mandatory} and \textbf{non\_mandatory} to an empty array
-	\item For each entry in nquads, the key is \textbf{key} and the value is \textbf{value}, separate them into mandatory and non mandatory
+	\item For each entry in \textbf{nquads}, the key is \textbf{key} and the value is \textbf{value}, separate it into mandatory and non mandatory
 	\begin{itemize}
 		\item If \textbf{mandatory\_indexes} contains \textbf{key}, add \textbf{value} to \textbf{mandatory}
 		\item Else add \textbf{value} to \textbf{non\_mandatory}
@@ -765,21 +771,20 @@ We follow these steps:
 
 \section{Security Considerations of VCs}
 \label{subsec:vcseccons}
-The combination of BBS and VC raises three security questions:
+The combination of BBS and VC raises two security questions:
 \begin{enumerate}
 	\item If we want to use IDs to identify a revoked VC, we run into linkability problems
 	\item The RDF canonicalization algorithm creates data leakage which leads to linkability
-	\item How do we sign the VP without creating linkability
 \end{enumerate}
 
 \subsection{IDs in VCs}
 While creating a VC, the issuer might add an ID to the VC to enable revocation.
-A verifier can then check if the ID of the VC which was presented to them is in the revocation list of the issuer, and thus accept or reject the presentation.\\
+A verifier can then check if the ID of the VC, which was presented to them, is in the revocation list of the issuer, and thus accept or reject the presentation.\\
 But there is a big problem with this.
 If the ID is just added to the VC and is revealed to multiple verifiers, they can link the presentations together based on the ID.
 With that we would break the unlinkability provided by BBS.\\
 
-To preserve the unlinkability between the presentations, the holder would need to be able to prove that the ID of the VC is not in the revocation list of the issuer.
+To preserve the unlinkability between the presentations, the holder would need to be able to prove that the ID of the VC is not in the revocation list of the issuer.\\
 
 As a solution to that problem, we can use something like ALLOSAUR\cite{allosaur}. 
 With this a holder can prove to a verifier that his ID is not in the revocation list, without presenting a unique identifier.
@@ -787,8 +792,7 @@ In this thesis we will assume that the concept shown in ALLOSAUR works without c
 We also won't look at how it works, as this would be out-of-scope for this thesis.
 
 \subsection{RDF canonicalization algorithm}
-In the algorithms described in the Analysis Document, we use RDF multiple times to transform the JSON-LD Document into statements.
-Using this algorithm can lead to data leakage which in turn can lead to linkability.
+In the algorithms described in the Analysis Document, we use RDF multiple times to transform the JSON-LD Document into statements. Using this algorithm can lead to data leakage which in turn can lead to linkability.\\
 
 Let's look at an example.
 We will use the example given in chapter 6.1 of \textit{Data Integrity BBS Cryptosuites v1.0}\cite{bbsvc}:
@@ -856,8 +860,9 @@ We use the RDF canonicalization algorithm and get these statements:
 ]
 \end{lstlisting}
 
-Now the data leakage problem arises in one specific case.
+The data leakage problem arises in one specific case.
 Let's say the holder only discloses information about the sails with the size 7.0 and 7.8, so the last two objects of the credentialSubject.\\
+
 Now, the holder receives a new credential, where information about a sail, which has an entry before the disclosed sails (size 7.0 and 7.8), has been changed.
 Let's say that the year for the size 6.0 sail has been updated to 2024.
 When the RDF algorithm is now run again on the new VC, we get these statements:
@@ -885,53 +890,25 @@ When the RDF algorithm is now run again on the new VC, we get these statements:
 ]
 \end{lstlisting}
 
-You can see how the ordering is different, and how the blank nodes (\_:c14nx) where assigned differently.
-Even if we didn't disclose any information about the two smaller sails before and after the VC update, a verifier could easily deduce that the content of the VC has changed, which is leaking data and depending on the size of the VC or what was already revealed, this can even lead to linkability.
+You can see how the ordering is different, and how the blank nodes (\_:c14nx) were assigned differently.
+Even if we didn't disclose any information about the two smaller sails before and after the VC update, a verifier could easily deduce that the content of the VC has changed, which is leaking data. Depending on the size of the VC or what was already revealed, this can even lead to linkability.\\
 
 There is an easy solution to this problem.
-As an input to the RDF algorithm we need to pass a function, which takes the canonical label and replaces them with another value.
-If we now add a HMAC (using SHA-256) to this function, we can randomize how the canonical label values are replaced each time a VC is created.
+As an input to the RDF algorithm we need to pass a function, which takes the canonical labels and replaces them with another value.
+If we now add a HMAC (using SHA-256) to this function, we can randomize how the canonical label values are replaced each time a VC is created.\\
 
 Note: It was suggested that the possibility to use KMAC with SHA3-256 should be added to the specification. This was declined by the working group on the basis that SHA-256 is more common.
 
-\subsection{Signing a VP}
-When creating a VP for a presentation, a holder should sign the VP for data integrity reasons. If the holder has his own key pair and uses that to sign the VP, they must make the public key of that key pair public. Making a key public is not very difficult, but a problem arises when the same keys are used multiple times to sign a VP. The VPs would then be linkable based on the unique public key of the holder. To prevent that, a holder could generate a key pair for each VP that they generate, but then making the public key known would be a lot of work, depending on how many presentations are done.\\
-To solve that issue we found two possibilities:
-\begin{itemize}
-	\item Let the wallet sign the VP
-	\item Binding a secret to the original signature (Bound Proof) and creating a keypair for each presentaion
-\end{itemize}
-
-\subsubsection{Wallet signs VP}
-The holder must save their credentials somewhere on their device. To make the process of receiving and presenting those credentials easier, digital wallets are used.
-One could think of them as physical wallets, storing all the physical credentials, but just digitally.
-To remove the linkability between presentations, we can now use the big user base of those wallets. If the developer of the wallet uses one key pair the sign all the presentations for all their users, the only information that the verifier would know, is which wallet application a holder is using. For this to work, the user base must be sufficient in size to allow for a big enough anonymity pool. This option has two small draw backs:
-\begin{enumerate}
-	\item The verifier knows which wallet application the holder is using
-	\item The wallet application must have enough users to be able to have a big enough anonymity pool
-\end{enumerate}
-
-\subsubsection{Bound BBS Proofs}
-
-Not usable!!
-
-The second option is that the holder generates a key pair and instead of making the public key public with a link pointing to it, they could directly add it to the VP.
-In the VC specification\cite{verifiable-credentials} it states that the \textit{verificationMethod} value in the proof object must be a URL (see chapter \ref{subsec:vcproof}).\\
-If we ignore the specification and add the signature as a value of \textit{verificationMethod}, we could bypass the publication of the public key, which in turn would make this process easier.\\
-Then the holder could generate a new key pair for each new VP, thus removing the links between presentations. Using the process the verifier learns no information about the holder.\\
-A small problem here is the trust. How is the verifier able to know that the VP was really signed by the holder of that VP and not by attacker in the middle, who changed the content of the VP? \\
-To solve that specific problem, we can use bound BBS signatures\cite{bound-bbs}, which produces signatures are bound to a specific value only known to the holder. Using this extension of BBS, the holder then can only generate a proof
-
 
 \chapter{OpenID for Verifiable Presentations}
-Now that we know how to create and sign VCs/VPs, we want to be able to send them the other parties.
+Now that we know how to create and sign VCs/VPs, we want to be able to send them to the other parties.
 In this thesis we will only look at the communication between a holder and a verifier, so how VPs are transmitted.
 As the message layer we use OpenID for Verifiable Presentations(OIDC4VP)\cite{oidc4vp}.
-The Goal of this chapter is to analyze if OIDC4VP leaks data or even breaks linkability.
+The goal of this chapter is to analyze if OIDC4VP leaks data or even breaks linkability.
 
 \section{How does OIDC4VP work?}
 OIDC4VP is a very easy to use protocol.
-There are just two parties, the verifier and the holder (which can be split up into holder and wallet, but for the sake of simplicity we merge them).
+There are just two parties, the holder and the verifier (which can be split up into holder and wallet, but for the sake of simplicity we merge them).
 After the initial interaction between a holder and verifier, these two parties can start a new session, present the VP and close the session.
 
 \begin{figure}[h]
@@ -941,17 +918,21 @@ After the initial interaction between a holder and verifier, these two parties c
 	\caption{Flowchart of OIDC4VP session}
 \end{figure}
 
-The flowchart in figure \ref{fig:flowvp} shows the cross device flow of a OIDC4VP session, so the flow if the initial interaction was not made on the same device where the VP is saved (for example scanning a QR code from your Laptop screen with your phone).\\
+The flowchart in figure \ref{fig:flowvp} shows the cross-device flow of a OIDC4VP session, meaning the flow, if the initial interaction was not made on the same device, where the VP is saved (for example scanning a QR code from your laptop screen with your phone).\\
+
 In the coming chapters we will examine each step in the session for data leakage and linkability.\\
-It's important to note that in this draft VC and VP can be used interchangeably.
+
+It's important to note that in this draft, VC and VP can be used interchangeably.
 OIDC4VP doesn't really mean that it is only for sending VPs between parties, it is a protocol that defines how the messaging between a holder and a verifier works, independent of VC or VP.\\
+
+\noindent
 Also, all the following chapters use HTTP POST/GET requests for the communication.
 
 \subsection{Presentation definition}
 \label{subsec:presdef}
-The first step in the session is the Authorization Request. 
+The first step in the session is the authorization request. 
 In this step the verifier communicates the requirements of the presented VP to the holder, like what type of credential or in which format.
-The verifier can also define which individual attributes must be revealed, which in turn is our beloved selective disclosure.
+The verifier can also define which individual attributes must be revealed, which is the wanted selective disclosure.
 
 Such an object might look like this:
 \begin{lstlisting}[language=json,firstnumber=1,caption={Example of a presentation definition},captionpos=b, label={list:presdef}]
@@ -992,41 +973,41 @@ Such an object might look like this:
 \end{lstlisting}
 
 Such an object is called \textbf{presentation\_definition}.
-Now there are many new attributes in this object, so let's define them from the top to the bottom. \\
+There are many new attributes in this object, so let's define them from the top to the bottom. \\
 
 \begin{enumerate}
 	\item The \textit{id} in the root is used to identify a specific presentation\_definition. It \textbf{MUST} be present
 	\item The \textit{input\_descriptors} is an array describing the different credentials that are requested. It \textbf{MUST} at least contain one entry
-	\begin{itemize}
-		\item The \textit{id} inside a input\_descriptor entry is used to identify a specific entry. It \textbf{MUST} be present for each entry in the \textit{input\_descriptors} array
+	\begin{enumerate}
+		\item The \textit{id} inside an input\_descriptor entry is used to identify a specific entry. It \textbf{MUST} be present for each entry in the \textit{input\_descriptors} array
 		\item The \textit{format} describes the format of the requested credential. It \textbf{MUST} be present
-		\begin{itemize}
+		\begin{enumerate}
 			\item For this thesis we use one of two entries for the \textit{format} object, \textit{ldp\_vc} stating that the requested object must be a VC or \textit{ldp\_vp} stating that it must be a VP.
-			\item The \textit{proof\_type} is an array which defines which proof types are accepted. It \textbf{MUST} be present. In this thesis the only proof type that is accepted it \textit{bbs2023}.
-		\end{itemize}
+			\item The \textit{proof\_type} is an array which defines which proof types are accepted. It \textbf{MUST} be present. In this thesis the only proof type that is accepted is \textit{bbs2023}.
+		\end{enumerate}
 		\item Next we have the \textit{constraints} object. This defines the constraints of the requested credential. It \textbf{MUST} be present
-		\begin{itemize}
+		\begin{enumerate}
 			\item If we want to use selective disclosure, we must define \textit{limit\_disclosure} as \textit{required}. If we don't want selective disclosure, \textit{limit\_disclosure} is not present
 			\item The \textit{fields} entry is an array which defines which fields must be present, and what the content of those fields might be. It \textbf{MUST} be present
-			\begin{itemize}
+			\begin{enumerate}
 				\item The \textit{path} defines the path of a field that must be present. \$ is the root of the presented credential. In listing \ref{list:presdef}, the first entry in the \textit{fields} array defines that the \textbf{type} attribute must be present in the presented credential
 				\item If \textit{path} is present we may also use \textit{filter} which lets us filter for specific entries. Again, in listing \ref{list:presdef}, the first entry filters for the type \textit{IDCardCredential} inside the \textbf{type} attribute with \textit{patter}, meaning that \textit{IDCardCredential} must be present. We also define the type of the value, which in this case is a \textit{string}
-				\item In the case of selective disclosure, we can also use \textit{path} to define which attributes inside the \textbf{credentialSubject} must be presented. In listing \ref{list:presdef} we define that \textit{\$.credentialSubject.first\_name} must be presented.
-			\end{itemize}
-		\end{itemize}
-	\end{itemize}
+				\item In the case of selective disclosure, we can also use \textit{path} to define which attributes inside the \textbf{credentialSubject} must be presented. In listing \ref{list:presdef} we define that \textit{\$.credentialSubject.first\_name} must be presented
+			\end{enumerate}
+		\end{enumerate}
+	\end{enumerate}
 \end{enumerate}
 
-Now that we know how this presentation definition looks, we can integrate it into the Authorization request in two different ways:
+Now that we know how a presentation definition looks, we can integrate it into the authorization request in two different ways:
 \begin{itemize}
-	\item Send the whole object as a part of the initial HTTP Post request
-	\item Send a \textit{presentation\_definition\_uri} as part of the initial HTTP Post request, which then allows the holder to retrieve the object from a static server
+	\item Send the whole object as a part of the initial HTTP POST request
+	\item Send a \textit{presentation\_definition\_uri} as part of the initial HTTP POST request, which then allows the holder to retrieve the object from a static server
 \end{itemize}
 
 But why are there two different integrations?\\
 If everything is done on the same device, it is easy to send all the data in the background. But if we are using two devices, we might need to scan a QR Code with the device containing the credential from a second device. There might be the problem that the size of the \textit{presentation\_definition} is too large for a QR Code (max. of 4296 alphanumeric characters).\\
 
-But we are not finished there. We also want to tell the holder where to send the presentation to.
+We also want to tell the holder where to send the presentation to.
 In this thesis we will use the \textit{direct\_post} response mode, which defines that the response must be sent to an endpoint using an HTTP POST request. The verifier must also set the \textit{response\_uri} parameter with the corresponding uri.
 
 \subsection{Presentation submission}
@@ -1034,7 +1015,7 @@ After the holder got the \textit{presentation\_definition} as well as the \texti
 
 For the response, the holder needs two parameters:
 \begin{enumerate}
-	\item A \textit{vp\_token} which just is a VP. This VP must be Base64url encoded. I can also be an array of VPs, which each are Base64url encoded
+	\item A \textit{vp\_token} which is just a VP. This VP must be base64-url encoded. It can also be an array of VPs, which each are base64-url encoded
 	\item A \textit{presentation\_submission}. This contains a map for the VC inside the VP
 \end{enumerate}
 
@@ -1072,19 +1053,19 @@ We have 3 entities in this session:
 	\item The verifier response endpoint. This entity is a part of the verifier. It receives the VP from the holder and stores it until the verifier requests it
 \end{itemize}
 
-The flow between these three parties is shown following flow chart
+The flow between these three parties is shown in the following sequence-diagram:
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=12cm]{./img/oidc4vpflowextended.png}
 	\label{fig:flowoid}
-	\caption{Full flowchart of OIDC4VP session}
+	\caption{Full flowchart of a OIDC4VP session}
 \end{figure}
 
 With all this information, let's go step by step and look what exactly needs to be done:
 \begin{enumerate}
-	\item The verifier wants to receive a VP from a holder. The first step is to generate a random number called a \textbf{nonce}. This value is used to counter replay attacks. These attacks try to use data from old sessions and re-submit them to a verifier. With the \textbf{nonce}, the verifier can check if there is an open session connected to it, and if not the invalid presentation is rejected (Step 1 in figure \ref{fig:flowoid})
-	\item The next step is to initiate a transaction between the verifier and the verifier response endpoint. The endpoint responds with two random numbers, the \textbf{transaction\_id} and the \textbf{request\_id}. The endpoints then keeps a map both values as they belong together. The \textbf{request\_id} is given to the holder, who uses it to tell the endpoint to which session (transaction) the presentation belongs. At the end of the session, a verifier can then fetch the presentation from the endpoint using the \textbf{transaction\_id} (Step 2 and 3 in figure \ref{fig:flowoid})
-	\item The verifier now generates a QR code for the holder to scan. In this thesis we will use the response mode \textit{direct\_post}. This mode allows to the holder to send the response to the verifier using a redirect. The QR Code must contain following information (Step 4 in figure \ref{fig:flowoid}):
+	\item The verifier wants to receive a VP from a holder. The first step is to generate a random number called a \textbf{nonce}. This value is used to counter replay attacks. These attacks try to use data from old sessions and re-submit them to a verifier. With the \textbf{nonce}, the verifier can check if there is an open session connected to it, and if not, the invalid presentation is rejected (Step 1 in figure \ref{fig:flowoid})
+	\item The next step is to initiate a transaction between the verifier and the verifier response endpoint. The endpoint responds with two random numbers, the \textbf{transaction\_id} and the \textbf{request\_id}. The endpoint then keeps a map of both values as they belong together. The \textbf{request\_id} is given to the holder, who uses it to tell the endpoint to which session (transaction) the presentation belongs. At the end of the session, a verifier can then fetch the presentation from the endpoint using the \textbf{transaction\_id} (Step 2 and 3 in figure \ref{fig:flowoid})
+	\item The verifier now generates a QR code for the holder to scan. In this thesis we will use the response mode \textit{direct\_post}. This mode allows to the holder to send the response to the verifier using a redirect. The QR code must contain the following information (Step 4 in figure \ref{fig:flowoid}):
 	\begin{itemize}
 		\item \textbf{response\_mode}: In this thesis, we set this value to \textit{direct\_post}
 		\item \textbf{response\_uri}: This value contains the uri where the holder need to send the VP to
@@ -1095,10 +1076,10 @@ With all this information, let's go step by step and look what exactly needs to 
 		\item \textbf{state}: The \textbf{request\_id} as defined above
 		\item \textbf{presentation\_definition}: The presentation definition as defined in \ref{subsec:presdef}
 	\end{itemize}
-	\item After scanning the QR Code, the holder generates the VP corresponding with the \textbf{presentation\_definition}. It is important to note that there are two special things that the holder needs to add to the VP. First the \textit{nonce} needs to added in the proof object of the VP. Then the \textit{client\_id} also needs to be added to the proof object, but as the domain. This domain value must also be used by the holder as an input to the BBS proof generation algorithm. This VP is called the \textit{vp\_token}. The holder also generates the \textit{presentation\_submission}. These values are then sent together with the \textbf{state} to the verifier response endpoint defined in \textbf{response\_uri} (Step 5 in figure \ref{fig:flowoid})
-	\item The verifier response endpoint receives the response from the holder. Using the \textit{state} (which initially was the \textbf{request\_id}) the endpoint can match the response from the holder to an open transaction with the verifier. Then the endpoint returns a \textit{redirect\_uri} and \textit{response\_code} to the holder. This points the holder back to the verifier to message him that the presentation was sent to the endpoint. The code is again a random number, which is linked to the respective presentation. There would be a possible implementation without this response to the holder. In that implementation the verifier would continuously pull the new data from the endpoint to check if the VP was presented. This would enable a Session fixation attack (Step 6 in figure \ref{fig:flowoid})
+	\item After scanning the QR code, the holder generates the VP corresponding with the \textbf{presentation\_definition}. It is important to note that there are two special things that the holder needs to add to the VP. First the \textit{nonce} needs to be added in the proof object of the VP. Then the \textit{client\_id} also needs to be added to the proof object, but as the domain. This domain value must also be used by the holder as an input to the BBS proof generation algorithm. This VP is called the \textit{vp\_token}. The holder also generates the \textit{presentation\_submission}. These values are then sent together with the \textbf{state} to the verifier response endpoint defined in \textbf{response\_uri} (Step 5 in figure \ref{fig:flowoid})
+	\item The verifier response endpoint receives the response from the holder. Using the \textit{state} (which initially was the \textbf{request\_id}), the endpoint can match the response from the holder to an open transaction with the verifier. Then the endpoint returns a \textit{redirect\_uri} and \textit{response\_code} to the holder. This points the holder back to the verifier to message him that the presentation was sent to the endpoint. The code is again a random number, which is linked to the respective presentation. There would be a possible implementation without this response to the holder. In that implementation the verifier would continuously pull the new data from the endpoint to check if the VP was presented. This would enable a session fixation attack (Step 6 in figure \ref{fig:flowoid})
 	\item The holder now has the \textit{redirect\_uri} and \textit{response\_code}. They now send an HTTP POST request to the \textit{redirect\_uri} with the \textit{response\_code} to the verifier. After sending the request, the session is finished for the holder (Step 7 in figure \ref{fig:flowoid})
-	\item After receiving the \textit{response\_code} from the holder, the verifier now fetches the \textit{vp\_token} and \textit{presentation\_submission} from the endpoint. For that they send an HTTP POST request containing the \textbf{transaction\_id} and \textbf{response\_code}. The \textit{transaction\_id} is only known by the verifier, but it might be that the system is compromised. As the \textit{response\_code} is only known to the part of the system where the holder was redirected to, the compromised part of the system is not able to pull the data of the holder. The endpoint then responds with the corresponding \textit{vp\_token} and \textit{presentation\_submission} (Step 8 and 9 in figure \ref{fig:flowoid})
+	\item After receiving the \textit{response\_code} from the holder, the verifier now fetches the \textit{vp\_token} and \textit{presentation\_submission} from the endpoint. For that they send an HTTP POST request containing the \textbf{transaction\_id} and \textbf{response\_code}. The \textit{transaction\_id} is only known by the verifier, but it might be that the system is compromised. As the \textit{response\_code} is only known to the part of the system, where the holder was redirected to, so the compromised part of the system is not able to pull the data of the holder. The endpoint then responds with the corresponding \textit{vp\_token} and \textit{presentation\_submission} (Step 8 and 9 in figure \ref{fig:flowoid})
 	\item In the last step, the verifier now verifies the nonce included in the \textit{vp\_token}. If that nonce is correct, they can verify the VP and either accept or reject it (Step 10 in figure \ref{fig:flowoid})
 \end{enumerate}
 
@@ -1111,22 +1092,21 @@ Adding OIDC4VP to the VC/VP-BBS stack raises two new security concerns:
 As all the data is generated randomly, no problems with unlinkability and selective disclosure is created.
 
 \subsection{Replay attacks}
-If a holder sends data to an verifier trought a channel that has a middle man in it, a replay attack is possible even if the data is encrypted.
-A replay attack is an attack where data that was already presented once, is presented again to for example gain access to an account.
+If a holder sends data to a verifier trought a channel that has a middle man in it, a replay attack is possible even if the data is encrypted.
+A replay attack is an attack, where data that was already presented once, is presented again to, for example, gain access to an account.
 To prevent such attacks, values called \textit{nonce} are used. When a session is created, a \textit{nonce} is given to the holder.
-The holder then can use that value once. After receiving the data, the verifier then adds to a used \textit{nonce} list, so that presenting the same data with the same nonce again is rejected.
-A basic way to create a \textit{nonce} is a counter. Using a counter is only secure until the current value is known. To then replay already presented data, an attacker would just need to add a higher value as the current counter as the \textit{nonce} value.
-A more secure version, would be to generate random numbers, and then adding those numbers to a used list.
-For efficiency, values older than the lifespan of the presentation can be deleted from the list.
+The holder then can present data with that nonce once. After receiving the data, the verifier then removes the nonce from the active list, so that presenting data with the same nonce again is rejected.
+A basic way to create a \textit{nonce} is a counter. Using a counter is only secure until the current value is known. To replay already presented data, an attacker would then just need to add a higher value as the current counter.
+A more secure version would be to generate random numbers, and then adding those numbers to a active list. When a session is finished, the nonce of that session is removed from that list.
 
-\subsection{Session Fixation}
+\subsection{Session fixation}
 A session fixation attack works when an attacker steals a token from a holder and uses that to keep a session open.
 In OIDC4VP a session fixation attack can be used to get the unencrypted data from a presentation.
-If attacker infiltrated a verifier, they could get the transaction id and request id for a session (see figure \ref{fig:flowoid}).
-Using those ids, the attack could then query the verifier backend to get the response data from the session.
-This attack can only happen if steps 6 and 7 in figure \ref{fig:flowoid} are not implemented, thus letting the verifier and the verifier query the endpoint until they get a response.\\
-To prevent this attack from happening, steps 6 and 7 in figure \ref{fig:flowoid} should be implemented. This adds to security features to the flow.
-First a random response code is generated. The verifier and the attacker wouldn't receive the data from the backend with just the transaction and request id, as they would also need the response code. 
+If attacker infiltrated a verifier, they could get the transaction-id and request-id for a session (see figure \ref{fig:flowoid}).
+Using those IDs, the attack could then query the verifier backend to get the response data from the session.
+This attack can only happen if steps 6 and 7 in figure \ref{fig:flowoid} are not implemented, thus letting the verifier querying the endpoint until they get a response.\\
+To prevent this attack from happening, steps 6 and 7 in figure \ref{fig:flowoid} should be implemented. This adds two security features to the flow.
+First a random response code is generated. The verifier and the attacker wouldn't receive the data from the backend with just the transaction-id and request-id, as they would also need the response code. 
 If the holder then would just send back the response code to the verifier, the attacker would also have it, which defeats the point of that code. That is why the holder also gets a redirect uri from the endpoint.\\
 The holder send the reponse code to the redirect uri, which is in another part of the verifiers system. With that the attacker never has all pieces and thus isn't able to access the presented data.
 
@@ -1134,11 +1114,48 @@ The holder send the reponse code to the redirect uri, which is in another part o
 \chapter{Sandbox}
 While researching for the intergration of BBS into VCs, I came by the \textit{Data Integrity BBS Cryptosuites v1.0}\cite{bbsvc} specification.
 This specification contained all the necessary information about how to process a VC into statements, selectively disclose those staments, sign the VC and then also verify that VC.\\
-Sadly, the specification was a bit of a mess (it was updated recently, so it is much better now). That is why I talked with Greg Bernstein, one of the authors of the specification, which linked me to his test implementation.
+Sadly, the specification was a bit of a mess (it was updated recently, so it is much better now). That is why I talked with Greg Bernstein, one of the authors of the specification, which linked me to his test implementation. Using that implementation I went trough the specification and described all the steps in chapter \ref{chap:vpnvc}. I also used the same implementation to generate all the VCs \& VPs seen in this thesis.\\
 
+If you, the reader, would also like to know how everything works, you can download the library here: \url{test url}.\\
+
+Here some quick tips how to use the library:
+\begin{itemize}
+	\item All the files that can be changed or run are in the /examples folder
+	\item Inside the /examples/input folder there are different files that can be changed. example.json contains the VC structure, mandatory.json the mandatory pointers and selective.json the selective pointers
+	\item To run files, cd into the /examples directory and run 'node <filename.js>'
+	\item Running createSignedBase.js generates a signed VC, which can be found in the /examples/output folder
+	\item Running verifySignedBase.js verifies the generated VC, and prints the result in the terminal
+	\item Running deriveDocument.js generates a derived VC, using the before generated signed VC and the selective pointers. The derived VC can be also found int the /examples/output folder
+	\item Running verifyDerivedDocument.js verifies the derived VC, and prints the result in the terminal
+	\item If you want to create a custom context, create a new js file in /examples/contexts. Then import the new file into /examples/documentLoader.js and add the new url to the existing list.
+\end{itemize}
+
+Do not forget to run 'npm i' in the root folder after downloading the library, to install all dependencies.
+
+
+\chapter{Future Work}
+In the timeframe of this thesis, not all planned technologies were analyzed. These can be part of future works to extend the features of this stack. These features are Blind BBS Signatutes, BBS Pseudonyms and Link Secrets. \\
+
+Besides theses technologies there are other points for the future. One point would be to find a concrete use case. Even tho there is a use-case described in chapter \ref{chap:usecase}, that use case is only demonstrative purposes. A good use case which takes advantage of all technologies must still be researched. The second point would be the implementation and testing. This thesis only contains theoretical analysis of the different technologies. Implementations using different programming languages might create new problems which were not part of this thesis. \\
+
+At last, the communication between an issuer and a holder must be analyzed. OpenID Connect for Verifiable Presentations would be used, but this was excluded from this thesis.
 
 
 \chapter{Conclusion}
+This thesis was very interesting to research and write. After learning how BBS works under the hood the semester before for the Project 2 module, learning how to integrate it with other technologies was very interesting and challenging. After setting up the project, looking at the risks and arranging the different sprints or sub-goals for 3 weeks, I was ready to start researching. \\
+
+The first step was to find out how the verifiable credentials work. After reading the VC specification for some time, I encountered two problems. The first problem was the sheer size of the specification. There were so many optional features or different ways to do something that I had to narrow it down. So after sometime testing, I defined a minimal set of features defined in chapter \ref{sec:usedvcconcepts}. Based on that I could then create a VC and concentrate on how to add BBS into the mix, which was the second problem. After some research if found the \textit{Data Integrity BBS Cryptosuites v1.0}\cite{bbsvc} specification, which specified exactly how to merge both technologies. Problem was, it was not comprehensible. In the time after my research into that topic, the specification was updated and is thus more readable, but it was really hard to understand. That is why I contacted one of the Authors of the specification, Greg Bernstein, which referred me to his implementation. Using that implementation I then understood the different steps of the specification and wrote them up. After finishing writing up all the algorithms, I searched for security problems. Two problems were found, one in the algorithm of the VC transformation (so that the VC could be signed) and a second one regarding identifying meta-data, which were both solved. At the end of the thesis a third problem was found, but it was not analyzed because of time constraints. This problem is about the signing of a VP. The verifier doesn't trust the holder, so how can the holder sign the VP that he generated. This is something that should be analyzed in future work. \\
+
+After finishing up researching VCs, the next was OpenID Connect for Verifiable Presentations. Here again, the first step was to read the specification. This time it was not as extensive as the VC specification, and there not many different options, so it was more straight forward. So after a week of reading and documenting, this step of the process was done. \\
+
+After that there was not much time left until the due date, so out of time constraint reasons, the research on Blind BBS Signatures, pseudonyms and link secrets was not done. \\
+
+Another thing besides the messy VC-BBS specification creating time problems, was the documentation. For me, writing is very difficult and takes a lot of time and tries for getting it to an acceptable level. For example the research, documenting and implementation of VCs \& VPs should have only take one week each. In the end it was 3 weeks of research and 4 weeks of testing Greg Bernsteins library and documenting. At the same time I needed to write the book entry and the poster, create my defense to make a test presentation with expert and guests and also create the video, the small presentation and prepare the demo day. Each of those tasks took time away from the main task of documenting and thus leaving me with less time than expected. \\
+
+At the end of the day, I'm happy with my results. I've learned a lot of new things about different technologies, but also about researching and documenting. It was a very interesting semester, with a lot of new things. I will use the acquired knowledge to implement this technology stack, and to keep researching the missing features. \\
+
+The most important thing to say is that \textbf{it works}! The goal of this thesis was achieved, by showing that there is a way to create unlinkable digital credentials.
+
 
 \bibliographystyle{plain}
 \bibliography{refs}
