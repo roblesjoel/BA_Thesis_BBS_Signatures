@@ -82,7 +82,7 @@
 \maketitle
 
 \addchap{Abstract}
-Here an abstract might be placed.
+This thesis focuses on analyzing the unlinkability of verifiable credentials when combined with the BBS signature scheme through practical implementation. Initially, it examines the features and key concepts of verifiable credentials, followed by a detailed exploration of their functionality. Algorithms for signing and verifying verifiable credentials, as well as creating selective disclosure verifiable presentations (VPs), are provided. The security concerns associated with using OpenID Connect for verifiable presentations are also analyzed. The research concludes that the implemented methods achieve the desired unlinkability, with potential future enhancements identified to further improve the unlinkability of verifiable credentials in digital identity systems.
 
 
 %------------ TABLEOFCONTENTS ----------------
@@ -94,20 +94,24 @@ Here an abstract might be placed.
 \chapter{Introduction}
 In today's digital world, digital identities are mostly managed by centralized entities, like big corporations or governments. This may be easier for individuals as they don't need to manage their data. As the individuals don't have the control how their data is handled, this approach leads to problems with privacy and security. \\
 
-Self-sovereign Identity (SSI)\cite{self-sovereign-identity} is a concept where individuals can control their digital identity and what data is shared with whom. The idea is to allow those individuals to store their data on their own devices, without centralized entities playing middleman. With the data on the device of the individual, they may selectively disclose information and thus preserve privacy. Another important aspect of SSI is the unlinkability between presentations, meaning that there is no link back to an individual when different data is presented to different verifying parties. Today's centralized entities always know which page an individual visited or what they bought, as they can link all this information back to one individual. A good example for this are targeted ads, which are based on previously revealed information. \\
+Self-sovereign Identity (SSI)\cite{self-sovereign-identity} is a concept where individuals can control their digital identity and what data is shared with whom. The idea is to allow those individuals to store their data on their own devices, without centralized entities playing middleman. With the data on the device of the individual, they may selectively disclose information, and thus preserve privacy. Another important aspect of SSI is the unlinkability between presentations, meaning that there is no link back to an individual when different data is presented to different verifying parties. Today's centralized entities always know which page an individual visited or what they bought, as they can link all this information back to one individual. A good example for this are targeted ads, which are based on previously revealed information. \\
+
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=12cm]{./img/trusttriangle.png}
-	\caption{The trust triangle, url={https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/VC\_triangle\_of\_Trust.svg/1280px\-VC\_triangle\_of\_Trust.svg.png}}
+	\caption{The trust triangle\protect\footnotemark}
 	\label{fig:trusttringle}
 \end{figure}
+
+\footnotetext{\url{https://upload.wikimedia.org/wikipedia/commons/5/51/VC_triangle_of_Trust.svg}}
+
 \newpage
-Besides the individual that owns the data, there are more involved entities in SSI, seen in the trust triangle in figure \ref{fig:trusttringle}. The issuer is the entity issuing credentials. A comparison of a credential might be an identity card, which was issued by a state. The third entity is the verifier. This party requests data from a holder, then verifies the response. An example would be the request and the subsequent presentation of a government issued ID when the identity of a holder is challenged. The verifying party is able to trust the presented data, because it is backed by the issuer. For this to work, the issuer must play fair (honest but curious) and does not issue malicious credentials. Only then the verifier can establish trust, hence the name the \textit{trust} triangle. \\
+Besides the individual that owns the data, there are more involved entities in SSI, seen in the trust triangle in figure \ref{fig:trusttringle}. The issuer is the entity issuing credentials. A comparison of a credential might be an identity card, which is issued by a state. The third entity is the verifier. This party requests data from a holder, then verifies the response. An example would be the request and the subsequent presentation of a government issued ID when the identity of a holder is challenged. The verifying party is able to trust the presented data, because it is backed by the issuer. For this to work, the issuer must play fair (honest but curious) and does not issue malicious credentials. Only then can the verifier establish trust, hence the name the \textit{trust} triangle. \\
 
 One of the key technologies used in this thesis enabling SSI, is the BBS Signature Scheme (BBS)\cite{bbs-signature-scheme}. This cryptographic signature scheme provides mechanisms for both important SSI features, selective-disclosure and unlinkability. This enables the creation of secure and private verifiable credentials and the digital representation of physical credentials. \\
 
-It is important to understand the difference between physical and digital credentials. First we need to establish that physical credentials can only be used in the physical world, where digital credentials can be used both in the physical and digital world and provide more security and privacy. It is possible that a verifier would accept a physical credential, where all the information that is not needed is taped over, as long as they can verify the validity of the credential (even though one would get weird looks). With that selective disclosure is achieved. Also, for example when signing a contract, no identifying data is stored by the verifier, as they only check if the individual really is who they say they are. And with that we have the unlinkability. But in the digital world this is different, everything is logged and saved. An individual cannot use their physical credential for a digital interaction. That is why physical credentials need to be translated to digital credentials. Selectively disclosing information gets easier for an individual, when instead of having to change the tape over the hidden information, they can just select what they want to share. But the translation also brings new problems with it. All physical credentials from the same type, like a Swiss government ID, have general security mechanisms, so using those mechanisms for individual verification does not reveal any information. In the digital world, cryptographic signatures are used as a sign of validity, integrity and authenticity of the data. Those signatures are individual per VC. This means that each credential has its own identifier: the signature that is used to protect it. \\
+It is important to understand the difference between physical and digital credentials. First we need to establish that physical credentials can only be used in the physical world, where digital credentials can be used both in the physical and digital world and provide more security and privacy. It is possible that a verifier would accept a physical credential, where all the information that is not needed is taped over, as long as they can verify the validity of the credential (even though one would get weird looks). With that, selective disclosure is achieved. Also, for example when signing a contract, no identifying data is stored by the verifier, as they only check if the individual really is who they say they are. And with that we have the unlinkability. But in the digital world this is different, everything is logged and saved. An individual cannot use their physical credential for a digital interaction. That is why physical credentials need to be translated to digital credentials. Selectively disclosing information gets easier for an individual, when instead of having to change the tape over the hidden information, they can just select what they want to share. But the translation also brings new problems with it. All physical credentials from the same type, like a Swiss government ID, have general security mechanisms, so using those mechanisms for individual verification does not reveal any information. In the digital world, cryptographic signatures are used as a sign of validity, integrity and authenticity of the data. Those signatures are individual per VC. This means that each credential has its own identifier: the signature that is used to protect it. \\
 
 BBS has a solution for this problem. Besides creating the signatures that protect the data and letting the individuals selectively disclose that data, there is a mechanism that allows to randomize the signature, without invalidating it. This allows the verifier to confirm an unlinkable presentation.  \\
 
@@ -122,6 +126,8 @@ Furthermore we will use an extension of VCs called verifiable presentations (VP)
 To send a VP between a holder and a verifier, we use OpenID Connect for Verifiable Presentations (OIDC4VP)\cite{oidc4vp}.
 We assume secure channels are used for the OIDC4VP communication.\\
 
+Now that we know the different technologies and what they do, we can define the goal of this thesis. We want to analyze if the unlinkability provided by BBS breaks when using it in conjunction with VCs and OIDC4VP in a real world scenario.
+
 
 \chapter{The BBS Signature Scheme}
 The BBS Signature Scheme\cite{bbs-signature-scheme} is a multi-message signature scheme, supporting selective-disclosure and the proof of the knowledge of a signature which in turn creates unlinkability. These features makes this signature scheme an integral part of SSI.\\
@@ -129,21 +135,17 @@ The BBS Signature Scheme\cite{bbs-signature-scheme} is a multi-message signature
 \noindent
 But what do these features really mean? \\
 
-Normal cryptographic signatures are only able to sign one message at a time, which is viable for digital credentials which contain multiple messages. To sign those credentials, a multi-message signature is needed, which is provided by BBS. The resulting signature provides data integrity for the messages. Important to note is also the fixed size of the signature. No matter the amount and sizes of the messages, the signature lenght stays the same, thus removing any links between the signature and the signed messages.\\
+Normal cryptographic signatures are only able to sign one message at a time, which is viable for digital credentials which contain multiple messages. To sign those credentials; a multi-message signature is needed, which is provided by BBS. The resulting signature provides data integrity for the messages. Important to note is also the fixed size of the signature. No matter the amount and sizes of the messages, the signature length stays the same, thus removing any links between the signature and the signed messages.\\
 
-Now we have a signed set of messages and we would like to present them. All the messages can be presented and verified together using the original signature. The holder may want to only present a sub set of the original messages, selectively disclosing them. To verify a BBS signature, the verifier would need all the data that was signed, so only revealing a part of the data would not work. To be able to that, the holder must generate a new BBS signature, called a BBS proof, which is generated using the original siganture. This new signature is valid for the sub set of the revealed messages with the added protection of proving to the verifier the knowledge of the original signature. This last part is important, as a verifier only trusts the original issuer of a credential and therefore only trusts the original signature.\\
+Now we have a signed set of messages and we would like to present them. All the messages can be presented and verified together using the original signature. The holder may want to only present a sub set of the original messages, selectively disclosing them. To verify a BBS signature, the verifier would need all the data that was signed, so revealing only a part of the data would not work. To be able to that, the holder must generate a new BBS signature, called a BBS proof, which is generated using the original siganture. This new signature is valid for the sub set of the revealed messages with the added protection of proving to the verifier the knowledge of the original signature. This last part is important, as a verifier only trusts the original issuer of a credential and therefore only trusts the original signature.\\
 
-The holder has generated a BBS proof and presented it to a verifier. Now the same holder would like to present the same data to the same verifier again. The easy way would be to use the same proof from the previous presentation. This would create a link to the previous presentation, as the proof value would be an identifier. To prevent the linking of presentations, a new proof must be created for each presentation, as these proofs are random for each generation. With that we have unlinkablity between presentations.
+The holder has generated a BBS proof and presented it to a verifier. Now the same holder would like to present the same data to the same verifier again. The easy way would be to use the same proof from the previous presentation. This would create a link to the previous presentation, as the proof value would be an identifier. To prevent the linking of presentations, a new proof must be created for each presentation, as these proofs are random for each generation. With that we have unlinkability between presentations.
 
 
 \chapter{Use Cases}
 \label{chap:usecase}
 
 \section{Use Case 1 (why use vc)}
-
-\section{Use Case 2 (why use pseudonyms)}
-
-\section{Use Case 3 (why use link secrets)}
 
 
 \chapter{Verifiable Credentials and Verifiable Presentations}
@@ -156,9 +158,9 @@ Verifiable credentials\cite{verifiable-credentials} are JSON-LD data models, des
 The idea is to be able to translate physical credentials, like an ID or a driver's license, into the digital world.
 These VCs are generated and signed cryptographically by an issuer, like a government.
 In this thesis we will use the BBS Signature Scheme to sign the VC.
-The content of VC is meta-data, like the life-time or an ID, and an object containing the data that wants to be stored, most of the time data that belongs to a specific holder.
-In the case of a government issued ID, these can be attributes like birthday, first and last name and so on.
-After creation, the issuer send the VC to the holder.\\
+The content of VC is meta-data, like the life-time or an ID, and an object containing the data that wants to be stored, most of the time, data that belongs to a specific holder.
+In the case of a government-issued ID, these can be attributes like birthday, first and last name and so on.
+After creation, the issuer sends the VC to the holder.\\
 
 Now the holder would like to present this VC to a verifier.
 Using the VC, the holder can generate a verifiable presentation\cite{verifiable-credentials}, which is very close to a VC in structure.
@@ -504,7 +506,7 @@ Now all the data is in the correct format to generate a BBS Signature.
 
 \subsubsection{Generate and serialize the signature}
 \label{subsec:signvc}
-This algorithm generates a BBS Signature using the inputed data.\\
+This algorithm generates a BBS Signature using the input data.\\
 
 The inputs for this algorithm are the hashed data \textbf{hash\_data} and a hmac key \textbf{hmac\_key}.\\
 
@@ -902,7 +904,7 @@ Note: It was suggested that the possibility to use KMAC with SHA3-256 should be 
 
 \chapter{OpenID for Verifiable Presentations}
 Now that we know how to create and sign VCs/VPs, we want to be able to send them to the other parties.
-In this thesis we will only look at the communication between a holder and a verifier, so how VPs are transmitted.
+In this thesis, we will only look at the communication between a holder and a verifier, so how VPs are transmitted.
 As the message layer we use OpenID for Verifiable Presentations(OIDC4VP)\cite{oidc4vp}.
 The goal of this chapter is to analyze if OIDC4VP leaks data or even breaks linkability.
 
@@ -1112,9 +1114,9 @@ The holder send the reponse code to the redirect uri, which is in another part o
 
 
 \chapter{Sandbox}
-While researching for the intergration of BBS into VCs, I came by the \textit{Data Integrity BBS Cryptosuites v1.0}\cite{bbsvc} specification.
-This specification contained all the necessary information about how to process a VC into statements, selectively disclose those staments, sign the VC and then also verify that VC.\\
-Sadly, the specification was a bit of a mess (it was updated recently, so it is much better now). That is why I talked with Greg Bernstein, one of the authors of the specification, which linked me to his test implementation. Using that implementation I went trough the specification and described all the steps in chapter \ref{chap:vpnvc}. I also used the same implementation to generate all the VCs \& VPs seen in this thesis.\\
+While researching for the integration of BBS into VCs, I came by the \textit{Data Integrity BBS Cryptosuites v1.0}\cite{bbsvc} specification.
+This specification contains all the necessary information about how to process a VC into statements, selectively disclose those statements, sign the VC and then also verify that VC.\\
+Sadly, the specification was a bit of a mess (it was updated recently, so it is much better now). That is why I talked with Greg Bernstein, one of the authors of the specification, which linked me to his test implementation. Using that implementation I went through the specification and described all the steps in chapter \ref{chap:vpnvc}. I also used the same implementation to generate all the VCs \& VPs seen in this thesis.\\
 
 If you, the reader, would also like to know how everything works, you can download the library here: \url{test url}.\\
 
@@ -1124,40 +1126,44 @@ Here some quick tips how to use the library:
 	\item Inside the /examples/input folder there are different files that can be changed. example.json contains the VC structure, mandatory.json the mandatory pointers and selective.json the selective pointers
 	\item To run files, cd into the /examples directory and run 'node <filename.js>'
 	\item Running createSignedBase.js generates a signed VC, which can be found in the /examples/output folder
-	\item Running verifySignedBase.js verifies the generated VC, and prints the result in the terminal
-	\item Running deriveDocument.js generates a derived VC, using the before generated signed VC and the selective pointers. The derived VC can be also found int the /examples/output folder
+	\item Running verifySignedBase.js verifies the generated VC and prints the result in the terminal
+	\item Running deriveDocument.js generates a derived VC, using the before generated signed VC and the selective pointers. The derived VC can also be found in the /examples/output folder
 	\item Running verifyDerivedDocument.js verifies the derived VC, and prints the result in the terminal
-	\item If you want to create a custom context, create a new js file in /examples/contexts. Then import the new file into /examples/documentLoader.js and add the new url to the existing list.
+	\item If you want to create a custom context, create a new js file in /examples/contexts. Then import the new file into /examples/documentLoader.js and add the new url to the existing list
 \end{itemize}
 
 Do not forget to run 'npm i' in the root folder after downloading the library, to install all dependencies.
 
 
 \chapter{Future Work}
-In the timeframe of this thesis, not all planned technologies were analyzed. These can be part of future works to extend the features of this stack. These features are Blind BBS Signatutes, BBS Pseudonyms and Link Secrets. \\
+In the timeframe of this thesis, not all planned technologies were analyzed. These can be part of future works to extend the features of this stack. These features are Blind BBS Signatures, BBS Pseudonyms and Link Secrets. \\
 
-Besides theses technologies there are other points for the future. One point would be to find a concrete use case. Even tho there is a use-case described in chapter \ref{chap:usecase}, that use case is only demonstrative purposes. A good use case which takes advantage of all technologies must still be researched. The second point would be the implementation and testing. This thesis only contains theoretical analysis of the different technologies. Implementations using different programming languages might create new problems which were not part of this thesis. \\
+In this thesis, the use case presented in chapter \ref{chap:usecase} is only for demonstrative purposes. We don't yet have a concrete use case, where all the features of the described technologies really show their usefulness. With time, when digitalizing credentials becomes more common, one might find a use case where selective disclosure and unlinkability are very important. \\
+
+An other point for future work would be the implementation and testing. This thesis only contains theoretical analysis of the different technologies. Implementations using different programming languages might create new problems which were not part of this thesis. \\
 
 At last, the communication between an issuer and a holder must be analyzed. OpenID Connect for Verifiable Presentations would be used, but this was excluded from this thesis.
 
 
 \chapter{Conclusion}
-This thesis was very interesting to research and write. After learning how BBS works under the hood the semester before for the Project 2 module, learning how to integrate it with other technologies was very interesting and challenging. After setting up the project, looking at the risks and arranging the different sprints or sub-goals for 3 weeks, I was ready to start researching. \\
+The most important thing to say is that \textbf{it works}! The goal of this thesis, to analyze the inner workings of the different technologies and to find solutions to keep the unlinkability intact, is reached.\\
 
-The first step was to find out how the verifiable credentials work. After reading the VC specification for some time, I encountered two problems. The first problem was the sheer size of the specification. There were so many optional features or different ways to do something that I had to narrow it down. So after sometime testing, I defined a minimal set of features defined in chapter \ref{sec:usedvcconcepts}. Based on that I could then create a VC and concentrate on how to add BBS into the mix, which was the second problem. After some research if found the \textit{Data Integrity BBS Cryptosuites v1.0}\cite{bbsvc} specification, which specified exactly how to merge both technologies. Problem was, it was not comprehensible. In the time after my research into that topic, the specification was updated and is thus more readable, but it was really hard to understand. That is why I contacted one of the Authors of the specification, Greg Bernstein, which referred me to his implementation. Using that implementation I then understood the different steps of the specification and wrote them up. After finishing writing up all the algorithms, I searched for security problems. Two problems were found, one in the algorithm of the VC transformation (so that the VC could be signed) and a second one regarding identifying meta-data, which were both solved. At the end of the thesis a third problem was found, but it was not analyzed because of time constraints. This problem is about the signing of a VP. The verifier doesn't trust the holder, so how can the holder sign the VP that he generated. This is something that should be analyzed in future work. \\
+It was very interesting to research for this project. After learning how BBS works under the hood the semester before for the Project 2 module, learning how to integrate it with other technologies was very interesting and challenging. After setting up the project, looking at the risks and arranging the different sprints and sub-goals for 3 weeks, I was ready to start researching. \\
 
-After finishing up researching VCs, the next was OpenID Connect for Verifiable Presentations. Here again, the first step was to read the specification. This time it was not as extensive as the VC specification, and there not many different options, so it was more straight forward. So after a week of reading and documenting, this step of the process was done. \\
+The first step was to find out how the verifiable credentials work. After reading the VC specification for some time, I encountered two problems. The first problem was the sheer size of the specification. There were so many optional features or different ways to do something that I had to narrow it down. So after sometime testing, I defined a minimal set of features found in chapter \ref{sec:usedvcconcepts}. Based on that I could then create a VC and concentrate on how to add BBS into the mix, which was the second problem. After some research I found the \textit{Data Integrity BBS Cryptosuites v1.0}\cite{bbsvc} specification, which states exactly how to merge both technologies. Problem was, it was not comprehensible. In the time after my research into that topic, the specification was updated and is thus more readable, but it was really hard to understand. That is why I contacted one of the authors of the specification, Greg Bernstein, which referred me to his implementation. Using that implementation I then understood the different steps of the specification and wrote them up. After finishing analyzing all the algorithms, I searched for security problems. Two problems were found, one in the algorithm of the VC transformation (so that the VC could be signed) and a second one regarding identifying meta-data, which were both solved. At the end of the thesis a third problem popped up, but it was not analyzed because of time constraints. This problem is about the signing of a VP. The verifier doesn't trust the holder, so how can the holder sign the VP that he generated. This is something that should be analyzed in future work. \\
 
+After finishing up researching VCs, the next topic was OpenID Connect for Verifiable Presentations. Here again, the first step was to read the specification. This time it was not as extensive as the VC specification, and there were not many different optional features, so it was more straight forward. So after a week of reading and documenting, this step of the process was done. \\
+
+\newpage
 After that there was not much time left until the due date, so out of time constraint reasons, the research on Blind BBS Signatures, pseudonyms and link secrets was not done. \\
 
-Another thing besides the messy VC-BBS specification creating time problems, was the documentation. For me, writing is very difficult and takes a lot of time and tries for getting it to an acceptable level. For example the research, documenting and implementation of VCs \& VPs should have only take one week each. In the end it was 3 weeks of research and 4 weeks of testing Greg Bernsteins library and documenting. At the same time I needed to write the book entry and the poster, create my defense to make a test presentation with expert and guests and also create the video, the small presentation and prepare the demo day. Each of those tasks took time away from the main task of documenting and thus leaving me with less time than expected. \\
+Another thing besides the messy VC-BBS specification creating time problems, was the documentation. For me, writing is very difficult and takes a lot of time and tries for getting it to an acceptable level. For example the research, documenting and implementation of VCs \& VPs should have only take one week each. In the end it was 3 weeks of research and 4 weeks of testing Greg Bernsteins library and documenting the findings. At the same time I needed to prepare the book entry and the poster, create my defense to make a test presentation with expert and guests and also create the video, the small presentation and prepare the demo day. Each of those assignments took time away from the main task of documenting and thus leaving me with less time than expected. \\
 
-At the end of the day, I'm happy with my results. I've learned a lot of new things about different technologies, but also about researching and documenting. It was a very interesting semester, with a lot of new things. I will use the acquired knowledge to implement this technology stack, and to keep researching the missing features. \\
-
-The most important thing to say is that \textbf{it works}! The goal of this thesis was achieved, by showing that there is a way to create unlinkable digital credentials.
+At the end of the day, I'm happy with my results. I've learned a lot of new things about different technologies, but also about researching and documenting. It was a very interesting semester, with a lot of up and downs. I will use the acquired knowledge to implement this technology stack and to keep researching the missing features.
 
 
 \bibliographystyle{plain}
 \bibliography{refs}
+
 
 \end{document}
