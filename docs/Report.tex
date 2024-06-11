@@ -83,7 +83,7 @@
 \maketitle
 
 \addchap{Abstract}
-This thesis focuses on analyzing the unlinkability of verifiable credentials when combined with the BBS signature scheme through practical implementation. Initially, it examines the features and key concepts of verifiable credentials, followed by a detailed exploration of their functionality. Algorithms for signing and verifying verifiable credentials, as well as creating selective disclosure verifiable presentations (VPs), are provided. The security concerns associated with using OpenID Connect for verifiable presentations are also analyzed. The research concludes that the implemented methods achieve the desired unlinkability, with potential future enhancements identified to further improve the unlinkability of verifiable credentials in digital identity systems.
+This thesis focuses on analyzing the unlinkability of verifiable credentials when combined with the BBS Signature Scheme through practical implementation. Initially, it examines the features and key concepts of verifiable credentials, followed by a detailed exploration of their functionality. Algorithms for signing and checking verifiable credentials, as well as creating selective disclosure verifiable presentations (VPs), are provided. The security concerns associated with using OpenID Connect for verifiable presentations are also analyzed. The research concludes that the implemented methods achieve the desired unlinkability, with potential future enhancements identified to further improve the unlinkability of verifiable credentials in digital identity systems.
 
 
 %------------ TABLEOFCONTENTS ----------------
@@ -95,7 +95,7 @@ This thesis focuses on analyzing the unlinkability of verifiable credentials whe
 \chapter{Introduction}
 In today's digital world, digital identities are mostly managed by centralized entities, like big corporations or governments. This may be easier for individuals as they don't need to manage their data. As the individuals don't have the control how their data is handled, this approach leads to problems with privacy and security. \\
 
-Self-sovereign Identity (SSI)\cite{self-sovereign-identity} is a concept where individuals can control their digital identity and what data is shared with whom. The idea is to allow those individuals to store their data on their own devices, without centralized entities playing middleman. With the data on the device of the individual, they may selectively disclose information, and thus preserve privacy. Another important aspect of SSI is the unlinkability between presentations, meaning that there is no link back to an individual when different data is presented to different verifying parties. Today's centralized entities always know which page an individual visited or what they bought, as they can link all this information back to one individual. A good example for this are targeted ads, which are based on previously revealed information. \\
+Self-sovereign Identity (SSI)\cite{self-sovereign-identity} is a concept where individuals can control their digital identity and what data is shared with whom. The idea is to allow those individuals to store their data on their own devices, without centralized entities playing middleman. With the data on the device of the individual, they may selectively disclose information, and thus preserve privacy. Another important aspect of SSI is the unlinkability between presentations, meaning that there is no link back to an individual when different data is presented to multiple verifying parties. Today's centralized entities always know which page an individual visited or what they bought, as they can link all this information back to one individual. A good example for this are targeted ads, which are based on previously revealed information. \\
 
 
 \begin{figure}[h]
@@ -136,18 +136,18 @@ The BBS Signature Scheme\cite{bbs-signature-scheme} is a multi-message signature
 \noindent
 But what do these features really mean? \\
 
-Normal cryptographic signatures are only able to sign one message at a time, which is viable for digital credentials which contain multiple messages. To sign those credentials; a multi-message signature is needed, which is provided by BBS. The resulting signature provides data integrity for the messages. Important to note is also the fixed size of the signature. No matter the amount and sizes of the messages, the signature length stays the same, thus removing any links between the signature and the signed messages.\\
+Normal cryptographic signatures are only able to sign one message at a time, which is viable for digital credentials which contain multiple messages. To sign those credentials, a multi-message signature is needed, which is provided by BBS. The resulting signature provides data integrity for the messages. Important to note is also the fixed size of the signature. No matter the amount and sizes of the messages, the signature length stays the same, thus removing any links between the signature and the signed messages.\\
 
-Now we have a signed set of messages and we would like to present them. All the messages can be presented and verified together using the original signature. The holder may want to only present a sub set of the original messages, selectively disclosing them. To verify a BBS signature, the verifier would need all the data that was signed, so revealing only a part of the data would not work. To be able to that, the holder must generate a new BBS signature, called a BBS proof, which is generated using the original siganture. This new signature is valid for the sub set of the revealed messages with the added protection of proving to the verifier the knowledge of the original signature. This last part is important, as a verifier only trusts the original issuer of a credential and therefore only trusts the original signature.\\
+Now we have a signed set of messages and we would like to present them. All the messages can be presented and verified together using the original signature. The holder may want to only present a sub set of the original messages, selectively disclosing them. To verify a BBS signature, the verifier would need all the data that was signed, so revealing only a part of the data would not work. To be able to that, the holder must generate a new BBS signature, called a BBS proof, which is generated using the original signature. This new signature is valid for the sub set of the revealed messages with the added protection of proving to the verifier the knowledge of the original signature. This last part is important, as a verifier only trusts the original issuer of a credential and therefore only trusts the original signature.\\
 
 The holder has generated a BBS proof and presented it to a verifier. Now the same holder would like to present the same data to the same verifier again. The easy way would be to use the same proof from the previous presentation. This would create a link to the previous presentation, as the proof value would be an identifier. To prevent the linking of presentations, a new proof must be created for each presentation, as these proofs are random for each generation. With that we have unlinkability between presentations.
 
 
 \chapter{Use Case}
 \label{chap:usecase}
-A university issues their diplomas as verifiable credentials to their students. Those contain multiple attributes, like degree, name, university and so on. A student would now like to join an online education platform. Only students with an degree in computer science are allowed to to join the platform.\\
+A university issues their diplomas as verifiable credentials to their students. Those contain multiple attributes, like degree, name, university and so on. A student would now like to join an online education platform. Only students with a degree in computer science are allowed to to join the platform.\\
 
-The student can now generate a selectively diclosed VP, which only contains the degree prooving that they studied computer science. All the other attributes stay hidden. The student can now present that VP and is able to join the online course. As each VP is unlinkable because of the BBS proof, the activity of the student stays secret and thus ensures their privacy.
+The student can now generate a selectively disclosed VP, which only contains the degree prooving that they studied computer science. All the other attributes stay hidden. The student can now present that VP and is able to join the online course. As each VP is unlinkable because of the BBS proof, the activity of the student stays secret and thus ensures their privacy.
 
 
 \chapter{Verifiable Credentials and Verifiable Presentations}
@@ -161,7 +161,7 @@ The idea is to be able to translate physical credentials, like an ID or a driver
 These VCs are generated and signed cryptographically by an issuer, like a government.
 In this thesis we will use the BBS Signature Scheme to sign the VC.
 The content of VC is meta-data, like the life-time or an ID, and an object containing the data that wants to be stored, most of the time, data that belongs to a specific holder.
-In the case of a government-issued ID, these can be attributes like birthday, first and last name and so on.
+In the case of a government-issued ID, these can be attributes like birthdate, first and last name and so on.
 After creation, the issuer sends the VC to the holder.\\
 
 Now the holder would like to present this VC to a verifier.
@@ -917,7 +917,7 @@ The goal of this chapter is to analyze if OIDC4VP leaks data or even breaks link
 
 \section{How does OIDC4VP work?}
 OIDC4VP is a very easy to use protocol.
-There are just two parties, the holder and the verifier (which can be split up into holder and wallet, but for the sake of simplicity we merge them).
+There are just two parties, the verifier and the holder (which can be split up into holder and wallet, but for the sake of simplicity we merge them).
 After the initial interaction between a holder and verifier, these two parties can start a new session, present the VP and close the session.
 
 \begin{figure}[h]
@@ -1164,13 +1164,13 @@ Another thing besides the messy VC-BBS specification creating time problems, was
 
 At the end of the day, I'm happy with my results. I've learned a lot of new things about different technologies, but also about researching and documenting. It was a very interesting semester, with a lot of up and downs. I will use the acquired knowledge to implement this technology stack and to keep researching the missing features.\\
 
-A big thanks goes out to my advisors, Laube Annett and Reto Koenig. Dealing with me on a weekly basis must have been tiring. They also really helped me to get throught documenting everything. Also a big thanks to my expert, Andreas Spichiger, who took time to listen to my presentations and give me feedback. This feedback helped me to create a better defense.\\
+A big thanks goes out to my advisors, Annett Laube and Reto Koenig. Dealing with me on a weekly basis must have been tiring. They also really helped me to get throught documenting everything. Also a big thanks to my expert, Andreas Spichiger, who took time to listen to my presentations and critiqued it. This feedback helped me to create a better defense.\\
 
 Also very important are my mother, my sister and my aunt. All these women generously helped me by proof reading the documentation, listening to my presentations and by being my guinea pigs to see if the text was abstract enough. Big thanks to them!\\
 
-Last but not least, big thanks to my girlfriend. Without her i would have probably starved to death. Because of her I got a nice meal each evening, without needing to consume time cooking. Those meals gave me energy to keep going. And also a big thanks for helping me in coming up with ideas on how to explain ceratin things.\\
+Last but not least, big thanks to my girlfriend. Without her I would have probably starved. Because of her I got a nice meal each evening, without needing to consume time cooking. Those meals gave me energy to keep going. And also a big thanks for helping me in coming up with ideas on how to explain certain things.\\
 
-And on a small side note, also small thanks to myself on not giving up after learning that there is not time to implement something.
+And on a small side note, also small thanks to myself on not giving up after learning that there is no time to implement something.
 
 
 \bibliographystyle{plain}
