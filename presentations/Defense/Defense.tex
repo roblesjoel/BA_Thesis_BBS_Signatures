@@ -1,0 +1,294 @@
+\documentclass[
+	german,%globale Übergabe der Hauptsprache
+%	logofile=example-image-duck, %Falls die Logo Dateien nicht vorliegen
+	authorontitle=true,
+	]{bfhbeamer}
+
+
+\usepackage[main=german]{babel}
+\usepackage{caption}
+
+% Der folgende Block ist nur bei pdfTeX auf Versionen vor April 2018 notwendig
+\usepackage{iftex}
+\ifPDFTeX
+\usepackage[utf8]{inputenc}%kompatibilität mit TeX Versionen vor April 2018
+\fi
+
+
+%Makros für Formatierungen der Doku
+%Im Allgemeinen nicht notwendig!
+\let\code\texttt
+
+\title{Bachelor Thesis}
+\subtitle{Unlinkability of Verifiable Credentials in a practical approach}
+\author[J. Robles]{Joel Robles}
+\institute{TI}
+\titlegraphic*{\includegraphics{example-image-duck}}%is only used with BFH-graphic and BFH-fullgraphic
+\date{June 5, 2024}
+
+% \setbeamertemplate{page number in foot}[framenumber]
+
+%Activate the output of a frame number:
+\setbeamertemplate{footline}[frame number]
+
+
+\AtBeginSection{\sectionpage}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Inhaltsverzeichnis}
+    \tableofcontents
+\end{frame}
+
+\section{Ziel}
+
+\begin{frame}{Was ist das Ziel?}
+    \centering
+    Die Analyse, ob eine Implementation von Verifiable Credentials mit dem BBS Signature Scheme in der realen Welt, unverknüpfbarkeit beibehält
+\end{frame}
+
+\section{Self-sovereign Identity}
+
+\begin{frame}{Self-sovereign Identity (SSI)}
+    \begin{itemize}
+        \item Ist ein Konzept wo eine Person (\textbf{holder}) entscheiden kann, wer was über sie wissen darf
+        \item Holders dürfen wählen was sie offenbaren und was nicht, auch bekannt als \textbf{selective disclosure}
+        \item Erstes Problem:
+        \begin{itemize}
+            \item Holder zeigt eine Staatliche ID
+            \item Ist eine Menge von Daten oder eine Menge von \textbf{Attributen}
+            \item Die Person welche verifiziert sieht alle Attribute
+        \end{itemize}
+        \item Zweites Problem:
+        \begin{itemize}
+            \item Holder zeigt Attribute einer Person die diese verifizieren will, bekannt als \textbf{verifier}
+            \item Holder zeigt die gleichen Attribute einem zweiten \textbf{verifier}
+            \item Der holder kann ge-\textbf{linked} werden
+        \end{itemize}
+        \item Heutiger stand - Holder haben keine Kontrolle über ihre Attribute
+        \item Zukünftiger stand dank SSI - Holder haben volle Kontrolle über ihre Attribute
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Trust Triangle}
+    \begin{columns}[onlytextwidth,T]
+        \column{70mm}  
+        \begin{itemize}
+            \item Wie weis ein verifier das eine Menge von Attributen (\textbf{credential}) valid ist?
+            \item Er vertraut dem issuer!
+            \item Beispiel: Schweizer ID hat Hologramme
+        \end{itemize}
+
+        \column{70mm}
+
+        \begin{figure}
+            \centering
+            \includegraphics[width=70mm]{../img/trusttriangle.png}
+            \caption{Trust triangle}
+        \end{figure}
+        
+    \end{columns}
+\end{frame}
+
+\section{Verifiable Credentials}
+
+\begin{frame}{Verifiable Credentials (VC)}
+    \begin{columns}[onlytextwidth,T]
+        \column{70mm}  
+
+    \begin{itemize}
+        \item Verifiable Credentials sind eine digitale repräsentation von Physischen credentials
+        \item JSON-LD repräsentiert Attribute als \textbf{key-value pairs}
+        \item Beispiel:
+        \begin{itemize}
+            \item Vorname auf einer ID
+            \item Repräsentiert als \{"first\_name": "John"\}
+            \item ``first\_name'' ist der key und ``John'' ist der value
+        \end{itemize}
+    \end{itemize}
+
+    \column{70mm}
+    \begin{figure}
+        \centering
+        \includegraphics[width=70mm]{../img/VCexp.png}
+        \caption{Beispiel VC}
+    \end{figure}
+
+    \end{columns}
+\end{frame}
+
+\begin{frame}{VCs and BBS}
+    \begin{itemize}
+        \item Warum werden sie \textbf{Verifiable} Credentials genannt?
+        \item Der verifier kann ein VC, welches ihm präsentiert wurde (\textbf{Verifiable Presentation}), verifizieren, aufgrund Kryptographischen Signaturen
+        \item Diese zeigen, dass das credential seit der Ausstellung nicht verändert wurde
+        \item Wir nutzen das BBS Signature Scheme (\textbf{BBS}) 
+        \item Diese Schema bietet \textbf{selective disclosure} und \textbf{unlinkability}
+        \item Aber wie unlinkability? - Der Verifier braucht die Signatur
+        \item BBS kann \textbf{proofs} generieren
+        \item Diese beweisen das der holder die Signatur kennt, ohne diese zu offenbaren
+        \item Weiter sind proofs unverknüpfbar zwischen jeder Generierung
+    \end{itemize}
+\end{frame}
+
+\section{Verifiable Presentations}
+
+\begin{frame}{Verifiable Presentation (VP)}
+    \begin{columns}[onlytextwidth,T]
+        \column{70mm}  
+        \begin{itemize}
+            \item Ein holder würde gerne ein VC präsentieren
+            \item Dafür werden \textbf{Verifiable Presentations} genutzt
+            \item BBS kann nur staments signieren
+            \item Der \textbf{RDF} canonicalization Algorithmus, welcher statements aus key-value pairs generiert
+        \end{itemize}
+
+        \column{70mm}
+
+        \begin{figure}
+            \centering
+            \includegraphics[width=70mm]{../img/VPcanon.png}
+            \caption{Beispiel canonicalized VP}
+        \end{figure}
+
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Der RDF Algorithmus}
+    \centering
+    JSON zu staments
+    \begin{columns}[onlytextwidth,T]
+        \column{70mm}  
+        \begin{figure}
+            \centering
+            \includegraphics[width=70mm]{../img/VCexp.png}
+            \caption{Beispiel VC}
+        \end{figure}
+
+        \column{70mm}  
+        \begin{figure}
+            \centering
+            \includegraphics[width=70mm]{../img/statements.png}
+            \caption{Beispiel statemetns}
+        \end{figure}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Der RDF Algorithmus}
+    \centering
+    Statements sortieren
+    \begin{columns}[onlytextwidth,T]
+        \column{70mm}  
+        \begin{figure}
+            \centering
+            \includegraphics[width=70mm]{../img/statements.png}
+            \caption{Beispiel statemetns}
+        \end{figure}
+
+        \column{70mm}  
+        \begin{figure}
+            \centering
+            \includegraphics[width=70mm]{../img/hashed.png}
+            \caption{Beispiel sortierung}
+        \end{figure}
+    \end{columns}
+\end{frame}
+
+\section{Sicherheitsüberlegungen von VC/VPs}
+
+\begin{frame}{Permutation von statements}
+    \begin{itemize}
+        \item Holder präsentiert ein VP mit verborgenen Zivilstands-Attributen
+        \item Holder heiratet bekommt ein neues VP mit geändertem Zivilistand
+        \item Holder präsentiert das aktualisierte VP mit verborgenem Zivilstand
+        \item \textbf{Datenleck}: Der verifier kann herausfinden, dass sich der Zivilistand geändert hat
+        \item Damit das nicht passieren kann, muss der issuer immer die staments zufällig permutieren
+        \item Der issuer muss die Permutation dem holder bekannt geben, aber \textbf{nie} dem verifier
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Verknüpfbarkeit von Identifikatoren \& Metadaten}
+    \begin{itemize}
+        \item VCs können Metadaten wie Ablaufdatum beinhalten
+        \item Falls das Ablaufdatum sehr genau ist (z.B. auf die Sekunde), führt dies zu Verknüpfbarkeit
+        \item Ablaufdatum auf einen Tag genau, um die Verknüpfbarkeit zu umgehen
+        \item VCs und VPs können auch ids für z.B. Entziehung beinhalten, welche zu Verknüpfbarkeit führen
+        \item Dafür kan man Zero-Knowledge proofs verwenden, um zu zeigen das man nicht Teil einer Entzugs-Liste ist
+    \end{itemize}
+\end{frame}
+
+\section{OpenID Connect for Verifiable Presentations}
+
+\begin{frame}{Transport zwischen holder und verifier}
+    \begin{figure}
+        \centering
+        \includegraphics[width=70mm]{../img/OIDC4VP.png}
+        \caption{OpenID connect for Verifiable Presentations}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{OIDC4VP Fluss}
+    \begin{figure}
+        \centering
+        \includegraphics[width=70mm]{../img/OIDC4VPFlow.png}
+        \caption{OpenID connect for Verifiable Presentations Fluss}
+    \end{figure}
+\end{frame}
+
+\section{Sicherheitsüberlegungen von OIDC4VP}
+
+\begin{frame}{Replay attack}
+    \begin{itemize}
+        \item Der holder sendet dem verifier ein VP
+        \item Ein \textit{Man in the Middle} speichert die Vorstellung
+        \item Der \textit{Man in the Middle} kann das gespeicherte VP wiederverwenden
+        \item Um dieses Problem zu umgehen, wird eine zufalls Nummer genutzt (challange-response)
+    \end{itemize}
+\end{frame}
+
+% \begin{frame}{Session fixation attack}
+%     \begin{itemize}
+%         \item Der Holder legt das VP im Endpoint des Verifiers ab
+%         \item Falls das System des Verifiers infisziert ist, kann ein Angreifer das VP einsehen
+%         \item Der endpoint des Verifiers retourniert eine redirect URL und ein response code
+%         \item Dieser code wird an das Terminal weitergeleitet, somit kann das infiszierte System das VP nicht einsehen
+%     \end{itemize}
+% \end{frame}
+
+\section{Fazit}
+
+\begin{frame}{Fazit}
+    \begin{itemize}
+        \item Was hat BBS für Vorteile?
+        \begin{itemize}
+            \item Selective-disclosure und unlinkability
+        \end{itemize}
+        \item Wie funktioneren VCs/VPs?
+        \item Wie kann man VCs/VPs und BBS verbinden?
+        \begin{itemize}
+            \item Kanonisierung durch RDF Algorithmus
+        \end{itemize}
+        \item Wie werden die VPs von holder zu verifier gesendet?
+        \begin{itemize}
+            \item OpenID connect for Verifiable Presentations
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Fazit}
+    \centering
+    \textbf{\huge Es funktioniert!}
+\end{frame}
+
+\section{Ausblick}
+
+\begin{frame}{Ausblick}
+    \begin{itemize}
+        \item Link Secrets und Blind BBS Signatures für linkability und selective disclosure analysieren
+        \item Implementieren und testen
+    \end{itemize}
+\end{frame}
+
+\end{document}
