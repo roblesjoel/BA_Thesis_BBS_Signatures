@@ -39,4 +39,4 @@ This file will be part of the project management document.
 
 1. There is the possibility that the implementation of Link Secrets breaks the unlinkability of BBS. If that is the case, the implementation of the Link Secrets needs to be reworked so there is no linkability. Possibility: Middle
 
-2. There is the possibility that the implementation of Link Secrets allows the holder of multiple VCs to Link the together on a different Secret. If that is the case, the implemetation of the Link Secrets needs to be reworked so that this os no longer possible: Possibility: High
+2. There is the possibility that the implementation of Link Secrets allows the holder of multiple VCs to Link the together on a different Secret. If that is the case, the implementation of the Link Secrets needs to be reworked so that this os no longer possible: Possibility: High

@@ -1,0 +1,35 @@
+{
+    "name": "@grottonetworking/bbs-2023-cryptosuite",
+    "version": "0.1.0",
+    "description": "JavaScript implementation of the BBS-2023 cryptosuite",
+    "type": "module",
+    "scripts": {
+        "test": "mocha"
+    },
+    "author": "Dr. Greg M. Bernstein",
+    "license": "BSD-3-Clause",
+    "engines": {
+        "node": ">=18"
+    },
+    "browser": {
+        "crypto": false,
+        "./lib/randomBytes.js": "./lib/randomBytes-browser.js"
+    },
+    "dependencies": {
+        "@grottonetworking/bbs-signatures": "^0.1.5",
+        "@noble/curves": "^1.1.0",
+        "@noble/hashes": "^1.3.1",
+        "cbor": "^9.0.1",
+        "json-pointer": "^0.6.2",
+        "jsonld": "^8.2.0",
+        "klona": "^2.0.6",
+        "multiformats": "^12.0.1",
+        "uuid": "^9.0.1"
+    },
+    "devDependencies": {
+        "chai": "^4.3.10",
+        "jsdoc-to-markdown": "^8.0.0",
+        "mocha": "^10.2.0",
+        "standard": "^17.1.0"
+    }
+}
