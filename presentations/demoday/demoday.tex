@@ -25,7 +25,7 @@
 
 \title{Bachelor Thesis}
 \subtitle{Unlinkability of Verifiable Credentials in a practical approach}
-\author[J. Robles]{Joel Robles}
+\author[J. Robles]{Joel Robles - Adv. Dr. Annett Laube, Dr. Reto Koenig - Exp. Dr. Andreas Spichiger}
 \institute{TI}
 \titlegraphic*{\includegraphics{example-image-duck}}%is only used with BFH-graphic and BFH-fullgraphic
 \date{June 14, 2024}
@@ -94,16 +94,16 @@
     \end{columns}
 \end{frame}
 
-\section{Problem}
+% \section{Probleme}
 
-\begin{frame}{Was ist das Problem?}
-    \begin{itemize}
-        \item Wir haben ja schon funktionierende credentials?
-        \item Zukünftig werden diese digitalisiert
-        \item Kreiert verschiedene Probleme
-        \item Wie umsetzen \& Sicherheits-Probleme
-    \end{itemize}
-\end{frame}
+% \begin{frame}{Was sind die Probleme?}
+%     \begin{itemize}
+%         \item Wir haben ja schon funktionierende credentials?
+%         \item Zukünftig werden diese digitalisiert
+%         \item Kreiert verschiedene Probleme
+%         \item Wie umsetzen \& Sicherheits-Probleme
+%     \end{itemize}
+% \end{frame}
 
 \section{Verifiable Credentials \& Verifiable Presentations}
 
@@ -119,7 +119,7 @@
         \begin{figure}
             \centering
             \includegraphics[width=70mm]{../img/VC.png}
-            \caption{Beispiel VC}
+            \caption{VC Aufbau}
         \end{figure}
 
     \end{columns}
@@ -180,7 +180,7 @@
         \begin{figure}
             \centering
             \includegraphics[width=70mm]{../img/VP.png}
-            \caption{Beispiel canonicalized VP}
+            \caption{VP Aufbau}
         \end{figure}
 
     \end{columns}
@@ -208,7 +208,7 @@
         \item Der holder sendet dem verifier ein VP
         \item Ein \textit{Man in the Middle} speichert die Vorstellung
         \item Der \textit{Man in the Middle} kann das gespeicherte VP wiederverwenden
-        \item Um dieses Problem zu umgehen, wird eine zufalls Nummer genutzt (challange-response)
+        \item Um dieses Problem zu umgehen, wird eine Zufallsnummer genutzt (challange-response)
     \end{itemize}
 \end{frame}
 
