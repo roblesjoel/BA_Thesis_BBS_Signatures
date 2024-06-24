@@ -30,7 +30,6 @@
 *.nlo
 *.nls
 *.out
-*.pdf
 *.pyg
 *.run.xml
 *.snm
@@ -48,7 +47,6 @@
 build/
 *.fdb_latexmk
 *.xml
-*.pdf
 *.fls
 *.bcf
 *.pyg

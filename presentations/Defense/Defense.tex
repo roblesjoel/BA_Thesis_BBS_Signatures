@@ -21,10 +21,10 @@
 
 \title{Bachelor Thesis}
 \subtitle{Unlinkability of Verifiable Credentials in a practical approach}
-\author[J. Robles]{Joel Robles}
-\institute{TI}
+\author[J. Robles]{Joel Robles - Adv. Dr. Annett Laube, Dr. Reto Koenig - Exp. Dr. Andreas Spichiger | TI}
+% \institute{TI}
 \titlegraphic*{\includegraphics{example-image-duck}}%is only used with BFH-graphic and BFH-fullgraphic
-\date{June 5, 2024}
+\date{3. Juli, 2024}
 
 % \setbeamertemplate{page number in foot}[framenumber]
 
@@ -54,19 +54,8 @@
 \begin{frame}{Self-sovereign Identity (SSI)}
     \begin{itemize}
         \item Ist ein Konzept wo eine Person (\textbf{holder}) entscheiden kann, wer was über sie wissen darf
-        \item Holders dürfen wählen was sie offenbaren und was nicht, auch bekannt als \textbf{selective disclosure}
-        \item Erstes Problem:
-        \begin{itemize}
-            \item Holder zeigt eine Staatliche ID
-            \item Ist eine Menge von Daten oder eine Menge von \textbf{Attributen}
-            \item Die Person welche verifiziert sieht alle Attribute
-        \end{itemize}
-        \item Zweites Problem:
-        \begin{itemize}
-            \item Holder zeigt Attribute einer Person die diese verifizieren will, bekannt als \textbf{verifier}
-            \item Holder zeigt die gleichen Attribute einem zweiten \textbf{verifier}
-            \item Der holder kann ge-\textbf{linked} werden
-        \end{itemize}
+        \item Holders dürfen wählen was sie offenbaren und was nicht (\textbf{selective disclosure})
+        \item Alte presentationen können zu neuen verbunden werden, somit kann ein Profil kreiert werden (\textbf{unlinkability})
         \item Heutiger stand - Holder haben keine Kontrolle über ihre Attribute
         \item Zukünftiger stand dank SSI - Holder haben volle Kontrolle über ihre Attribute
     \end{itemize}
@@ -76,7 +65,9 @@
     \begin{columns}[onlytextwidth,T]
         \column{70mm}  
         \begin{itemize}
-            \item Wie weis ein verifier das eine Menge von Attributen (\textbf{credential}) valid ist?
+            \item Der holder zeigt eine staatliche ID einem verifier
+            \item Diese beinhaltet mehrere Attribute, z.B. Vorname
+            \item Wie weiss ein verifier das eine Menge von Attributen (\textbf{credential}) valid ist?
             \item Er vertraut dem issuer!
             \item Beispiel: Schweizer ID hat Hologramme
         \end{itemize}
@@ -92,7 +83,7 @@
     \end{columns}
 \end{frame}
 
-\section{Verifiable Credentials}
+\section{Verifiable Credentials \& Verifiable Presentations}
 
 \begin{frame}{Verifiable Credentials (VC)}
     \begin{columns}[onlytextwidth,T]
@@ -112,12 +103,60 @@
     \column{70mm}
     \begin{figure}
         \centering
-        \includegraphics[width=70mm]{../img/VCexp.png}
+        \includegraphics[width=70mm]{../img/VC.png}
+        \caption{VC Aufbau}
+    \end{figure}
+
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Verifiable Credentials (VC)}
+    \begin{columns}[onlytextwidth,T]
+        \column{70mm}  
+
+    \begin{itemize}
+        \item Verifiable Credentials sind eine digitale repräsentation von Physischen credentials
+        \item JSON-LD repräsentiert Attribute als \textbf{key-value pairs}
+        \item Beispiel:
+        \begin{itemize}
+            \item Vorname auf einer ID
+            \item Repräsentiert als \{"first\_name": "John"\}
+            \item ``first\_name'' ist der key und ``John'' ist der value
+        \end{itemize}
+    \end{itemize}
+
+    \column{70mm}
+    \begin{figure}
+        \centering
+        \includegraphics[width=60mm]{../img/VCSignExample.png}
         \caption{Beispiel VC}
     \end{figure}
 
     \end{columns}
 \end{frame}
+
+\begin{frame}{Probleme von digitalen credentials}
+    \begin{columns}[onlytextwidth,T]
+        \column{70mm}  
+        \textbf{Problem 1:}
+        \begin{itemize}
+            \item Holder zeigt eine Staatliche ID
+            \item Die Person welche verifiziert sieht alle Attribute
+            \item Bricht \textbf{selective-disclosure}
+        \end{itemize}
+
+        \column{70mm}  
+        \textbf{Problem 2:}
+        \begin{itemize}
+            \item Holder zeigt ein credential einem verifier
+            \item Holder zeigt die gleichen Attribute einem zweiten verifier
+            \item Der holder kann ge-linked werden
+            \item Bricht \textbf{unlinkability}
+        \end{itemize}
+
+    \end{columns}
+\end{frame}
+
 
 \begin{frame}{VCs and BBS}
     \begin{itemize}
@@ -129,11 +168,15 @@
         \item Aber wie unlinkability? - Der Verifier braucht die Signatur
         \item BBS kann \textbf{proofs} generieren
         \item Diese beweisen das der holder die Signatur kennt, ohne diese zu offenbaren
+        \item Fungieren als neue Signatur für das selectively disclosed VC
         \item Weiter sind proofs unverknüpfbar zwischen jeder Generierung
     \end{itemize}
 \end{frame}
 
-\section{Verifiable Presentations}
+\begin{frame}{BBS proofs}
+    
+\end{frame}
+
 
 \begin{frame}{Verifiable Presentation (VP)}
     \begin{columns}[onlytextwidth,T]
@@ -149,8 +192,8 @@
 
         \begin{figure}
             \centering
-            \includegraphics[width=70mm]{../img/VPcanon.png}
-            \caption{Beispiel canonicalized VP}
+            \includegraphics[width=70mm]{../img/VP.png}
+            \caption{VP Aufbau}
         \end{figure}
 
     \end{columns}
@@ -196,8 +239,6 @@
     \end{columns}
 \end{frame}
 
-\section{Sicherheitsüberlegungen von VC/VPs}
-
 \begin{frame}{Permutation von statements}
     \begin{itemize}
         \item Holder präsentiert ein VP mit verborgenen Zivilstands-Attributen
@@ -236,8 +277,6 @@
         \caption{OpenID connect for Verifiable Presentations Fluss}
     \end{figure}
 \end{frame}
-
-\section{Sicherheitsüberlegungen von OIDC4VP}
 
 \begin{frame}{Replay attack}
     \begin{itemize}
