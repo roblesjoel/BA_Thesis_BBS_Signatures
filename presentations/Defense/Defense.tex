@@ -55,7 +55,7 @@
     \begin{itemize}
         \item Ist ein Konzept, bei dem eine Person (\textbf{Holder}) entscheiden kann, wer was über sie wissen darf
         \item Holder dürfen wählen, was sie offenbaren und was nicht (\textbf{selective disclosure})
-        \item Alte Präsentationen können zu neuen verbunden werden, wodurch ein Profil kreiert werden kann (\textbf{unlinkability})
+        \item Keine Verbindung zwischen Präsentationen (\textbf{unlinkability})
         \item Heutiger Stand - Holder haben keine Kontrolle über ihre Attribute
         \item Zukünftiger Stand dank SSI - Holder haben volle Kontrolle über ihre Attribute
     \end{itemize}
@@ -65,9 +65,9 @@
     \begin{columns}[onlytextwidth,T]
         \column{70mm}  
         \begin{itemize}
-            \item Der Holder zeigt eine staatliche ID einem Verifier
+            \item Der Holder zeigt einem Verifier eine staatliche ID 
             \item Diese beinhaltet mehrere Attribute, z.B. Vorname
-            \item Wie weiss ein Verifier das eine Menge von Attributen (\textbf{Credential}) valid ist?
+            \item Wie weiss ein Verifier, dass eine Menge von Attributen (\textbf{Credential}) valid ist?
             \item Er vertraut dem Issuer!
             \item Beispiel: Schweizer ID hat Hologramme
         \end{itemize}
@@ -133,8 +133,8 @@
         \column{70mm}  
         \textbf{Problem 1:}
         \begin{itemize}
-            \item Holder zeigt eine staatliche ID
-            \item Die Person, die verifiziert, sieht alle Attribute
+            \item Holder zeigt ein Credential einem Verifier
+            \item Der Verifier, sieht alle Attribute
             \item Bricht \textbf{selective-disclosure}
         \end{itemize}
 
@@ -142,8 +142,8 @@
         \textbf{Problem 2:}
         \begin{itemize}
             \item Holder zeigt ein Credential einem Verifier
-            \item Holder zeigt die gleichen Attribute einem zweiten Verifier
-            \item Der Holder kann ge-linked werden
+            \item Holder zeigt das gleiche Credential einem zweiten Verifier
+            \item Der Holder kann ge-linked werden (Metadaten)
             \item Bricht \textbf{unlinkability}
         \end{itemize}
 
@@ -154,7 +154,7 @@
 \begin{frame}{VCs and BBS}
     \begin{itemize}
         \item Warum werden sie \textbf{Verifiable} Credentials genannt?
-        \item Der Verifier kann ein VC, welches ihm präsentiert wurde (\textbf{Verifiable Presentation}), verifizieren, aufgrund kryptographischer Signaturen
+        \item Der Verifier kann ein VC, welches ihm präsentiert wurde (\textbf{Verifiable Presentation}), aufgrund kryptographischer Signaturen verifizieren
         \item Diese zeigen, dass das Credential seit der Ausstellung nicht verändert wurde
         \item Wir nutzen das BBS Signature Scheme (\textbf{BBS}) 
         \item Dieses Schema bietet \textbf{selective disclosure} und \textbf{unlinkability}
@@ -164,6 +164,11 @@
         \item Fungieren als neue Signatur für das selectively disclosed VC
         \item Weiter sind proofs unverknüpfbar zwischen jeder Generierung
     \end{itemize}
+\end{frame}
+
+\begin{frame}{BBS proofs}
+    \centering
+    \includegraphics[width=120mm]{../img/BBSProofGen.png}
 \end{frame}
 
 \begin{frame}{BBS proofs}
@@ -180,7 +185,7 @@
         \begin{figure}
             \centering
             \includegraphics[width=60mm]{../img/VCProofBlock.png}
-            \caption{VC mit BBS proof}
+            \caption{VC mit BBS Proof}
         \end{figure}
 
     \end{columns}
@@ -243,18 +248,19 @@
         \begin{figure}
             \centering
             \includegraphics[width=70mm]{../img/hashed.png}
-            \caption{Beispiel sortierung}
+            \caption{Beispiel Sortierung}
         \end{figure}
     \end{columns}
 \end{frame}
 
 \begin{frame}{Permutation von Statements}
     \begin{itemize}
-        \item Holder präsentiert ein VP mit verborgenen Zivilstands-Attributen
+        \item Holder bekommt ein VC, welches unter anderem ein Zivilstands-Attribut beinhaltet
+        \item Holder präsentiert ein VP mit verborgenen Zivilstands-Attribut
         \item Holder heiratet, bekommt ein neues VC mit geändertem Zivilstand
         \item Holder präsentiert das aktualisierte VP mit verborgenem Zivilstand
         \item \textbf{Datenleck}: Der Verifier kann herausfinden, dass sich der Zivilstand geändert hat
-        \item Aber nur wenn Attribute, welche nach dem Zivilstand kommen präsentiert werden (RDF Algorithmus)
+        \item Aber nur wenn Attribute, welche nach dem Zivilstand kommen, präsentiert werden (RDF Algorithmus)
         \item Damit das nicht passieren kann, muss der Issuer immer die Statements zufällig permutieren
         \item Der Issuer muss die Permutation dem Holder bekannt geben, aber \textbf{nie} dem Verifier
     \end{itemize}
@@ -266,7 +272,7 @@
         \item Falls das Ablaufdatum sehr genau ist (z.B. auf die Sekunde), führt dies zu Verknüpfbarkeit
         \item Ablaufdatum auf einen Tag genau, um die Verknüpfbarkeit zu umgehen
         \item VCs und VPs können auch IDs für z.B. Entziehung beinhalten, welche zu Verknüpfbarkeit führen
-        \item Dafür kan man Zero-Knowledge proofs verwenden, um zu zeigen das man nicht Teil einer Entzugs-Liste ist
+        \item Dafür kan man Zero-Knowledge proofs verwenden, um zu zeigen, dass man nicht Teil einer Entzugs-Liste ist
     \end{itemize}
 \end{frame}
 
@@ -284,7 +290,7 @@
     \begin{figure}
         \centering
         \includegraphics[width=70mm]{../img/OIDC4VPFlow.png}
-        \caption{OpenID connect for Verifiable Presentations Fluss}
+        \caption{OpenID connect for Verifiable Presentations Sequenz}
     \end{figure}
 \end{frame}
 
