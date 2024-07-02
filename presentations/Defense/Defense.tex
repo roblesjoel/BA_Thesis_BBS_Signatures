@@ -54,8 +54,8 @@
 \begin{frame}{Self-sovereign Identity (SSI)}
     \begin{itemize}
         \item Ist ein Konzept, bei dem eine Person (\textbf{Holder}) entscheiden kann, wer was über sie wissen darf
-        \item Holder dürfen wählen, was sie offenbaren und was nicht (\textbf{selective disclosure})
-        \item Keine Verbindung zwischen Präsentationen (\textbf{unlinkability})
+        \item Holder dürfen wählen, was sie offenbaren und was nicht (\textbf{Selective-Disclosure})
+        \item Keine Verbindung zwischen Präsentationen (\textbf{Unverknüpfbarkeit} (unlinkability))
         \item Heutiger Stand - Holder haben keine Kontrolle über ihre Attribute
         \item Zukünftiger Stand dank SSI - Holder haben volle Kontrolle über ihre Attribute
     \end{itemize}
@@ -109,12 +109,12 @@
 
     \begin{itemize}
         \item Verifiable Credentials sind eine digitale Repräsentation von physischen Credentials
-        \item JSON-LD repräsentiert Attribute als \textbf{key-value pairs}
+        \item JSON-LD repräsentiert Attribute als \textbf{Key-Value-Paare}
         \item Beispiel:
         \begin{itemize}
             \item Vorname auf einer ID
             \item Repräsentiert als \{"first\_name": "John"\}
-            \item ``first\_name'' ist der key und ``John'' ist der value
+            \item ``first\_name'' ist der Key und ``John'' ist der Value
         \end{itemize}
     \end{itemize}
 
@@ -134,8 +134,8 @@
         \textbf{Problem 1:}
         \begin{itemize}
             \item Holder zeigt ein Credential einem Verifier
-            \item Der Verifier, sieht alle Attribute
-            \item Bricht \textbf{selective-disclosure}
+            \item Der Verifier sieht alle Attribute
+            \item Bricht \textbf{Selective-Disclosure}
         \end{itemize}
 
         \column{70mm}  
@@ -144,34 +144,34 @@
             \item Holder zeigt ein Credential einem Verifier
             \item Holder zeigt das gleiche Credential einem zweiten Verifier
             \item Der Holder kann ge-linked werden (Metadaten)
-            \item Bricht \textbf{unlinkability}
+            \item Bricht \textbf{Unverknüpfbarkeit} (unlinkability)
         \end{itemize}
 
     \end{columns}
 \end{frame}
 
 
-\begin{frame}{VCs and BBS}
+\begin{frame}{VCs und BBS}
     \begin{itemize}
         \item Warum werden sie \textbf{Verifiable} Credentials genannt?
-        \item Der Verifier kann ein VC, welches ihm präsentiert wurde (\textbf{Verifiable Presentation}), aufgrund kryptographischer Signaturen verifizieren
+        \item Der Verifier kann ein VC, welches ihm präsentiert wurde, aufgrund kryptografischer Signaturen verifizieren
         \item Diese zeigen, dass das Credential seit der Ausstellung nicht verändert wurde
         \item Wir nutzen das BBS Signature Scheme (\textbf{BBS}) 
-        \item Dieses Schema bietet \textbf{selective disclosure} und \textbf{unlinkability}
-        \item Aber wie unlinkability? - Der Verifier braucht die Signatur
-        \item BBS kann \textbf{proofs} generieren
+        \item Dieses Schema bietet \textbf{Selective-Disclosure} und \textbf{Unverknüpfbarkeit}
+        \item Aber wie Unverknüpfbarkeit? - Der Verifier braucht die Signatur
+        \item BBS kann \textbf{Proofs} generieren
         \item Diese beweisen, dass der Holder die Signatur kennt, ohne diese zu offenbaren
         \item Fungieren als neue Signatur für das selectively disclosed VC
-        \item Weiter sind proofs unverknüpfbar zwischen jeder Generierung
+        \item Weiter sind Proofs unverknüpfbar zwischen jeder Generierung
     \end{itemize}
 \end{frame}
 
-\begin{frame}{BBS proofs}
+\begin{frame}{BBS Proofs}
     \centering
     \includegraphics[width=120mm]{../img/BBSProofGen.png}
 \end{frame}
 
-\begin{frame}{BBS proofs}
+\begin{frame}{BBS Proofs}
     \begin{columns}[onlytextwidth,T]
         \column{70mm}  
         \begin{figure}
@@ -199,7 +199,7 @@
             \item Ein Holder würde gerne ein VC präsentieren
             \item Dafür werden \textbf{Verifiable Presentations} genutzt
             \item BBS kann nur Statements signieren
-            \item Der \textbf{RDF} canonicalization Algorithmus, welcher Statements aus key-value pairs generiert
+            \item Der \textbf{RDF} Canonicalization Algorithmus, welcher Statements aus Key-Value-Paaren generiert
         \end{itemize}
 
         \column{70mm}
@@ -268,11 +268,11 @@
 
 \begin{frame}{Verknüpfbarkeit von Identifikatoren \& Metadaten}
     \begin{itemize}
-        \item VCs können Metadaten wie Ablaufdatum beinhalten
+        \item VCs können Metadaten, wie Ablaufdatum, beinhalten
         \item Falls das Ablaufdatum sehr genau ist (z.B. auf die Sekunde), führt dies zu Verknüpfbarkeit
         \item Ablaufdatum auf einen Tag genau, um die Verknüpfbarkeit zu umgehen
         \item VCs und VPs können auch IDs für z.B. Entziehung beinhalten, welche zu Verknüpfbarkeit führen
-        \item Dafür kan man Zero-Knowledge proofs verwenden, um zu zeigen, dass man nicht Teil einer Entzugs-Liste ist
+        \item Dafür kann man Zero-Knowledge Proofs verwenden, um zu zeigen, dass man nicht Teil einer Entzugs-Liste ist
     \end{itemize}
 \end{frame}
 
@@ -286,7 +286,7 @@
     \end{figure}
 \end{frame}
 
-\begin{frame}{OIDC4VP Fluss}
+\begin{frame}{OIDC4VP Sequenz}
     \begin{figure}
         \centering
         \includegraphics[width=70mm]{../img/OIDC4VPFlow.png}
@@ -323,7 +323,7 @@
         \item Was sind die Probleme mit dieser Kombination und wie kann man diese lösen?
         \begin{itemize}
             \item \textbf{Determinismus des RDF Algorithmus und Verknüpfbarkeit von Metadaten und Identifikatoren}
-            \item \textbf{Lösung: Permutierung der Statements und Gebrauch von zero-knowledge proofs}
+            \item \textbf{Lösung: Permutierung der Statements und Gebrauch von zero-knowledge Proofs}
         \end{itemize}
         \item Wie werden die VPs von Holder zu Verifier gesendet und was sind die Probleme?
         \begin{itemize}
@@ -342,7 +342,7 @@
 
 \begin{frame}{Ausblick}
     \begin{itemize}
-        \item Link Secrets und Blind BBS Signatures für linkability und selective disclosure analysieren
+        \item Link Secrets und Blind BBS Signatures auf Unverknüpfbarkeit und Selective-Disclosure analysieren
         \item Implementieren und testen
     \end{itemize}
 \end{frame}
